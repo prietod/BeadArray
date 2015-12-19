@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+basedir="/hiidata/teddy/data/jinfiniti/gene_expression"
+bundles="201505"
+
+for bundle in $bundles; do
+  find $basedir/$bundle -type f | grep -v '\.zip'  | awk -F'/' '{print $NF}'
+done
+
+# 3998787099_B_Grn.locs
