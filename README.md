@@ -30,7 +30,7 @@ All shell scripts in `bin/` should use the following convention at the top of th
 
 #### tmp/ 
 
-- `tmp/data` - Data copied into a certain directory format for analysis.
+- `tmp/data` - Data extracted and/or copied into structure for analysis.
 - `tmp/qc` - Quality-Control Information
 - `tmp/results` - Final Results of analysis 
 - `tmp/run` - Temporary scratch files, cached data, etc.
