@@ -26,7 +26,7 @@ All shell scripts in `bin/` should use the following convention at the top of th
 
 - `bin/` - Driver scripts, utility scripts, mostly if not all written in Bash.
 - `code/` - The intelligent bits that do the real analysis work. 
-- `tmp/` - Directory on which all temporary data is stored (e.g. data, runtime data, results, qc) - It will be ignored on Git Commits
+- `tmp/` - Directory on which all temporal data is stored (input data, utility data, qc, results) - It will be ignored upon any Git Commit and should be copied out as needed. 
 
 #### tmp/ 
 
