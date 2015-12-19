@@ -14,7 +14,7 @@ BeadArray HPC Project
 
 ### Shell Scripts
 
-All shell scripts in `bin/` should use the convention for their beginning stanza:
+All shell scripts in `bin/` should use the following convention at the top of their file: 
 
     #!/usr/bin/env bash
 
@@ -28,7 +28,7 @@ All shell scripts in `bin/` should use the convention for their beginning stanza
 - `code/` - The intelligent bits that do the real analysis work. 
 - `tmp/` - Directory on which all temporary data is stored (e.g. data, runtime data, results, qc) - It will be ignored on Git Commits
 
-#### Temp Directory
+#### tmp/ 
 
 - `tmp/data` - Data copied into a certain directory format for analysis.
 - `tmp/qc` - Quality-Control Information
