@@ -14,14 +14,13 @@ BeadArray HPC Project
 
 ### Shell Scripts
 
-All shell scripts in `bin/` should use the convention:
+All shell scripts in `bin/` should use the convention for their beginning stanza:
 
-  #!/usr/bin/env bash
+    #!/usr/bin/env bash
 
-  MYDIR=$(readlink -f $(dirname $0))
-  MYBASE=$(readlink -f $MYDIR/..)
+    MYDIR=$(readlink -f $(dirname $0))
+    MYBASE=$(readlink -f $MYDIR/..)
 
-for their beginning stanza.
 
 ### Directories
 
