@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+
+MYDIR=$(readlink -f $(dirname $0))
+MYBASE=$(readlink -f $MYDIR/..)
+
+DATA_BASEDIR=${DATA_BASEDIR:-/hiidata/teddy/data/jinfiniti/gene_expression}
+INDEX_FILE=${INDEX_FILE:-$MYBASE/tmp/run/filedb.txt}
+
+filter_out_excluded_files_and_dirs() {
+  egrep -v '(/level2/|\.zip$|map_info.txt$)' 
+}
+
+convert_tabs_to_colons() {
+  sed 's/\t/:/g'
+}
+
+strip_first_line() {
+  sed -n '2,$p'
+}
+
+print_first_line() {
+  head -1 | sed 's/^/#/'
+}
+
+sort_by_chip_barcode() {
+  sort -t: -k7,7
+}
+
+#------------------------------------------------------------------------
+# main
+#------------------------------------------------------------------------
+
+mkdir -p "$(dirname $INDEX_FILE)"
+
+#---
+
+echo "$(basename $0): Creating Filtered/Sorted File Index '$INDEX_FILE' for path '$DATA_BASEDIR'" 1>&2
+
+find $DATA_BASEDIR -type f | filter_out_excluded_files_and_dirs | sort > $INDEX_FILE
+
+#---
+
+echo "$(basename $0): Reformatting '$DATA_BASEDIR/map_info.txt' and writing to '$MYBASE/tmp/run/map_info.csv'" 1>&2
+
+print_first_line < $DATA_BASEDIR/map_info.txt | convert_tabs_to_colons > $MYBASE/tmp/run/map_info-header.csv
+
+strip_first_line < $DATA_BASEDIR/map_info.txt | convert_tabs_to_colons | sort_by_chip_barcode > $MYBASE/tmp/run/map_info.csv
+

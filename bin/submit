@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+MYDIR=$(readlink -f $(dirname $0))
+MYBASE=$(readlink -f $MYDIR/..)
+
+mkdir $MYBASE/tmp/log
+
+export MYBASE
+
+sbatch \
+  --job-name=BeadArray \
+  --output=$MYBASE/tmp/log/BeadArray_%A_%a.out \
+  --error=$MYBASE/tmp/log/BeadArray_%A_%a.err \
+  --array=1-2 \
+  --time=00:01:00 \
+  --partition=hii02 \
+  --ntasks=1 \
+  $MYBASE/code/BeadArray.sbatch
