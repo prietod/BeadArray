@@ -10,7 +10,7 @@ BeadArray HPC Project
 
     bin/run
 
-## Scratch
+## Info
 
 ### Shell Scripts
 
@@ -36,3 +36,14 @@ All shell scripts in `bin/` should use the following convention at the top of th
 - `tmp/run` - Temporary scratch files, cached data, etc.
 
  
+## Scratch
+
+    for n in $( bin/get-mapinfo Chip_Barcode -u ); do
+      grep ":$n:" tmp/run/map_info.csv | sort -t: -k8,8 ; 
+      echo
+    done > tmp/run/map_info-by-chip_barcode.txt
+
+    for n in $( bin/get-mapinfo subject_id -u ); do
+      grep "^$n:" tmp/run/map_info.csv | sort -t: -k8,8 ; 
+      echo
+    done > tmp/run/map_info-by-subject_id.txt
