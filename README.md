@@ -52,6 +52,10 @@ tmp/
        ...
 
 
+   post-processing-script
+    - roll-up data
+    - generate aggregate image
+
 
 
 tmp/1234456/data <---
