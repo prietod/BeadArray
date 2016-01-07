@@ -2,6 +2,11 @@
 #
 # https://google.github.io/styleguide/Rguide.xml
 
+filter_excluded() {
+  grep -v '/level2' \
+  | grep -v '7911755025'
+}
+
 setup_barcode_dirs() {
   local chip_barcode=$1
   work_dir=$HII_WORK_DIR/${chip_barcode}
@@ -33,6 +38,7 @@ for chip_barcode in ${CHIP_BARCODES}; do
   setup_barcode_dirs ${chip_barcode}
 
   find $HII_DATA_DIR/teddy/data/jinfiniti/gene_expression/ -type f -name "${chip_barcode}_[A-L].txt" \
+    | filter_excluded \
     | xargs -r -n1 -I% echo cp % ${work_data_dir} | bash -x
 
   R --slave --quiet --no-restore --no-save \

@@ -1,3 +1,4 @@
+#
 
 #source("http://www.bioconductor.org/biocLite.R")
 #biocLite(c("illuminaHumanv4.db"))
@@ -13,9 +14,6 @@ data_dir <- toString(args[1])
 results_dir <- toString(args[2])
 qc_dir <- toString(args[3])
 
-print(data_dir)
-print(results_dir)
-print(qc_dir)
 
 #comment #dir.create(paste(getwd(),"/results/",sep=""), showWarnings = TRUE, recursive = FALSE, mode = "0777")
 #comment #dir.create(paste(getwd(),"/qc_details/",sep=""), showWarnings = TRUE, recursive = FALSE, mode = "0777")
