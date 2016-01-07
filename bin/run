@@ -1,54 +1,41 @@
 #!/usr/bin/env bash
+#
+# https://google.github.io/styleguide/Rguide.xml
+
+setup_barcode_dirs() {
+  local chip_barcode=$1
+  work_dir=$HII_WORK_DIR/${chip_barcode}
+
+  work_data_dir=${work_dir}/data
+  work_qc_dir=${work_dir}/qc
+  work_results_dir=${work_dir}/results
+
+  for d in $work_data_dir $work_qc_dir $work_results_dir; do
+    mkdir -p $d
+  done
+}
+
+#set -x
 
 MYDIR=$(readlink -f $(dirname $0))
 MYBASE=$(readlink -f $MYDIR/..)
 
-filter_files() {
-  grep -v '\.zip$' | grep -v '/level2/' | grep -v 'map_info.txt'
-}
+HII_DATA_DIR=${HII_DATA_DIR:-/hiidata}
+HII_WORK_DIR=${HII_WORK_DIR:-$MYBASE/tmp}
+HII_CODE=${HII_CODE:-$MYBASE/code/BeadArray.R}
 
-find_cache_and_lookup_base_directory() {
-  if [[ ! -f $MYBASE/tmp/filedb.txt || -n $RESET  ]]; then
-    find /hiidata/teddy/data/jinfiniti/gene_expression -type f | filter_files | sort > $MYBASE/tmp/filedb.txt
-  fi
-}
+CHIP_BARCODES="${@:-3998755068 }" # also 3998787078
 
-find_vial_candidates() {
-  grep '\.txt$' $MYBASE/tmp/filedb.txt | awk -F/ '{print $NF}' | sed 's/\(.*\)_[A-Z]\.txt$/\1/' | sort -u
-}
+module load apps/R/${R_VERSION:-3.2.3}
 
-find_vial_instances() {
-  for c in $( find_vial_candidates ); do
-    count=$( grep "/${c}_[A-Z]\.txt" $MYBASE/tmp/filedb.txt  | wc -l )
-    echo $c:$count
-  done
-}
+for chip_barcode in ${CHIP_BARCODES}; do
 
-get_sample_txt_files() {
-  find $BASEDIR -type f -name '*.txt'
-}
+  setup_barcode_dirs ${chip_barcode}
 
-#------------------------------------------------------------------------
-# main
-#------------------------------------------------------------------------
+  find $HII_DATA_DIR/teddy/data/jinfiniti/gene_expression/ -type f -name "${chip_barcode}_[A-L].txt" \
+    | xargs -r -n1 -I% echo cp % ${work_data_dir} | bash -x
 
-if [[ $1 == '-r' ]]; then
-  RESET='y'
-  shift
-fi
+  R --slave --quiet --no-restore --no-save \
+    --args ${work_data_dir} ${work_qc_dir} ${work_results_dir} < ${HII_CODE}
+done
 
-find_cache_and_lookup_base_directory
-
-#find_vial_candidates
-
-find_vial_instances
-
-
-#get_sample_txt_files
-#bundles="201505"
-#
-#for bundle in $bundles; do
-#  find $basedir/$bundle -type f | grep -v '\.zip'  | awk -F'/' '{print $NF}'
-#done
-
-# 3998787099_B_Grn.locs
