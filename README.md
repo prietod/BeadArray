@@ -6,11 +6,18 @@
 
     cd BeadArray
 
+
+## Running Locally
+
     bin/run code/<name>.R [chip_barcode] [chip_barcode...]
 
-For Example:
+For example:
 
     bin/run code/BeadArray.R 3998755068
+
+## Running via Slurm
+
+TBD
 
 ## Style Guide
 
@@ -45,7 +52,7 @@ for each `chip_barcode`:
 - `qc_details_dir/` - all necessary QC details :-)
 - `results_dir/` - all results
 
-E.g.:
+For example:
 
     - tmp/work/3998755068/data/<files..>
     - tmp/work/3998755068/results/<files..>
@@ -70,40 +77,33 @@ Example of `data_dir` contents for one vial_barcode:
 
 ## Scratch
 
-tmp/
-  123456/
-    data/ # (hiidata)
-    qc_details/
-      *.pdf
-      *.txt
-      qc/
-        <f1>/
-        <f2>/
-        <f3>/...
-     results/
-       ...
+    tmp/
+      123456/
+        data/ # (hiidata)
+        qc_details/
+          *.pdf
+          *.txt
+          qc/
+            <f1>/
+            <f2>/
+            <f3>/...
+        results/
+          ...
+
+      post-processing-script
+        - roll-up data
+        - generate aggregate image
 
 
-   post-processing-script
-    - roll-up data
-    - generate aggregate image
 
+        for n in $( bin/get-mapinfo Chip_Barcode -u ); do
+          grep ":$n:" tmp/run/map_info.csv | sort -t: -k8,8 ;
+          echo
+        done > tmp/run/map_info-by-chip_barcode.txt
 
-
-tmp/1234456/data <---
-tmp/1234456/qc <--- pdf
-tmp/1234456/results
-
-----
-
-    for n in $( bin/get-mapinfo Chip_Barcode -u ); do
-      grep ":$n:" tmp/run/map_info.csv | sort -t: -k8,8 ;
-      echo
-    done > tmp/run/map_info-by-chip_barcode.txt
-
-    for n in $( bin/get-mapinfo subject_id -u ); do
-      grep "^$n:" tmp/run/map_info.csv | sort -t: -k8,8 ;
-      echo
-    done > tmp/run/map_info-by-subject_id.txt
+        for n in $( bin/get-mapinfo subject_id -u ); do
+          grep "^$n:" tmp/run/map_info.csv | sort -t: -k8,8 ;
+          echo
+        done > tmp/run/map_info-by-subject_id.txt
 
 
