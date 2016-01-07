@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 #
-# https://google.github.io/styleguide/Rguide.xml
 
 filter_excluded() {
   grep -v '/level2' | grep -v '7911755025' | grep -v '\.zip$'
@@ -30,7 +29,7 @@ WORK_DIR=${WORK_DIR:-$MYBASE/tmp}
 
 CODE=${CODE:-$MYBASE/code/BeadArray.R}
 
-CHIP_BARCODES="${@:-3998755068 }" # also
+CHIP_BARCODES="${@:-3998787078}"
 
 module load apps/R/${R_VERSION:-3.2.3}
 

@@ -1,39 +1,71 @@
 # BeadArray
 
-BeadArray HPC Project
-
 ## Installation
 
     git clone git@github.com:USF-HII/BeadArray.git
 
     cd BeadArray
 
-    bin/run
+    bin/run code/<name>.R [chip_barcode] [chip_barcode...]
 
-## Info
+For Example:
 
-### Shell Scripts
+    bin/run code/BeadArray.R 3998755068
 
-All shell scripts in `bin/` should use the following convention at the top of their file:
+## Style Guide
 
-    #!/usr/bin/env bash
+- https://google.github.io/styleguide/Rguide.xml
 
-    MYDIR=$(readlink -f $(dirname $0))
-    MYBASE=$(readlink -f $MYDIR/..)
+## R Code Arguments
 
+The `bin/run` script will copy the necessary files into a working data structure and will pass 3 arguments to your R code.
+
+Your R code should contain the following lines:
+
+```
+#------------------------------------------------------------------------
+# Get cli arguments
+#------------------------------------------------------------------------
+
+args <- commandArgs(trailingOnly = TRUE)
+
+data_dir <- toString(args[1])
+results_dir <- toString(args[2])
+qc_details_dir <- toString(args[3])
+```
+
+At this point you can reference these variables to locate the desired directory for reading/writing.
+
+## Working Directory structure
+
+The default Working Directory `$WORK_DIR` is under the project at `tmp/work` and contains the following sub-directories
+for each `chip_barcode`:
+
+- `data_dir/` - contains all of the files for processing for a chip_barcode
+- `qc_details_dir/` - all necessary QC details :-)
+- `results_dir/` - all results
+
+E.g.:
+
+    - tmp/work/3998755068/data/<files..>
+    - tmp/work/3998755068/results/<files..>
+    - tmp/work/3998755068/qc_details/<files..>
+
+Example of `data_dir` contents for one vial_barcode:
+
+    tmp/work/3998755068/data/3998755068_A.csv
+    tmp/work/3998755068/data/3998755068_A.txt
+    tmp/work/3998755068/data/3998755068_A_Grn.idat
+    tmp/work/3998755068/data/3998755068_A_Grn.locs
+    tmp/work/3998755068/data/3998755068_A_Grn.tif
+    tmp/work/3998755068/data/3998755068_A_Grn.xml
+    tmp/work/3998755068/data/3998755068_B.csv ...etc.
 
 ### Directories
 
 - `bin/` - Driver scripts, utility scripts, mostly if not all written in Bash.
 - `code/` - The intelligent bits that do the real analysis work.
 - `tmp/` - Directory in which all temporal data is stored (input data, utility data, qc, results) - It will be ignored upon any Git Commit and should be copied out as needed.
-
-#### tmp/
-
-- `tmp/data` - Data extracted and/or copied into structure for analysis.
-- `tmp/qc` - Quality-Control Information
-- `tmp/results` - Final Results of analysis
-- `tmp/run` - Temporary scratch files, cached data, etc.
 
 
 ## Scratch
