@@ -3,33 +3,34 @@
 # https://google.github.io/styleguide/Rguide.xml
 
 filter_excluded() {
-  grep -v '/level2' \
-  | grep -v '7911755025'
+  grep -v '/level2' | grep -v '7911755025' | grep -v '\.zip$'
 }
 
 setup_barcode_dirs() {
   local chip_barcode=$1
-  work_dir=$HII_WORK_DIR/${chip_barcode}
+  work_dir=$WORK_DIR/${chip_barcode}
 
   work_data_dir=${work_dir}/data
-  work_qc_dir=${work_dir}/qc
+  work_qc_details=${work_dir}/qc_details
   work_results_dir=${work_dir}/results
 
-  for d in $work_data_dir $work_qc_dir $work_results_dir; do
+  for d in $work_data_dir $work_qc_details $work_results_dir; do
     mkdir -p $d
   done
 }
 
 #set -x
 
-MYDIR=$(readlink -f $(dirname $0))
-MYBASE=$(readlink -f $MYDIR/..)
 
-HII_DATA_DIR=${HII_DATA_DIR:-/hiidata}
-HII_WORK_DIR=${HII_WORK_DIR:-$MYBASE/tmp}
-HII_CODE=${HII_CODE:-$MYBASE/code/BeadArray.R}
 
-CHIP_BARCODES="${@:-3998755068 }" # also 3998787078
+MYBASE="$( dirname $0 )/.."
+
+DATA_DIR=${DATA_DIR:-/hiidata/teddy/data/jinfiniti/gene_expression}
+WORK_DIR=${WORK_DIR:-$MYBASE/tmp}
+
+CODE=${CODE:-$MYBASE/code/BeadArray.R}
+
+CHIP_BARCODES="${@:-3998755068 }" # also
 
 module load apps/R/${R_VERSION:-3.2.3}
 
@@ -37,11 +38,11 @@ for chip_barcode in ${CHIP_BARCODES}; do
 
   setup_barcode_dirs ${chip_barcode}
 
-  find $HII_DATA_DIR/teddy/data/jinfiniti/gene_expression/ -type f -name "${chip_barcode}_[A-L].txt" \
-    | filter_excluded \
-    | xargs -r -n1 -I% echo cp % ${work_data_dir} | bash -x
+  for f in $( find $DATA_DIR -type f -name "${chip_barcode}*" | filter_excluded ); do
+     [[ -f ${work_data_dir}/$( basename $f ) ]] || cp -v $f ${work_data_dir}
+   done
 
   R --slave --quiet --no-restore --no-save \
-    --args ${work_data_dir} ${work_qc_dir} ${work_results_dir} < ${HII_CODE}
+    --args ${work_data_dir} ${work_qc_details} ${work_results_dir} < ${CODE}
 done
 
