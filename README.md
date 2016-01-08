@@ -70,8 +70,8 @@ Your R code should contain the following lines:
 args <- commandArgs(trailingOnly = TRUE)
 
 data_dir <- toString(args[1])
-results_dir <- toString(args[2])
-qc_details_dir <- toString(args[3])
+qc_details_dir <- toString(args[2])
+results_dir <- toString(args[3])
 ```
 
 At this point you can reference these variables to locate the desired directory for reading/writing.

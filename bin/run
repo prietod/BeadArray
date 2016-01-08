@@ -22,11 +22,8 @@ setup_barcode_dirs() {
   done
 }
 
-set -x
-
-MYBASE="$( dirname $0 )/.."
-
-echo starting...
+MYDIR="$( readlink -f $( dirname $0 ))"
+MYBASE="$( readlink -f $MYDIR/.. )"
 
 source $MYBASE/lib/env.sh
 source $MYBASE/lib/common.sh

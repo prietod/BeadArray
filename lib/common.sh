@@ -8,9 +8,3 @@ function join {
   shift
   echo "$*"
 }
-
-function render-template {
-  eval "echo \"$(cat $1)\""
-}
-
-

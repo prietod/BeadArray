@@ -2,7 +2,7 @@
 #
 # bin/util/get-mapinfo - returns all columns for a particular field
 
-MYBASE="$( dirname $0 )/../.."
+MYBASE="$( dirname $0 )/.."
 
 usage() {
   echo "Usage: $( basename $0 ) [-u] <$( join \| $fields )>" 1>&2

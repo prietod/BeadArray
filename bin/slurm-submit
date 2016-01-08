@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-MYBASE="$( dirname $0 )/.."
+MYDIR="$( readlink -f $( dirname $0 ))"
+MYBASE="$( readlink -f $MYDIR/.. )"
 
 source $MYBASE/lib/env.sh
 source $MYBASE/lib/common.sh
