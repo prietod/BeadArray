@@ -20,8 +20,6 @@ setup_barcode_dirs() {
 
 #set -x
 
-
-
 MYBASE="$( dirname $0 )/.."
 
 DATA_DIR=${DATA_DIR:-/hiidata/teddy/data/jinfiniti/gene_expression}

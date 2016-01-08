@@ -3,9 +3,7 @@
 ## Installation
 
     git clone git@github.com:USF-HII/BeadArray.git
-
     cd BeadArray
-
 
 ## Running Locally
 
@@ -17,7 +15,42 @@ For example:
 
 ## Running via Slurm
 
-TBD
+Generate all the bar codes:
+
+   bin/util/get-mapinfo -u chip_barcode > tmp/chip_barcodes.txt
+
+   bin/slurm-submit code/BeadArray.R < tmp/chip_barcodes.txt
+
+## Env File
+
+The file `lib/env.sh` contains environmental variables which have defaults but which may be overriden.
+
+At the time of this documentation:
+
+```
+export DATA_DIR=${DATA_DIR:-/hiidata/teddy/data/jinfiniti/gene_expression}
+export MAP_INFO=${MAP_INFO:-/hiidata/teddy/data/jinfiniti/gene_expression/map_info.txt}
+```
+
+## Map Info
+
+The map info file is a tab-delimited list with the following fields:
+
+- subject_id
+- vial_barcode_number
+- test_name
+- donor_number
+- box
+- row
+- chip_barcode
+- array
+- draw_dte
+- sample_status
+- date_received_sample
+- date_of_evaluation
+- comments
+
+Use the command `bin/util/get-mapinfo` to query this file.
 
 ## Style Guide
 

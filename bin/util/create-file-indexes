@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 
 MYDIR=$(readlink -f $(dirname $0))
-MYBASE=$(readlink -f $MYDIR/..)
+MYBASE=$(readlink -f $MYDIR/../..)
 
 DATA_BASEDIR=${DATA_BASEDIR:-/hiidata/teddy/data/jinfiniti/gene_expression}
 INDEX_FILE=${INDEX_FILE:-$MYBASE/tmp/run/filedb.txt}
 
 filter_out_excluded_files_and_dirs() {
-  egrep -v '(/level2/|\.zip$|map_info.txt$)' 
+  egrep -v '(/level2/|\.zip$|map_info.txt$)'
 }
 
 convert_tabs_to_colons() {

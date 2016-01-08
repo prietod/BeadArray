@@ -12,6 +12,7 @@ log_dir=$MYBASE/tmp/log
 (cd $log_dir && mkdir $datestamp && ln -nsf $datestamp current)
 
 
+
 sbatch \
   --job-name=BeadArray \
   --output=$log_dir/$datestamp/%a.log \
@@ -19,4 +20,6 @@ sbatch \
   --time=00:01:00 \
   --partition=hii02 \
   --ntasks=1 \
+  --wrap=$MYBASE/bin/run $1 <command string>
+
   $MYBASE/bin/submit.sbatch
