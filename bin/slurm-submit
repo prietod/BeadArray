@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+MYBASE="$( dirname $0 )/.."
+
+source $MYBASE/lib/env.sh
+source $MYBASE/lib/common.sh
+
+datestamp=$( date +%FT%T )
+
+log_dir=$MYBASE/tmp/log
+
+( mkdir -p $log_dir && cd $log_dir && mkdir $datestamp && ln -nsf $datestamp current )
+
+declare -a ARRAY_MAP
+export ARRAY_MAP
+
+while read f; do
+  ARRAY_MAP[$((++n))]=$f
+done
+
+count=${#ARRAY_MAP[@]}
+
+sbatch \
+  --job-name="$( basename $1 )" \
+  --output=${log_dir}/${datestamp}/%a.log \
+  --array=1-${count} \
+  --mem=8192 \
+  --time=08:00:00 \
+  --partition=hii02 \
+  --ntasks=1 \
+  --wrap="$MYBASE/bin/run $1 \${ARRAY_MAP[\$SLURM_ARRAY_TASK_ID]}"

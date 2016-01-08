@@ -1,8 +1,20 @@
 #!/usr/bin/env bash
+#
+# bin/util/get-mapinfo - returns all columns for a particular field
 
 MYBASE="$( dirname $0 )/../.."
 
+usage() {
+  echo "Usage: $( basename $0 ) [-u] <$( join \| $fields )>" 1>&2
+  exit 1
+}
+
+strip_header() {
+  sed -n '2,$p'
+}
+
 source $MYBASE/lib/env.sh
+source $MYBASE/lib/common.sh
 
 if [[ $1 == '-u' ]]; then
   filter="sort -u"
@@ -11,25 +23,28 @@ else
   filter="sort"
 fi
 
-case $1 in
-  subject_id) field=1;;
-  vial_barcode_number) field=2;;
-  test_name) field=3;;
-  donor_number) field=4;;
-  box) field=5;;
-  row) field=6;;
-  chip_barcode) field=7;;
-  array) field=8;;
-  draw_dte) field=9;;
-  sample_status) field=10;;
-  date_received_sample) field=11;;
-  date_of_evaluation) field=12;;
-  comments) field=13;;
+fields="
+subject_id
+vial_barcode_number
+test_name
+donor_number
+box
+row
+chip_barcode
+array
+draw_dte
+sample_status
+date_received_sample
+date_of_evaluation
+comments
+"
 
-  *) echo "Usage: $( basename $0) <subject_id|vial_barcode_number|test_name|donor_number|box|row|chip_barcode|array|draw_dte|sample_status|date_received_sample|date_of_evaluation|comments>" 1>&2; echo 1>&2; exit 1;;
+declare -A field_map
 
-esac
+for f in $fields; do
+  field_map[$f]=$((++n))
+done
 
-shift
+[[ $# != 1 ]] && usage
 
-awk -F: "{print \$$field }" $MYBASE/tmp/run/map_info.csv | $filter
+strip_header < $MAP_INFO | awk -F'\t' "{ print \$${field_map[$1]} }" | $filter

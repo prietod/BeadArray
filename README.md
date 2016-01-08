@@ -7,7 +7,7 @@
 
 ## Running Locally
 
-    bin/run code/<name>.R [chip_barcode] [chip_barcode...]
+    bin/run <R_script> [chip_barcode] [chip_barcode...]
 
 For example:
 

@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-#
+
+usage() {
+  echo "Usage: $( basename $0 ) <code> [chip_barcode] [chip_barcode..]" 1>&2
+  exit 1
+}
 
 filter_excluded() {
   grep -v '/level2' | grep -v '7911755025' | grep -v '\.zip$'
@@ -18,20 +22,24 @@ setup_barcode_dirs() {
   done
 }
 
-#set -x
+set -x
 
 MYBASE="$( dirname $0 )/.."
 
-DATA_DIR=${DATA_DIR:-/hiidata/teddy/data/jinfiniti/gene_expression}
-WORK_DIR=${WORK_DIR:-$MYBASE/tmp}
+echo starting...
 
-CODE=${CODE:-$MYBASE/code/BeadArray.R}
+source $MYBASE/lib/env.sh
+source $MYBASE/lib/common.sh
 
-CHIP_BARCODES="${@:-3998787078}"
+[[ $# < 1 ]] && usage
+
+code=${1}; shift
+
+chip_barcodes="${@:-3998787078}" # set default for testing
 
 module load apps/R/${R_VERSION:-3.2.3}
 
-for chip_barcode in ${CHIP_BARCODES}; do
+for chip_barcode in ${chip_barcodes}; do
 
   setup_barcode_dirs ${chip_barcode}
 
@@ -40,6 +48,6 @@ for chip_barcode in ${CHIP_BARCODES}; do
    done
 
   R --slave --quiet --no-restore --no-save \
-    --args ${work_data_dir} ${work_qc_details} ${work_results_dir} < ${CODE}
+    --args ${work_data_dir} ${work_qc_details} ${work_results_dir} < ${code}
 done
 
