@@ -13,11 +13,11 @@ setup_barcode_dirs() {
   local chip_barcode=$1
   work_dir=$WORK_DIR/${chip_barcode}
 
-  work_data_dir=${work_dir}/data
-  work_qc_details=${work_dir}/qc_details
-  work_results_dir=${work_dir}/results
+  work_raw_data_dir=${work_dir}/raw/data
 
-  for d in $work_data_dir $work_qc_details $work_results_dir; do
+  work_raw_qc_dir=${work_dir}/raw/qc/${code_short_name}
+
+  for d in $work_raw_data_dir $work_raw_qc_dir; do
     mkdir -p $d
   done
 }
@@ -32,7 +32,11 @@ source $MYBASE/lib/common.sh
 
 code=${1}; shift
 
-chip_barcodes="${@:-3998787078}" # set default for testing
+code_short_name=$( basename $code .R )
+
+#chip_barcodes="${@:-3998787078}" # set default for testing
+
+chip_barcodes="${@:-3998755068}" # set default for testing
 
 module load apps/R/${R_VERSION:-3.2.3}
 
@@ -41,10 +45,10 @@ for chip_barcode in ${chip_barcodes}; do
   setup_barcode_dirs ${chip_barcode}
 
   for f in $( find $DATA_DIR -type f -name "${chip_barcode}*" | filter_excluded ); do
-     [[ -f ${work_data_dir}/$( basename $f ) ]] || cp -v $f ${work_data_dir}
+     [[ -f ${work_raw_data_dir}/$( basename $f ) ]] || cp -v $f ${work_raw_data_dir}
    done
 
   R --slave --quiet --no-restore --no-save \
-    --args ${work_data_dir} ${work_qc_details} ${work_results_dir} < ${code}
+    --args ${work_raw_data_dir} ${work_raw_qc_dir} < ${code}
 done
 
