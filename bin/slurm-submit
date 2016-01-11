@@ -6,9 +6,13 @@ MYBASE="$( readlink -f $MYDIR/.. )"
 source $MYBASE/lib/env.sh
 source $MYBASE/lib/common.sh
 
-datestamp=$( date +%FT%T )
+datestamp=$( date +%Y-%m-%dT%H:%M )
 
-log_dir=$MYBASE/tmp/log
+code=$1; shift
+
+code_short_name=$( basename $code .R )
+
+log_dir=$MYBASE/tmp/log/${code_short_name}
 
 ( mkdir -p $log_dir && cd $log_dir && mkdir $datestamp && ln -nsf $datestamp current )
 
@@ -21,12 +25,20 @@ done
 
 count=${#ARRAY_MAP[@]}
 
+SUBMIT_CPUS_PER_TASK="${SUBMIT_CPUS_PER_TASK:-2}"
+SUBMIT_MEM_MB="${SUBMIT_MEM_MB:-16000}"
+SUBMIT_TIME="${SUBMIT_TIME:-16:00:00}"
+SUBMIT_PARTITION="hii02"
+
+set -x
+
 sbatch \
-  --job-name="$( basename $1 )" \
+  --ntasks=1 \
+  --job-name="${code_short_name}" \
   --output=${log_dir}/${datestamp}/%a.log \
   --array=1-${count} \
-  --mem=8192 \
-  --time=08:00:00 \
-  --partition=hii02 \
-  --ntasks=1 \
-  --wrap="$MYBASE/bin/run $1 \${ARRAY_MAP[\$SLURM_ARRAY_TASK_ID]}"
+  --mem=${SUBMIT_MEM_MB} \
+  --cpus-per-task=${SUBMIT_CPUS_PER_TASK} \
+  --time=${SUBMIT_TIME} \
+  --partition=${SUBMIT_PARTITION} \
+  --wrap="$MYBASE/bin/random-sleep; $MYBASE/bin/run $code \${ARRAY_MAP[\$SLURM_ARRAY_TASK_ID]}"
