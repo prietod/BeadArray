@@ -2,6 +2,39 @@
 suppressMessages(library(beadarray))
 suppressMessages(library(illuminaHumanv4.db))
 
+# Versions of R packages: sessionInfo() or packageVersion("illuminaHumanv4.db")
+# beadarray_2.20.0
+# illuminaHumanv4.db_1.26.0
+# org.Hs.eg.db_3.2.3
+# RSQLite_1.0.0
+# DBI_0.3.1
+# AnnotationDbi_1.32.3
+# IRanges_2.4.6
+# S4Vectors_0.8.5
+# ggplot2_2.0.0
+# Biobase_2.30.0
+# BiocGenerics_0.16.1
+# Rcpp_0.12.2
+# XVector_0.10.0
+# magrittr_1.5
+# GenomicRanges_1.22.3
+# zlibbioc_1.16.0
+# munsell_0.4.2
+# colorspace_1.2-6
+# stringr_1.0.0
+# plyr_1.8.3
+# GenomeInfoDb_1.6.1
+# tools_3.2.3
+# base64_1.2
+# grid_3.2.3
+# gtable_0.1.2
+# reshape2_1.4.1
+# limma_3.26.3
+# stringi_1.0-1
+# BeadDataPackR_1.22.0
+# scales_0.3.0
+# illuminaio_0.12.0
+
 #------------------------------------------------------------------------
 # Get cli args and assign appropriate variables
 #------------------------------------------------------------------------
@@ -32,12 +65,6 @@ array.GreenInt <- matrix(, nrow = max(array.numBeads), ncol = length(array.names
 for (i in 1:length(array.names)) {
 
   # To read each of the TIFF file
-<<<<<<< HEAD
-=======
-  print(tiff.Files[i])
-  print(raw_data_dir)
-
->>>>>>> origin/master
   TIFF <- readTIFF(file.path(raw_data_dir, tiff.Files[i]))
 
   # To find numbers of pixels of value zero in the image that must be an imaging artifact rather than a true measure of intensity for that location
@@ -148,11 +175,7 @@ for (j in 1:length(array.names)) {
   # Ratio of number of masked beads to total number of beads
   array.qcvalues[j, 15] = (BASHoutput$QC[[1]]/table(getBeadData(data, what = "wts", array = j))[[2]])
 
-<<<<<<< HEAD
   # The Extended score returned by BASH is an indication of the level of variability across the entire surface of the chip. If this value is large it may indicate a significant gradient effect in the intensities
-=======
-  # The Extended score returned by BASH is an indication of the level of variability across the entire surface of the chip. If this value is large it may indicaate a significant gradient effect in the intensities
->>>>>>> origin/master
   array.qcvalues[j, 16] = BASHoutput$QC[[2]]
 
   # The Extended score returned by BASH in the previous use case gives an indication of the level of variability across the entire surface of the chip. If this value is large it may indicate a significant gradient effect in the intensities
@@ -217,7 +240,6 @@ data <- insertSectionData(data, what = "BeadLevelQC", data=qcReport)
 
 # To store mean and stdev of several types of control probes
 array.qcvalues[, 22] = as.matrix(qcReport)[, 1]
-<<<<<<< HEAD
 array.qcvalues[, 23] = as.matrix(qcReport)[, 8]
 array.qcvalues[, 24] = as.matrix(qcReport)[, 2]
 array.qcvalues[, 25] = as.matrix(qcReport)[, 9]
@@ -232,19 +254,6 @@ array.qcvalues[, 33] = as.matrix(qcReport)[, 13]
 array.qcvalues[, 34] = as.matrix(qcReport)[, 7] 
 array.qcvalues[, 35] = as.matrix(qcReport)[, 14]
 
-=======
-array.qcvalues[, 23] = as.matrix(qcReport)[, 7]
-array.qcvalues[, 24] = as.matrix(qcReport)[, 2]
-array.qcvalues[, 25] = as.matrix(qcReport)[, 8]
-array.qcvalues[, 26] = as.matrix(qcReport)[, 3]
-array.qcvalues[, 27] = as.matrix(qcReport)[, 9]
-array.qcvalues[, 28] = as.matrix(qcReport)[, 4]
-array.qcvalues[, 29] = as.matrix(qcReport)[, 10]
-array.qcvalues[, 30] = as.matrix(qcReport)[, 5]
-array.qcvalues[, 31] = as.matrix(qcReport)[, 11]
-array.qcvalues[, 32] = as.matrix(qcReport)[, 6]
-array.qcvalues[, 33] = as.matrix(qcReport)[, 12]
->>>>>>> origin/master
 
 # All observations are extracted, transformed and then grouped together according to their ArrayAddressID. Outliers are removed and the mean and standard deviation of the remaining beads are calculated
 # The default options of summarize apply a log2 transformation, remove outliers using the Illumina 3 M.A.D cut-off and report the mean and standard deviation for each bead type
@@ -273,7 +282,6 @@ det <- calculateDetection(datasumm)
 for (l in 1:length(array.names)) {
 
   # To store the percentile of summarized gene expression intensities
-<<<<<<< HEAD
   array.qcvalues[l, 38] = suppressWarnings(quantile(as.matrix(exprs(datasumm))[, l], 0.01, na.rm = TRUE)[[1]])
   array.qcvalues[l, 39] = suppressWarnings(quantile(as.matrix(exprs(datasumm))[, l], 0.05, na.rm = TRUE)[[1]])
   array.qcvalues[l, 40] = suppressWarnings(quantile(as.matrix(exprs(datasumm))[, l], 0.1, na.rm = TRUE)[[1]])
@@ -298,32 +306,6 @@ for (l in 1:length(array.names)) {
   array.qcvalues[l, 57] = suppressWarnings(quantile(as.matrix(nObservations(datasumm))[, l], 0.99, na.rm = TRUE)[[1]])
   array.qcvalues[l, 58] = suppressWarnings(mean(as.matrix(nObservations(datasumm))[, l], na.rm = TRUE))
   array.qcvalues[l, 59] = suppressWarnings(sd(as.matrix(nObservations(datasumm))[, l], na.rm = TRUE))
-=======
-  array.qcvalues[l, 36] = suppressWarnings(quantile(as.matrix(exprs(datasumm))[, l], 0.01, na.rm = TRUE)[[1]])
-  array.qcvalues[l, 37] = suppressWarnings(quantile(as.matrix(exprs(datasumm))[, l], 0.05, na.rm = TRUE)[[1]])
-  array.qcvalues[l, 38] = suppressWarnings(quantile(as.matrix(exprs(datasumm))[, l], 0.1, na.rm = TRUE)[[1]])
-  array.qcvalues[l, 39] = suppressWarnings(quantile(as.matrix(exprs(datasumm))[, l], 0.25, na.rm = TRUE)[[1]])
-  array.qcvalues[l, 40] = suppressWarnings(quantile(as.matrix(exprs(datasumm))[, l], 0.50, na.rm = TRUE)[[1]])
-  array.qcvalues[l, 41] = suppressWarnings(quantile(as.matrix(exprs(datasumm))[, l], 0.75, na.rm = TRUE)[[1]])
-  array.qcvalues[l, 42] = suppressWarnings(quantile(as.matrix(exprs(datasumm))[, l], 0.90, na.rm = TRUE)[[1]])
-  array.qcvalues[l, 43] = suppressWarnings(quantile(as.matrix(exprs(datasumm))[, l], 0.95, na.rm = TRUE)[[1]])
-  array.qcvalues[l, 44] = suppressWarnings(quantile(as.matrix(exprs(datasumm))[, l], 0.99, na.rm = TRUE)[[1]])
-  array.qcvalues[l, 45] = suppressWarnings(mean(as.matrix(exprs(datasumm))[, l], na.rm = TRUE))
-  array.qcvalues[l, 46] = suppressWarnings(sd(as.matrix(exprs(datasumm))[, l], na.rm = TRUE))
-
-  # To store the percentile of the number of beads used for the summarization of gene expression
-  array.qcvalues[l, 47] = suppressWarnings(quantile(as.matrix(nObservations(datasumm))[, l], 0.01, na.rm = TRUE)[[1]])
-  array.qcvalues[l, 48] = suppressWarnings(quantile(as.matrix(nObservations(datasumm))[, l], 0.05, na.rm = TRUE)[[1]])
-  array.qcvalues[l, 49] = suppressWarnings(quantile(as.matrix(nObservations(datasumm))[, l], 0.1, na.rm = TRUE)[[1]])
-  array.qcvalues[l, 50] = suppressWarnings(quantile(as.matrix(nObservations(datasumm))[, l], 0.25, na.rm = TRUE)[[1]])
-  array.qcvalues[l, 51] = suppressWarnings(quantile(as.matrix(nObservations(datasumm))[, l], 0.50, na.rm = TRUE)[[1]])
-  array.qcvalues[l, 52] = suppressWarnings(quantile(as.matrix(nObservations(datasumm))[, l], 0.75, na.rm = TRUE)[[1]])
-  array.qcvalues[l, 53] = suppressWarnings(quantile(as.matrix(nObservations(datasumm))[, l], 0.90, na.rm = TRUE)[[1]])
-  array.qcvalues[l, 54] = suppressWarnings(quantile(as.matrix(nObservations(datasumm))[, l], 0.95, na.rm = TRUE)[[1]])
-  array.qcvalues[l, 55] = suppressWarnings(quantile(as.matrix(nObservations(datasumm))[, l], 0.99, na.rm = TRUE)[[1]])
-  array.qcvalues[l, 56] = suppressWarnings(mean(as.matrix(nObservations(datasumm))[, l], na.rm = TRUE))
-  array.qcvalues[l, 57] = suppressWarnings(sd(as.matrix(nObservations(datasumm))[, l], na.rm = TRUE))
->>>>>>> origin/master
 
   # To store detection counts information with probes having P-value < 0.01
   # P-value < 0.01 was selected based on lumi package information
@@ -352,3 +334,5 @@ Detection(datasumm) <- det
 # To write an entire QC table
 write.table(array.qcvalues, file = paste(sapply(strsplit(tiff.Files[1], "_"), "[", 1), "raw_qc_details.txt", sep = "_"), append = FALSE, quote = FALSE, sep = "\t", eol = "\n", na = "NA", dec = ".", row.names = array.names, col.names = FALSE)
 
+# To move up one directory and out of qc_details directory
+setwd("..")
