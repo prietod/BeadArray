@@ -5,6 +5,11 @@ error() {
   exit 1
 }
 
+create_dir() {
+  local dir="$1"
+  [[ -d ${dir} ]] || mkdir -p ${dir}
+}
+
 usage() {
   echo "Usage: $( basename $0 ) <code> [chip_barcode] [chip_barcode..]" 1>&2
   exit 1
@@ -12,17 +17,6 @@ usage() {
 
 filter_excluded() {
   grep -v '/level2' | grep -v '7911755025' | grep -v '\.zip$'
-}
-
-setup_barcode_dirs() {
-  local chip_barcode=$1
-
-  RAW_DATA_DIR=${WORK_DIR}/${chip_barcode}/raw/data
-  RAW_QC_DIR=${WORK_DIR}/${chip_barcode}/raw/qc/${code_name}
-
-  for d in $RAW_DATA_DIR $RAW_QC_DIR; do
-    mkdir -p $d
-  done
 }
 
 check_group_membership() {
@@ -33,8 +27,10 @@ check_group_membership() {
 copy_data() {
   local chip_barcode=$1
 
-  for f in $( find ${DATA_DIR} -type f -name "${chip_barcode}*" | filter_excluded ); do
-    [[ -f ${RAW_DATA_DIR}/$( basename ${f} ) ]] || cp -v ${f} ${RAW_DATA_DIR}
+  create_dir ${DEST_DATA_DIR}/${chip_barcode}
+
+  for f in $( find ${SOURCE_DATA_DIR} -type f -name "${chip_barcode}*" | filter_excluded ); do
+    [[ -f ${DEST_DATA_DIR}/${chip_barcode}/$( basename ${f} ) ]] || cp -v ${f} ${DEST_DATA_DIR}/${chip_barcode}
   done
 }
 
@@ -70,11 +66,12 @@ main() {
 
     clear_job_complete ${code_name} ${chip_barcode}
 
-    setup_barcode_dirs ${chip_barcode}
+    local raw_qc_dir=${WORK_DIR}/${code_name}/${chip_barcode}/raw/qc
+    mkdir -p ${raw_qc_dir}
 
     copy_data ${chip_barcode}
 
-    R --slave --quiet --no-restore --no-save --args ${RAW_DATA_DIR} ${RAW_QC_DIR} < ${code}
+    R --slave --quiet --no-restore --no-save --args ${DEST_DATA_DIR}/${chip_barcode} ${raw_qc_dir} < ${code}
 
     [[ $? == 0 ]] && mark_as_complete ${code_name} ${chip_barcode}
   done
@@ -82,9 +79,14 @@ main() {
 
 BASE="$(readlink -f $(readlink -f $(dirname "${BASH_SOURCE}")/..))"
 
-DATA_DIR="${DATA_DIR:-/hiidata/teddy/data/jinfiniti/gene_expression}"
-MAP_INFO="${MAP_INFO:-$DATA_DIR/map_info.txt}"
+SOURCE_DATA_DIR="${SOURCE_DATA_DIR:-/hiidata/teddy/data/jinfiniti/gene_expression}"
+
+MAP_INFO="${MAP_INFO:-$SOURCE_DATA_DIR/map_info.txt}"
+
+DEST_DATA_DIR="${DEST_DATA_DIR:-$BASE/tmp/data}"
+
 WORK_DIR="${WORK_DIR:-$BASE/tmp/work}"
+
 COMPLETE_DIR="${COMPLETE_DIR:-$BASE/tmp/complete}"
 
 cd $BASE

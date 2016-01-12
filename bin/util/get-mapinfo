@@ -4,9 +4,9 @@
 
 BASE="$(readlink -f $(readlink -f $(dirname "${BASH_SOURCE}")/../..))"
 
-DATA_DIR="${DATA_DIR:-/hiidata/teddy/data/jinfiniti/gene_expression}"
+SOURCE_DATA_DIR="${SOURCE_DATA_DIR:-/hiidata/teddy/data/jinfiniti/gene_expression}"
 
-MAP_INFO="${MAP_INFO:-$DATA_DIR/map_info.txt}"
+MAP_INFO="${MAP_INFO:-$SOURCE_DATA_DIR/map_info.txt}"
 
 usage() {
   echo "Usage: $( basename $0 ) [-u] <$( join \| $fields )>" 1>&2
