@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 error() {
-  local chip_barcode=$1
-  echo "Error: $@" | tee ${FAILED_DIR}/${chip_barcode}.txt 1>&2
+  local chip_barcode=$1; shift
+  echo "Error: "$@" | tee ${FAILED_DIR}/${chip_barcode}.txt 1>&2
   exit 1
 }
 
@@ -27,7 +27,7 @@ check_have_group() {
   local id_output=$( id )
   if ! echo ${id_output} | grep -q "\<${group}\>"; then
     error $chip_barcode \
-      "Exiting. Node dropped '${group}' group ownership in session, data inaccessible. id-output: ${id_output}" \
+      "Exiting. Node dropped '${group}' group ownership in session, data inaccessible. id-output: ${id_output}"
   fi
 }
 
