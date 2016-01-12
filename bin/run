@@ -27,11 +27,13 @@ filter_excluded() {
 
 check_have_group() {
   local group=$1
-  local chip_barcode=$2
+  local code_name=$2
+  local chip_barcode=$3
 
   local id_output=$( id )
   if ! echo ${id_output} | grep -q "\<${group}\>"; then
-    error $chip_barcode "Exiting. Node dropped '${group}' group ownership in session, data inaccessible. id-output: ${id_output}"
+    error ${code_name} ${chip_barcode} \
+      "Exiting. Node dropped '${group}' group ownership in session, data inaccessible. id-output: ${id_output}"
   fi
 }
 
@@ -69,11 +71,11 @@ main() {
 
   local code_name=$( basename $code .R )
 
-  check_have_group hiifoo
-
   module load apps/R/${R_VERSION:-3.2.3}
 
   for chip_barcode in ${chip_barcodes}; do
+
+    check_have_group hiifoo ${code_name} ${chip_barcode}
 
     clear_job_complete ${code_name} ${chip_barcode}
 
