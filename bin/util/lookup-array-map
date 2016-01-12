@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+awk -F: "/^$SLURM_ARRAY_TASK_ID:/ { print \$2 }" $1

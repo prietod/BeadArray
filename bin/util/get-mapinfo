@@ -2,7 +2,11 @@
 #
 # bin/util/get-mapinfo - returns all columns for a particular field
 
-MYBASE="$( dirname $0 )/.."
+BASE="$(readlink -f $(readlink -f $(dirname "${BASH_SOURCE}")/../..))"
+
+DATA_DIR="${DATA_DIR:-/hiidata/teddy/data/jinfiniti/gene_expression}"
+
+MAP_INFO="${MAP_INFO:-$DATA_DIR/map_info.txt}"
 
 usage() {
   echo "Usage: $( basename $0 ) [-u] <$( join \| $fields )>" 1>&2
@@ -12,9 +16,6 @@ usage() {
 strip_header() {
   sed -n '2,$p'
 }
-
-source $MYBASE/lib/env.sh
-source $MYBASE/lib/common.sh
 
 if [[ $1 == '-u' ]]; then
   filter="sort -u"

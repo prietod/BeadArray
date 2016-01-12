@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+error() {
+  echo "$@" 1>&2
+  exit 1
+}
+
 usage() {
   echo "Usage: $( basename $0 ) <code> [chip_barcode] [chip_barcode..]" 1>&2
   exit 1
@@ -11,44 +16,79 @@ filter_excluded() {
 
 setup_barcode_dirs() {
   local chip_barcode=$1
-  work_dir=$WORK_DIR/${chip_barcode}
 
-  work_raw_data_dir=${work_dir}/raw/data
+  RAW_DATA_DIR=${WORK_DIR}/${chip_barcode}/raw/data
+  RAW_QC_DIR=${WORK_DIR}/${chip_barcode}/raw/qc/${code_name}
 
-  work_raw_qc_dir=${work_dir}/raw/qc/${code_short_name}
-
-  for d in $work_raw_data_dir $work_raw_qc_dir; do
+  for d in $RAW_DATA_DIR $RAW_QC_DIR; do
     mkdir -p $d
   done
 }
 
-MYDIR="$( readlink -f $( dirname $0 ))"
-MYBASE="$( readlink -f $MYDIR/.. )"
+check_group_membership() {
+  local id_output=$( id )
+  echo ${id_output} | grep -q '\<hii\>' || error "NOT MEMBER OF 'hii' GROUP FOR THIS SESSION! [${id_output}]. Exiting."
+}
 
-source $MYBASE/lib/env.sh
-source $MYBASE/lib/common.sh
+copy_data() {
+  local chip_barcode=$1
+
+  for f in $( find ${DATA_DIR} -type f -name "${chip_barcode}*" | filter_excluded ); do
+    [[ -f ${RAW_DATA_DIR}/$( basename ${f} ) ]] || cp -v ${f} ${RAW_DATA_DIR}
+  done
+}
+
+mark_job_complete() {
+  local code_name=$1
+  local chip_barcode=$2
+
+  [[ -d ${COMPLETE_DIR}/${code_name} ]] || mkdir -p ${COMPLETE_DIR}/${code_name}
+
+  date +%FT%T > ${COMPLETE_DIR}/${code_name}/${chip_barcode}.txt
+}
+
+clear_job_complete() {
+  local code_name=$1
+  local chip_barcode=$2
+
+  if [[ -f ${COMPLETE_DIR}/${code_name}/${chip_barcode}.txt ]]; then
+    rm ${COMPLETE_DIR}/${code_name}/${chip_barcode}.txt
+  fi
+}
+
+main() {
+  local code=${1}; shift
+  local chip_barcodes="${@:-3998755068}" # default for testing
+
+  local code_name=$( basename $code .R )
+
+  check_group_membership
+
+  module load apps/R/${R_VERSION:-3.2.3}
+
+  for chip_barcode in ${chip_barcodes}; do
+
+    clear_job_complete ${code_name} ${chip_barcode}
+
+    setup_barcode_dirs ${chip_barcode}
+
+    copy_data ${chip_barcode}
+
+    R --slave --quiet --no-restore --no-save --args ${RAW_DATA_DIR} ${RAW_QC_DIR} < ${code}
+
+    [[ $? == 0 ]] && mark_as_complete ${code_name} ${chip_barcode}
+  done
+}
+
+BASE="$(readlink -f $(readlink -f $(dirname "${BASH_SOURCE}")/..))"
+
+DATA_DIR="${DATA_DIR:-/hiidata/teddy/data/jinfiniti/gene_expression}"
+MAP_INFO="${MAP_INFO:-$DATA_DIR/map_info.txt}"
+WORK_DIR="${WORK_DIR:-$BASE/tmp/work}"
+COMPLETE_DIR="${COMPLETE_DIR:-$BASE/tmp/complete}"
+
+cd $BASE
 
 [[ $# < 1 ]] && usage
 
-code=${1}; shift
-
-code_short_name=$( basename $code .R )
-
-#chip_barcodes="${@:-3998787078}" # set default for testing
-
-chip_barcodes="${@:-3998755068}" # set default for testing
-
-module load apps/R/${R_VERSION:-3.2.3}
-
-for chip_barcode in ${chip_barcodes}; do
-
-  setup_barcode_dirs ${chip_barcode}
-
-  for f in $( find $DATA_DIR -type f -name "${chip_barcode}*" | filter_excluded ); do
-     [[ -f ${work_raw_data_dir}/$( basename $f ) ]] || cp -v $f ${work_raw_data_dir}
-   done
-
-  R --slave --quiet --no-restore --no-save \
-    --args ${work_raw_data_dir} ${work_raw_qc_dir} < ${code}
-done
-
+main "$@"

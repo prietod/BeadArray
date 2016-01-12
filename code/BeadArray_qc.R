@@ -249,9 +249,9 @@ array.qcvalues[, 28] = as.matrix(qcReport)[, 4]
 array.qcvalues[, 29] = as.matrix(qcReport)[, 11]
 array.qcvalues[, 30] = as.matrix(qcReport)[, 5]
 array.qcvalues[, 31] = as.matrix(qcReport)[, 12]
-array.qcvalues[, 32] = as.matrix(qcReport)[, 6] 
+array.qcvalues[, 32] = as.matrix(qcReport)[, 6]
 array.qcvalues[, 33] = as.matrix(qcReport)[, 13]
-array.qcvalues[, 34] = as.matrix(qcReport)[, 7] 
+array.qcvalues[, 34] = as.matrix(qcReport)[, 7]
 array.qcvalues[, 35] = as.matrix(qcReport)[, 14]
 
 
