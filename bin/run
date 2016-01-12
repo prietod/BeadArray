@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
 error() {
-  echo "$@" 1>&2
+  local chip_barcode=$1
+  echo "Error: $@" | tee ${FAILED_DIR}/${chip_barcode}.txt 1>&2
   exit 1
 }
 
@@ -19,9 +20,15 @@ filter_excluded() {
   grep -v '/level2' | grep -v '7911755025' | grep -v '\.zip$'
 }
 
-check_group_membership() {
+check_have_group() {
+  local group=$1
+  local chip_barcode=$2
+
   local id_output=$( id )
-  echo ${id_output} | grep -q '\<hii\>' || error "NOT MEMBER OF 'hii' GROUP FOR THIS SESSION! [${id_output}]. Exiting."
+  if ! echo ${id_output} | grep -q "\<${group}\>"; then
+    error $chip_barcode \
+      "Exiting. Node dropped '${group}' group ownership in session, data inaccessible. id-output: ${id_output}" \
+  fi
 }
 
 copy_data() {
@@ -58,7 +65,7 @@ main() {
 
   local code_name=$( basename $code .R )
 
-  check_group_membership
+  check_have_group hiifoo
 
   module load apps/R/${R_VERSION:-3.2.3}
 
@@ -73,7 +80,7 @@ main() {
 
     R --slave --quiet --no-restore --no-save --args ${DEST_DATA_DIR}/${chip_barcode} ${raw_qc_dir} < ${code}
 
-    [[ $? == 0 ]] && mark_as_complete ${code_name} ${chip_barcode}
+    [[ $? == 0 ]] && mark_job_complete ${code_name} ${chip_barcode}
   done
 }
 
@@ -88,6 +95,8 @@ DEST_DATA_DIR="${DEST_DATA_DIR:-$BASE/tmp/data}"
 WORK_DIR="${WORK_DIR:-$BASE/tmp/work}"
 
 COMPLETE_DIR="${COMPLETE_DIR:-$BASE/tmp/complete}"
+
+FAILED_DIR="${FAILED_DIR:-$BASE/tmp/failed}"
 
 cd $BASE
 
