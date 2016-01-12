@@ -110,6 +110,27 @@ Example of `data_dir` contents for one vial_barcode:
 
 ## Scratch
 
+   tmp/work/<vial_barcode>
+
+      - raw/
+         - data/ <- all 12 copied
+
+         - qc/
+            <R_script_name>/ <- pdfs, txtfile
+
+      - filter
+         - data/
+         - qc/
+         - result/
+
+
+      - raw_data/
+      - raw_qc/
+      - filter_data/
+      - filter_qc/
+      - filter_result/
+
+
     tmp/
       123456/
         data/ # (hiidata)
