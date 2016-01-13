@@ -33,6 +33,7 @@ mark_job_complete() {
 setup_dirs() {
   [[ -d $COMPLETE_DIR/$CODE_NAME ]] || mkdir -p $COMPLETE_DIR/$CODE_NAME
   [[ -d $FAILED_DIR/$CODE_NAME ]] || mkdir -p $FAILED_DIR/$CODE_NAME
+  [[ -d $RAW_QC_DIR ]] mkdir -p $RAW_QC_DIR
 }
 
 usage() {
