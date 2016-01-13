@@ -2,7 +2,7 @@
 
 BASE="$(readlink -f $(readlink -f $(dirname "${BASH_SOURCE}")/..))"
 
-DATESTAMP=$( date +%Y-%m-%dT%H:%M:%S )
+DATESTAMP=$( date +%FT%T )
 
 SUBMIT_CPUS_PER_TASK="${SUBMIT_CPUS_PER_TASK:-2}"
 SUBMIT_MEM_MB="${SUBMIT_MEM_MB:-16000}"
