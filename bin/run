@@ -17,7 +17,7 @@ clear_previous_job() {
     $RAW_QC_DIR; do
     echo $f
 
-    [[ -e $f ]] && echo rm -rf $f
+    [[ -e $f ]] && rm -rf $f
   done
 }
 
