@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+BASE="$(readlink -f $(readlink -f $(dirname "${BASH_SOURCE}")/../..))"
+
+create_dir() {
+  local dir="$1"
+  [[ -d ${dir} ]] || mkdir -p ${dir}
+}
+
+filter_excluded() {
+  grep -v '/level2' | grep -v '7911755025' | grep -v '\.zip$'
+}
+
+copy_data() {
+  local chip_barcode=$1
+
+  create_dir ${DEST_DATA_DIR}/${chip_barcode}
+
+  for f in $( find ${SOURCE_DATA_DIR} -type f -name "${chip_barcode}*" | filter_excluded ); do
+    [[ -f ${DEST_DATA_DIR}/${chip_barcode}/$( basename ${f} ) ]] || cp -v ${f} ${DEST_DATA_DIR}/${chip_barcode}
+  done
+}
+
+
+SOURCE_DATA_DIR="${SOURCE_DATA_DIR:-/hiidata/teddy/data/jinfiniti/gene_expression}"
+
+DEST_DATA_DIR="${DEST_DATA_DIR:-$BASE/tmp/data}"
+
+MAP_INFO="${MAP_INFO:-$SOURCE_DATA_DIR/map_info.txt}"
+
+cd $BASE
+
+for chip_barcode in $( bin/util/get-mapinfo -u chip_barcode  ); do
+  copy_data ${chip_barcode}
+done

@@ -5,7 +5,7 @@ error() {
   local chip_barcode=$1; shift
   local msg=$1; shift
 
-  make_dir ${FAILED_DIR}/${code_name}
+  create_dir ${FAILED_DIR}/${code_name}
 
   echo "Error: $msg" | tee ${FAILED_DIR}/${code_name}/${chip_barcode}.txt 1>&2
   exit 1
@@ -75,7 +75,7 @@ main() {
 
   for chip_barcode in ${chip_barcodes}; do
 
-    check_have_group hiifoo ${code_name} ${chip_barcode}
+    check_have_group hii ${code_name} ${chip_barcode}
 
     clear_job_complete ${code_name} ${chip_barcode}
 
