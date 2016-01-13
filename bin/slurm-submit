@@ -18,7 +18,7 @@ log_dir=$BASE/tmp/log/${code_name}
 
 ( mkdir -p $log_dir && cd $log_dir && mkdir $DATESTAMP && ln -nsf $DATESTAMP current )
 
-array_map=$BASE/tmp/slurm-array/${code_name}.txt
+array_map=$BASE/tmp/slurm-array/${code_name}-$DATESTAMP.txt
 
 [[ -d "$( dirname $array_map )" ]] || mkdir -p "$( dirname $array_map )"
 
