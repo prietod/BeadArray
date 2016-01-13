@@ -15,7 +15,6 @@ clear_previous_job() {
     $COMPLETE_DIR/$CODE_NAME/$CHIP_BARCODE.txt \
     $FAILED_DIR/$CODE_NAME/$CHIP_BARCODE.txt \
     $RAW_QC_DIR; do
-    echo $f
 
     [[ -e $f ]] && rm -rf $f
   done
