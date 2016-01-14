@@ -8,7 +8,11 @@ create_dir() {
 }
 
 filter_excluded() {
-  grep -v '/level2' | grep -v '7911755025' | grep -v '\.zip$'
+  egrep -v '/level2' \
+    | egrep -v '\.zip$' \
+    | egrep -v '/7911755025_' \
+    | egrep -v '/9257259052_(H|I|J)' \
+    | egrep -v  '/9445264179_B'
 }
 
 copy_data() {
