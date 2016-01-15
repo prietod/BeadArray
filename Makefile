@@ -1,18 +1,39 @@
 all:
+	@echo "clean"
+	@echo "combine"
+	@echo "combine-qc"
+	@echo "combine-qc-average"
 	@echo "cancel-all"
 	@echo "test"
 	@echo "qc"
 	@echo "qc-clean-all"
-	@echo "qc-avg"
-	@echo "qc-avg-clean-all"
+	@echo "qc-average"
+	@echo "qc-average-clean-all"
+
+clean:
+	-rm -rf tmp/work tmp/log tmp/slurm-array
 
 cancel-all:
 	scancel -phii02 --signal=9 --full --user $$LOGNAME
 
+combine: combine-qc combine-qc-average
+
+combine-qc:
+	mkdir -p tmp/work/BeadArray_qc/combined
+	> tmp/work/BeadArray_qc/combined/raw_qc_details.txt
+	find tmp/work/BeadArray_qc/chips -name '*_raw_qc_details.txt' \
+		| xargs -I{} cat {} >> tmp/work/BeadArray_qc/combined/raw_qc_details.txt
+
+combine-qc-average:
+	mkdir -p tmp/work/BeadArray_qc_average/combined
+	> tmp/work/BeadArray_qc_average/combined/raw_qc_details.txt
+	find tmp/work/BeadArray_qc_average/chips -name '*_raw_qc_average_details.txt' \
+		| xargs -I{} cat {} >> tmp/work/BeadArray_qc_average/combined/raw_qc_average_details.txt
+
 qc:
 	bin/util/get-mapinfo -u chip_barcode | bin/slurm-submit code/BeadArray_qc.R
 
-qc-avg:
+qc-average:
 	bin/util/get-mapinfo -u chip_barcode | bin/slurm-submit code/BeadArray_qc_average.R
 
 test:
@@ -25,5 +46,5 @@ test:
 qc-clean-all:
 	-rm -rf tmp/{work,complete}/BeadArray_qc
 
-qc-avg-clean-all:
+qc-average-clean-all:
 	-rm -rf tmp/{work,complete}/BeadArray_qc_average

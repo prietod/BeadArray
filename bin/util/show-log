@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+BASE="$(readlink -f $(readlink -f $(dirname "${BASH_SOURCE}")/..))"
+
+[[ $# -ne 2 ]] && { echo "Usage: $(basename $0) <code_name> <chip_barcode>" 1>&2; exit 1; }
+
+code=$1
+chip_barcode=$2
+
+cd $BASE
+
+map=$( ls -1t tmp/slurm-array/$code-*  | head -1 )
+
+echo less awk -F: "\$2 == $chip_barcode { print \$1 }" $map
+     less awk -F: "\$2 == $chip_barcode { print \$1 }" $map
+
