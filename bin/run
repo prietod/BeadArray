@@ -69,7 +69,7 @@ CHIP_BARCODE="${2:-$DEFAULT_CHIP_BARCODE}"
 
 CODE_NAME=$( basename $CODE .R )
 
-RAW_QC_DIR=$WORK_DIR/$CODE_NAME/$CHIP_BARCODE/raw/qc
+RAW_QC_DIR=$WORK_DIR/$CODE_NAME/chips/$CHIP_BARCODE/raw/qc
 
 clear_previous_job
 

@@ -65,11 +65,13 @@ Use the command `bin/util/get-mapinfo` to query this file and use the flag `-u` 
 ## Directory Structure
 
 - `bin/` - Driver scripts, utility scripts, mostly if not all written in Bash.
+
 - `code/` - The intelligent bits that do the real analysis work.
+
 - `tmp/` - Directory in which all temporal data is stored (input data, utility data, qc, results).
            It will be ignored upon any Git Commit and should be copied out as needed.
 
-### Layout of tmp/
+### tmp/
 
     - tmp/
       - data/

@@ -34,6 +34,7 @@ sleep_command="$BASE/bin/util/random-sleep $SUBMIT_RANDOM_SECONDS"
 
 if ! [[ -f "${code}" ]]; then
   echo "Error: R Script '${code}' does not exist. Exiting." 1>&2
+  exit 1
 fi
 
 set -x
