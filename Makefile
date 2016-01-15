@@ -26,7 +26,7 @@ combine-qc:
 
 combine-qc-average:
 	mkdir -p tmp/work/BeadArray_qc_average/combined
-	> tmp/work/BeadArray_qc_average/combined/raw_qc_details.txt
+	> tmp/work/BeadArray_qc_average/combined/raw_qc_average_details.txt
 	find tmp/work/BeadArray_qc_average/chips -name '*_raw_qc_average_details.txt' \
 		| xargs -I{} cat {} >> tmp/work/BeadArray_qc_average/combined/raw_qc_average_details.txt
 
