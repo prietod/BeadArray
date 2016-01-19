@@ -7,9 +7,12 @@ files = sys.argv[1:]
 
 data = {}
 
+headers = []
+
 for filename in files:
     with open(filename) as f:
         header = f.readline()
+        headers.append(header.rstrip().split('\t'))
 
         for line in f.readlines():
             columns = line.rstrip().split('\t')
@@ -21,6 +24,15 @@ for filename in files:
 
             data[primary_key].append(values)
 
+
+# print re-oriented header
+
+line = [ str(headers[file][column]) for column in range(12) for file in range(4) ]
+line.insert(0, 'Probe_ID')
+print('\t'.join(line))
+
+# print re-oriented values
+
 for k in sorted(data.iterkeys()):
     try:
         line = [ str(data[k][file][column]) for column in range(12) for file in range(4) ]
@@ -30,15 +42,3 @@ for k in sorted(data.iterkeys()):
         sys.stderr.write('error\n')
         sys.stderr.write(k + '\n')
         sys.exit(1)
-
-
-
-#for k in sorted(data.iterkeys()):
-#    try:
-#        line = [ str(data[k][file][column]) for column in range(12) for file in range(4) ]
-#        line.insert(0, k)
-#        print('\t'.join(line))
-#    except:
-#        print('error')
-#        print(k)
-#
