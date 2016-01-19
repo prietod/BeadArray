@@ -9,6 +9,7 @@ all:
 	@echo "qc-clean-all"
 	@echo "qc-average"
 	@echo "qc-average-clean-all"
+	@echo "test-fix-data"
 
 clean:
 	-rm -rf tmp/work tmp/log tmp/slurm-array
@@ -18,17 +19,21 @@ cancel-all:
 
 combine: combine-qc combine-qc-average
 
+test-fix-data:
+	bin/fix-data test_data/{Avg_Signal.txt,BEAD_STDERR.txt,Avg_NBEADS.txt,Detection_Pval.txt} > tmp/test-fix-data.txt
+	diff tmp/test-fix-data.txt test_data/fixed.txt
+
 combine-qc:
 	mkdir -p tmp/work/BeadArray_qc/combined
 	> tmp/work/BeadArray_qc/combined/raw_qc_details.txt
 	find tmp/work/BeadArray_qc/chips -name '*_raw_qc_details.txt' \
-		| xargs -I{} cat {} >> tmp/work/BeadArray_qc/combined/raw_qc_details.txt
+		| xargs -n1 -I{} cat {} >> tmp/work/BeadArray_qc/combined/raw_qc_details.txt
 
 combine-qc-average:
 	mkdir -p tmp/work/BeadArray_qc_average/combined
 	> tmp/work/BeadArray_qc_average/combined/raw_qc_average_details.txt
 	find tmp/work/BeadArray_qc_average/chips -name '*_raw_qc_average_details.txt' \
-		| xargs -I{} cat {} >> tmp/work/BeadArray_qc_average/combined/raw_qc_average_details.txt
+		| xargs -n1 -I{} cat {} >> tmp/work/BeadArray_qc_average/combined/raw_qc_average_details.txt
 
 qc:
 	bin/util/get-mapinfo -u chip_barcode | bin/slurm-submit code/BeadArray_qc.R
