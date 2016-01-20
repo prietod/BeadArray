@@ -39,6 +39,5 @@ for k in sorted(data.iterkeys()):
         line.insert(0, k)
         print('\t'.join(line))
     except:
-        sys.stderr.write('error\n')
-        sys.stderr.write(k + '\n')
+        sys.stderr.write('Error: Key: ' + k )
         sys.exit(1)
