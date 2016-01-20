@@ -103,5 +103,5 @@ From the project base directory of the project:
       dir=tmp/work/${code_name}/chips/9224522100/raw/qc
       [[ -d ${dir} ]] && rm -rf ${dir}
       mkdir -p ${dir}
-      tar --directory ${dir} -zxf /hiidata/projects/${code_name}/${code_name}-chips-9224522100-raw-qc.tar.gz
+      tar --directory ${dir} -zxf /hiidata/projects/BeadArray/${code_name}-chips-9224522100-raw-qc.tar.gz
     done
