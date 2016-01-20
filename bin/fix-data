@@ -24,18 +24,21 @@ for filename in files:
 
             data[primary_key].append(values)
 
-
 # print re-oriented header
 
-line = [ str(headers[file][column]) for column in range(12) for file in range(4) ]
+num_cols = len(headers[0])
+
+line = [ str(headers[file][column]) for column in range(num_cols) for file in range(4) ]
 line.insert(0, 'Probe_ID')
 print('\t'.join(line))
+
 
 # print re-oriented values
 
 for k in sorted(data.iterkeys()):
     try:
-        line = [ str(data[k][file][column]) for column in range(12) for file in range(4) ]
+        number_cols = len(data[k][file])
+        line = [ str(data[k][file][column]) for column in range(num_cols) for file in range(4) ]
         line.insert(0, k)
         print('\t'.join(line))
     except:

@@ -25,6 +25,12 @@ test-fix-data:
 		> tmp/test/fix-data/result.txt
 	diff tmp/test/fix-data/result.txt test/fix-data/expected/result.txt
 
+test-fix-data-7-cols:
+	mkdir -p tmp/test/fix-data
+	bin/fix-data test/fix-data/input/{Avg_Signal-7-cols.txt,BEAD_STDERR-7-cols.txt,Avg_NBEADS-7-cols.txt,Detection_Pval-7-cols.txt} \
+		> tmp/test/fix-data/result-7-cols.txt
+	diff tmp/test/fix-data/result-7-cols.txt test/fix-data/expected/result-7-cols.txt
+
 combine-qc:
 	mkdir -p tmp/work/BeadArray_qc/combined
 	> tmp/work/BeadArray_qc/combined/raw_qc_details.txt
