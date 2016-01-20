@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+
+BASE="$(readlink -f $(readlink -f $(dirname "${BASH_SOURCE}")/..))"
+
+check_have_group() {
+  local group=$1
+  local id_output=$( id )
+  if ! echo ${id_output} | grep -q "\<${group}\>"; then
+    error "Exiting. Node dropped '${group}' group ownership in session, data inaccessible. id-output: ${id_output}"
+  fi
+}
+
+error_and_exit() {
+  local msg=$1
+  echo "Error: $msg" | tee $FAILED_DIR/$CODE_NAME/$CHIP_BARCODE.txt 1>&2
+  exit 1
+}
+
+usage() {
+  echo "Usage: $( basename $0 ) <input-qc-file> <output-qc-file>" 1>&2
+  exit 1
+}
+
+R_VERSION=${R_VERSION:-3.2.3}
+
+#---------------------------------------------------------------
+# main
+#---------------------------------------------------------------
+
+[[ $# -ne 2 ]] && usage
+
+input_file=$1
+output_file=$2
+
+module load apps/R/${R_VERSION}
+
+R --slave --quiet --no-restore --no-save --args $(pwd)/$input_file $(pwd)/$output_file < $BASE/code/BeadArray_sample_filter.R
+
+rc=$?
+
+if [[ $rc == 0 ]]; then
+  mark_job_complete
+else
+  error_and_exit "R failed with return code: $rc"
+fi

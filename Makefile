@@ -33,15 +33,19 @@ test-fix-data-7-cols:
 
 combine-qc:
 	mkdir -p tmp/work/BeadArray_qc/combined
-	> tmp/work/BeadArray_qc/combined/raw_qc_details.txt
+	cat static/qc_header.txt > tmp/work/BeadArray_qc/combined/raw_qc_details.txt
 	find tmp/work/BeadArray_qc/chips -name '*_raw_qc_details.txt' \
 		| xargs -n1 -I{} cat {} >> tmp/work/BeadArray_qc/combined/raw_qc_details.txt
+	bin/run-sample-filter tmp/work/BeadArray_qc/combined/raw_qc_details.txt \
+		tmp/work/BeadArray_qc/combined/qc_exclude_sample_list.txt
 
 combine-qc-average:
 	mkdir -p tmp/work/BeadArray_qc_average/combined
-	> tmp/work/BeadArray_qc_average/combined/raw_qc_average_details.txt
+	cat static/qc_header.txt > tmp/work/BeadArray_qc_average/combined/raw_qc_average_details.txt
 	find tmp/work/BeadArray_qc_average/chips -name '*_raw_qc_average_details.txt' \
 		| xargs -n1 -I{} cat {} >> tmp/work/BeadArray_qc_average/combined/raw_qc_average_details.txt
+	bin/run-sample-filter tmp/work/BeadArray_qc_average/combined/raw_qc_average_details.txt \
+		tmp/work/BeadArray_qc/combined/qc_average_exclude_sample_list.txt
 
 qc:
 	bin/util/get-mapinfo -u chip_barcode | bin/slurm-submit code/BeadArray_qc.R
