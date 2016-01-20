@@ -20,8 +20,10 @@ cancel-all:
 combine: combine-qc combine-qc-average
 
 test-fix-data:
-	bin/fix-data test_data/{Avg_Signal.txt,BEAD_STDERR.txt,Avg_NBEADS.txt,Detection_Pval.txt} > tmp/test-fix-data.txt
-	diff tmp/test-fix-data.txt test_data/fixed.txt
+	mkdir -p tmp/test/fix-data
+	bin/fix-data test/fix-data/input/{Avg_Signal.txt,BEAD_STDERR.txt,Avg_NBEADS.txt,Detection_Pval.txt} \
+		> tmp/test/fix-data/result.txt
+	diff tmp/test/fix-data/result.txt test/fix-data/expected/result.txt
 
 combine-qc:
 	mkdir -p tmp/work/BeadArray_qc/combined
