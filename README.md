@@ -87,3 +87,21 @@ Use the command `bin/util/get-mapinfo` to query this file and use the flag `-u` 
                   - qc/
                     - <generated_files...>
 
+## Notes
+
+### Chip Bar Code 9224522100
+
+We are experiencing a segmentation fault on chip barcode `9224522100` on our HPC platform
+but were able to analyze this on a different system.
+
+After the `Beadarray_qc` and `Beadarray_qc_average` pipelines are run we must unarchive the results
+for this chip as follows:
+
+From the project base directory of the project:
+
+    for code_name in BeadArray_qc BeadArray_qc_average; do
+      dir=tmp/work/${code_name}/chips/9224522100/raw/qc
+      [[ -d ${dir} ]] && rm -rf ${dir}
+      mkdir -p ${dir}
+      tar --directory ${dir} -zxf /hiidata/projects/${code_name}/${code_name}-chips-9224522100-raw-qc.tar.gz
+    done
