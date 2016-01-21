@@ -12,7 +12,7 @@ check_have_group() {
 
 error_and_exit() {
   local msg=$1
-  echo "Error: $msg" | tee $FAILED_DIR/$CODE_NAME/$CHIP_BARCODE.txt 1>&2
+  echo "Error: $msg" 1>&2
   exit 1
 }
 
