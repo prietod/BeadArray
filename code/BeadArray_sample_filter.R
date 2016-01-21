@@ -4,18 +4,22 @@
 # library("doBy")
 # library("pracma")
 
+
 #------------------------------------------------------------------------
 # Get cli args and assign appropriate variables
 #------------------------------------------------------------------------
 
 args <- commandArgs(trailingOnly = TRUE)
 
-input_file <- toString(args[1])
-output_file <- toString(args[2])
+# To create a directory for storing pdf files
+data_dir <- toString(args[1])
 
 # To filter out samples based on the different QC variables
 # To read the qc data from a text file
-array.qc.details = read.table(file = input_file, sep = "\t", header = TRUE)
+array.qc.details = read.table(path = data_dir, file = "raw_qc_details.txt", sep = "\t", header = TRUE)
+
+# To change the directory
+setwd(data_dir)
 
 # To run a for loop to generate different plots
 # To create a box plots for different QC variables for each column
@@ -119,18 +123,18 @@ for (q in 1:dim(as.matrix(array.qc.details))[1]) {
   }
 
   # To filter out samples based on median numbers of beads used to create the summary values < 16
-  else if (as.numeric(array.qc.details$Nos_beads_int_log2_50_percentile[q]) < 16) {
+  else if (as.numeric(array.qc.details$Nos_beads_50_percentile[q]) < 16) {
     array.qc.filter[n_filter_count, 1] = array.qc.details$Array_ID[q]
     array.qc.filter[n_filter_count, 2] = "Low median number of beads used to create the summary values for each probe on each array after outliers removal"
-    array.qc.filter[n_filter_count, 3] = as.numeric(array.qc.details$Nos_beads_int_log2_50_percentile[q])
+    array.qc.filter[n_filter_count, 3] = as.numeric(array.qc.details$Nos_beads_50_percentile[q])
     n_filter_count = n_filter_count + 1
   }
 
   # To filter out samples based on mean numbers of beads used to create the summary values < 16
-  else if (as.numeric(array.qc.details$Nos_beads_int_log2_mean[q]) < 16) {
+  else if (as.numeric(array.qc.details$Nos_beads_mean[q]) < 16) {
     array.qc.filter[n_filter_count, 1] = array.qc.details$Array_ID[q]
     array.qc.filter[n_filter_count, 2] = "Low mean number of beads used to create the summary values for each probe on each array after outliers removal"
-    array.qc.filter[n_filter_count, 3] = as.numeric(array.qc.details$Nos_beads_int_log2_mean[q])
+    array.qc.filter[n_filter_count, 3] = as.numeric(array.qc.details$Nos_beads_mean[q])
     n_filter_count = n_filter_count + 1
   }
 
@@ -166,4 +170,4 @@ for (q in 1:dim(as.matrix(array.qc.details))[1]) {
 }
 
 # To write a table with samples ID to be removed with quality information
-write.table(array.qc.filter, file = output_file, append = FALSE, quote = FALSE, sep = "\t", eol = "\n", na = "NA", dec = ".", row.names = FALSE, col.names = c("Array_ID", "Quality_info", "Quality_value"))
+write.table(array.qc.filter, file = "Exclude_sample_list.txt", append = FALSE, quote = FALSE, sep = "\t", eol = "\n", na = "NA", dec = ".", row.names = FALSE, col.names = c("Array_ID", "Quality_info", "Quality_value"))
