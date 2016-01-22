@@ -112,7 +112,7 @@ From the project base directory of the project:
 
 - Apply `static/exclude-data-raw.txt` and copy all `/hiidata/teddy/data/jinfiniti/gene_expression` list to `tmp/data/raw`
 
-- For `BeadArray_{qc,qc_average}.R` as <script>`
+- For `BeadArray_{qc,qc_average}.R` as `<script>`
 
     - Multiple run `code/<script>` on `tmp/data/raw/<chip>` generating `tmp/work/<script>/chips/<chip>/raw/qc/<files..>`
 
