@@ -110,27 +110,25 @@ From the project base directory of the project:
 
 ### High Level Flow
 
-```
+- Apply `static/exclude-data-raw.txt` and copy all `/hiidata/teddy/data/jinfiniti/gene_expression` list to `tmp/data/raw`
 
-- Apply static/exclude-data-raw.txt and copy all /hiidata/teddy/data/jinfiniti/gene_expression list to tmp/data/raw
+- For `BeadArray_{qc,qc_average}.R` as <script>`
 
-- For BeadArray_{qc,qc_average}.R as <script>
+    - Multiple run `code/<script>` on `tmp/data/raw/<chip>` generating `tmp/work/<script>/chips/<chip>/raw/qc/<files..>`
 
-  - Multiple run code/<script> on tmp/data/raw/<chip> generating tmp/work/<script>/chips/<chip>/raw/qc/<files..>
+- Concatenate all `tmp/work/<script>/chips/<chip>/raw/qc/<chip>_details.txt` to `tmp/work/<script>/combined/raw-qc-details.txt`
 
-- Concatenate all tmp/work/<script>/chips/<chip>/raw/qc/<chip>_details.txt to tmp/work/<script>/combined/raw-qc-details.txt
+- Single run `code/BeadArray_sample_filter.R` on `tmp/work/<script>/combined/raw-qc-details.txt`
 
-- Single run code/BeadArray_sample_filter.R on tmp/work/<script>/combined/raw-qc-details.txt
+- Verify both `tmp/work/BeadArray_{qc,qc_average}.R/combined/raw-qc-details.txt` and copy first
+  column to `tmp/work/all/exclude-data-filtered.txt`
 
-- Verify both tmp/work/<script>/combined/raw-qc-details.txt
+- Apply `tmp/work/all/exclude-data-fitlered.txt` and copy data from `tmp/data/raw/<chip>` to `tmp/data/filtered`
 
-- Apply static/exclude-data-fit data-Copy data from tmp/data/raw to tmp/data/filtered applying
+- Multipe run `code/BeadArray_method_1_step_{1..5}.R` on `tmp/data/filtered/<chip>`
 
-- Run code/BeadArray_method_1_step_{1..5}.R on
+- Multiple run `code/BeadArray_approach_a_step_1.R` on `tmp/work/<script>/chips/<chip>/raw-qc-details.txt`
 
-- Multiple run code/BeadArray_approach_a_step_1.R on tmp/work/<script>/chips/<chip>/raw-qc-details.txt
-
-```
 
 ### Thoughts
 
