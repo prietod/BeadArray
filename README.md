@@ -1,4 +1,4 @@
-# BeadArray
+# bEADaRRay
 
 ## Installation
 
@@ -105,3 +105,53 @@ From the project base directory of the project:
       mkdir -p ${dir}
       tar --directory ${dir} -zxf /hiidata/projects/BeadArray/${code_name}-chips-9224522100-raw-qc.tar.gz
     done
+
+## Scratch
+
+### High Level Flow
+
+```
+
+- Apply static/exclude-data-raw.txt and copy all /hiidata/teddy/data/jinfiniti/gene_expression list to tmp/data/raw
+
+- For BeadArray_{qc,qc_average}.R as <script>
+
+  - Multiple run code/<script> on tmp/data/raw/<chip> generating tmp/work/<script>/chips/<chip>/raw/qc/<files..>
+
+- Concatenate all tmp/work/<script>/chips/<chip>/raw/qc/<chip>_details.txt to tmp/work/<script>/combined/raw-qc-details.txt
+
+- Single run code/BeadArray_sample_filter.R on tmp/work/<script>/combined/raw-qc-details.txt
+
+- Verify both tmp/work/<script>/combined/raw-qc-details.txt
+
+- Apply static/exclude-data-fit data-Copy data from tmp/data/raw to tmp/data/filtered applying
+
+- Run code/BeadArray_method_1_step_{1..5}.R on
+
+- Multiple run code/BeadArray_approach_a_step_1.R on tmp/work/<script>/chips/<chip>/raw-qc-details.txt
+
+```
+
+### Thoughts
+
+#### Left-Oriented versus Right-Oriented Namespace Variance
+
+General idea is if you vary the left-hand side of a namespace (e.g. foo/bar/...),
+you should not vary the right-hand side of the directories or files (e.g. foo/bar/foo-bar-abc.txt)
+as it this double-ended variance is not conducive to automated pipelines.
+
+[need example showing why its not conducive ;-)]
+
+The reason this double-ended variance exists is because one forsees in the future that
+the two namespaces will somehow be combined and a conflict will occur.
+
+With automated pipelines, it should be trivial to to apply the Left-Oriented variance, E.g.:
+
+    foo/bar/abc.txt
+    foo/baz/abc.txt
+
+when consolidation occurs:
+
+    combined/foo-bar-abc.txt
+    combined/foo-baz-abc.txt
+
