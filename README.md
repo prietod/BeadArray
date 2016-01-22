@@ -81,7 +81,11 @@ Use the command `bin/util/get-mapinfo` to query this file and use the flag `-u` 
 - For each chip run `code/BeadArray_qc_average.R` on `tmp/data/raw/<chip>` generating
   `tmp/work/BeadArray_qc_average.R/chips/<chip>/raw/qc/<files..>`
 
-- Concatenate all `tmp/work/<script>/chips/<chip>/raw/qc/<chip>_details.txt` to `tmp/work/<script>/combined/raw-qc-details.txt`
+- Concatenate all `tmp/work/BeadArray_qc.R/chips/<chip>/raw/qc/<chip>_details.txt` to
+  `tmp/work/BeadArray_qc.R/combined/raw-qc-details.txt`
+
+- Concatenate all `tmp/work/BeadArray_qc_average.R/chips/<chip>/raw/qc/<chip>_details.txt` to
+  `tmp/work/BeadArray_qc_average.R/combined/raw-qc-details.txt`
 
 - Single run `code/BeadArray_sample_filter.R` on `tmp/work/<script>/combined/raw-qc-details.txt`
 
