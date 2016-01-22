@@ -42,23 +42,6 @@ raw_qc_dir <- toString(args[2])
 
 At this point you can reference these variables to locate the desired directory for reading/writing.
 
-## Map Info
-
-The map info file is a tab-delimited list with the following fields:
-
-- subject_id
-- vial_barcode_number
-- test_name
-- donor_number
-- box
-- row
-- chip_barcode
-- array
-- draw_dte
-- sample_status
-- date_received_sample
-- date_of_evaluation
-- comments
 
 Use the command `bin/util/get-mapinfo` to query this file and use the flag `-u` to list a column uniquely.
 
@@ -87,28 +70,8 @@ Use the command `bin/util/get-mapinfo` to query this file and use the flag `-u` 
                   - qc/
                     - <generated_files...>
 
-## Notes
 
-### Chip Bar Code 9224522100
-
-We are experiencing a segmentation fault on chip barcode `9224522100` on our HPC platform
-but were able to analyze this on a different system.
-
-After the `Beadarray_qc` and `Beadarray_qc_average` pipelines are run we must unarchive the results
-for this chip as follows:
-
-From the project base directory of the project:
-
-    for code_name in BeadArray_qc BeadArray_qc_average; do
-      dir=tmp/work/${code_name}/chips/9224522100/raw/qc
-      [[ -d ${dir} ]] && rm -rf ${dir}
-      mkdir -p ${dir}
-      tar --directory ${dir} -zxf /hiidata/projects/BeadArray/${code_name}-chips-9224522100-raw-qc.tar.gz
-    done
-
-## Scratch
-
-### High Level Flow
+## High Level Flow
 
 - Apply `static/exclude-data-raw.txt` and copy all `/hiidata/teddy/data/jinfiniti/gene_expression` list to `tmp/data/raw`
 
@@ -130,7 +93,7 @@ From the project base directory of the project:
 - Multiple run `code/BeadArray_approach_a_step_1.R` on `tmp/work/<script>/chips/<chip>/raw-qc-details.txt`
 
 
-### Thoughts
+## Thoughts
 
 #### Left-Oriented versus Right-Oriented Namespace Variance
 
@@ -153,3 +116,39 @@ when consolidation occurs:
     combined/foo-bar-abc.txt
     combined/foo-baz-abc.txt
 
+## Notes
+
+### Chip Bar Code 9224522100
+
+We are experiencing a segmentation fault on chip barcode `9224522100` on our HPC platform
+but were able to analyze this on a different system.
+
+After the `Beadarray_qc` and `Beadarray_qc_average` pipelines are run we must unarchive the results
+for this chip as follows:
+
+From the project base directory of the project:
+
+    for code_name in BeadArray_qc BeadArray_qc_average; do
+      dir=tmp/work/${code_name}/chips/9224522100/raw/qc
+      [[ -d ${dir} ]] && rm -rf ${dir}
+      mkdir -p ${dir}
+      tar --directory ${dir} -zxf /hiidata/projects/BeadArray/${code_name}-chips-9224522100-raw-qc.tar.gz
+    done
+
+### Map Info
+
+The map info file is a tab-delimited list with the following fields:
+
+- subject_id
+- vial_barcode_number
+- test_name
+- donor_number
+- box
+- row
+- chip_barcode
+- array
+- draw_dte
+- sample_status
+- date_received_sample
+- date_of_evaluation
+- comments
