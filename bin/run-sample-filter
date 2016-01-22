@@ -27,19 +27,12 @@ R_VERSION=${R_VERSION:-3.2.3}
 # main
 #---------------------------------------------------------------
 
-[[ $# -ne 2 ]] && usage
-
-input_file=$1
-output_file=$2
-
 module load apps/R/${R_VERSION}
 
-R --slave --quiet --no-restore --no-save --args $(pwd)/$input_file $(pwd)/$output_file < $BASE/code/BeadArray_sample_filter.R
+R --slave --quiet --no-restore --no-save --args "$@" < $BASE/code/BeadArray_sample_filter.R
 
 rc=$?
 
-if [[ $rc == 0 ]]; then
-  mark_job_complete
-else
+if [[ $rc != 0 ]]; then
   error_and_exit "R failed with return code: $rc"
 fi

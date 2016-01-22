@@ -13,13 +13,14 @@ args <- commandArgs(trailingOnly = TRUE)
 
 # To create a directory for storing pdf files
 data_dir <- toString(args[1])
-
-# To filter out samples based on the different QC variables
-# To read the qc data from a text file
-array.qc.details = read.table(path = data_dir, file = "raw_qc_details.txt", sep = "\t", header = TRUE)
+raw_qc_file <- toString(args[2])
 
 # To change the directory
 setwd(data_dir)
+
+# To filter out samples based on the different QC variables
+# To read the qc data from a text file
+array.qc.details = read.table(file = raw_qc_file, sep = "\t", header = TRUE)
 
 # To run a for loop to generate different plots
 # To create a box plots for different QC variables for each column

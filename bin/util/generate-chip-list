@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+
+BASE="$(readlink -f $(readlink -f $(dirname "${BASH_SOURCE}")/../..))"
+ME="$(basename ${BASH_SOURCE})"
+
+error() { echo "$ME - Error: "$@"" 1>&2; }
+
+error_exit() { error "$@"; exit 1; }
+
+usage() {
+  echo "Usage: $ME <map_info>" 1>&2
+  exit 1
+}
+
+strip_header() {
+  sed -n '2,$p'
+}
+
+fields="
+subject_id
+vial_barcode_number
+test_name
+donor_number
+box
+row
+chip_barcode
+array
+draw_dte
+sample_status
+date_received_sample
+date_of_evaluation
+comments
+"
+
+declare -A field_map
+
+for f in $fields; do
+  field_map[$f]=$((++n))
+done
+
+[[ $# != 1 ]] && usage
+
+map_info=${1}
+
+[[ -f ${map_info} ]] || error_exit "map_info file '${map_info}' does not exist."
+
+strip_header < ${map_info} | awk -F'\t' "{ print \$${field_map[chip_barcode]} }" | sort -u

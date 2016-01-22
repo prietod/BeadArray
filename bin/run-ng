@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+
+BASE="$(readlink -f $(readlink -f $(dirname "${BASH_SOURCE}")/..))"
+
+check_have_group() {
+  local group=$1
+  local id_output=$( id )
+  if ! echo ${id_output} | grep -q "\<${group}\>"; then
+    error "Exiting. Node dropped '${group}' group ownership in session, data inaccessible. id-output: ${id_output}"
+  fi
+}
+
+clear_previous_job() {
+  for f in \
+    $COMPLETE_DIR/${script_short}/${chip_barcode}.txt \
+    $FAILED_DIR/${script_short}/${chip_barcode}.txt \
+    $RESULTS_DIR \
+    $QC_DIR; do
+
+    [[ -e $f ]] && rm -rf $f
+  done
+}
+
+error_and_exit() {
+  local msg=$1
+  echo "Error: $msg" | tee $FAILED_DIR/${script_short}/${chip_barcode}.txt 1>&2
+  exit 1
+}
+
+mark_job_complete() {
+  date +%FT%T > $COMPLETE_DIR/${script_short}/${chip_barcode}.txt
+}
+
+setup_dirs() {
+  [[ -d $COMPLETE_DIR/$script_short ]] || mkdir -p $COMPLETE_DIR/${script_short}
+  [[ -d $FAILED_DIR/$script_short ]] || mkdir -p $FAILED_DIR/${script_short}
+  [[ -d $QC_DIR ]] || mkdir -p $QC_DIR
+  [[ -d $RESULTS_DIR ]] || mkdir -p $RESULTS_DIR
+}
+
+usage() {
+  echo "Usage: $( basename $0 ) <chip_barscript> <code> <data_dir> <qc_dir> [results_dir]" 1>&2
+  exit 1
+}
+
+R_VERSION=${R_VERSION:-3.2.3}
+
+WORK_DIR="${WORK_DIR:-$BASE/tmp/work}"
+
+COMPLETE_DIR="${COMPLETE_DIR:-$BASE/tmp/complete}"
+
+FAILED_DIR="${FAILED_DIR:-$BASE/tmp/failed}"
+
+#---------------------------------------------------------------
+# main
+#---------------------------------------------------------------
+
+[[ $# < 4 ]] && usage
+
+chip_barcode=$1
+script=$2
+data_dir=$3
+qc_dir=$4
+results_dir=$5
+
+script_short=$( basename ${script} )
+
+QC_DIR=$WORK_DIR/${script_short}/chips/${chip_barcode}/${qc_dir}
+RESULTS_DIR=$WORK_DIR/${script_short}/chips/${chip_barcode}/${results_dir}
+
+clear_previous_job
+
+setup_dirs
+
+module load apps/R/${R_VERSION}
+
+R --slave --quiet --no-restore --no-save --args ${data_dir}/${chip_barcode} $QC_DIR $RESULTS_DIR < ${script}
+
+rc=$?
+
+if [[ $rc == 0 ]]; then
+  mark_job_complete
+else
+  error_and_exit "R failed with return code: $rc"
+fi

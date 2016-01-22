@@ -73,7 +73,8 @@ Use the command `bin/util/get-mapinfo` to query this file and use the flag `-u` 
 
 ## High Level Flow
 
-- Apply `static/exclude-data-raw.txt` and copy all `/hiidata/teddy/data/jinfiniti/gene_expression` list to `tmp/data/raw`
+- Filtering with `static/exclude-data-raw.txt`, copy all chip data from `/hiidata/teddy/data/jinfiniti/gene_expression`
+  to `tmp/data/raw`
 
 - For each chip run `code/BeadArray_qc.R` on `tmp/data/raw/<chip>` generating
   `tmp/work/BeadArray_qc.R/chips/<chip>/raw/qc/<files..>`
@@ -89,38 +90,26 @@ Use the command `bin/util/get-mapinfo` to query this file and use the flag `-u` 
 
 - Single run `code/BeadArray_sample_filter.R` on `tmp/work/<script>/combined/raw-qc-details.txt`
 
-- Verify both `tmp/work/BeadArray_{qc,qc_average}.R/combined/raw-qc-details.txt` and copy first
+- Verify both `tmp/work/BeadArray_qc.R/combined/raw-qc-details.txt` and
+  `tmp/work/BeadArray_qc_average.R/combined/raw-qc-details.txt` match.
+
   column to `tmp/work/all/exclude-data-filtered.txt`
 
-- Apply `tmp/work/all/exclude-data-fitlered.txt` and copy data from `tmp/data/raw/<chip>` to `tmp/data/filtered`
+- Apply `tmp/work/all/exclude-data-filtered.txt` and copy data from `tmp/data/raw` to `tmp/data/filtered`
+
+- Multiple run `code/BeadArray_approach_a_step_1.R` on `tmp/work/<script>/chips/<chip>/raw-qc-details.txt`
 
 - Multipe run `code/BeadArray_method_1_step_{1..5}.R` on `tmp/data/filtered/<chip>`
 
-- Multiple run `code/BeadArray_approach_a_step_1.R` on `tmp/work/<script>/chips/<chip>/raw-qc-details.txt`
 
 
 ## Thoughts
 
 #### Left-Oriented versus Right-Oriented Namespace Variance
 
-General idea is if you vary the left-hand side of a namespace (e.g. foo/bar/...),
-you should not vary the right-hand side of the directories or files (e.g. foo/bar/foo-bar-abc.txt)
-as it this double-ended variance is not conducive to automated pipelines.
-
-[need example showing why its not conducive ;-)]
-
-The reason this double-ended variance exists is because one forsees in the future that
-the two namespaces will somehow be combined and a conflict will occur.
-
-With automated pipelines, it should be trivial to to apply the Left-Oriented variance, E.g.:
-
-    foo/bar/abc.txt
-    foo/baz/abc.txt
-
-when consolidation occurs:
-
-    combined/foo-bar-abc.txt
-    combined/foo-baz-abc.txt
+If left-hand side of a namespace varies (e.g. `/foo/bar/...`, `/foo/baz/...`)
+then the right-hand side should not duplicate or represent that variance (e.g.
+`/foo/bar/foo-bar-abc.txt`). This is to faciliate simpler code in a pipeline.
 
 ## Notes
 
