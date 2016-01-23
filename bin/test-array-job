@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+echo "test-array-job with key: $1"

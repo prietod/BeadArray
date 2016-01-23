@@ -23,7 +23,13 @@ all:
 
 stage-1: setup-dirs generate-chip-list copy-raw-data
 
-stage-2: combine-qc combine-qc-average run-sample-filter copy-filtered-data
+stage-2: run-stage-2
+
+stage-3: combine-qc combine-qc-average run-sample-filter copy-filtered-data
+
+run-stage-2:
+	cat $(chip_list) | bin/slurm-submit-array bin/run-R-chips-qc code/BeadArray_qc.R
+	cat $(chip_list) | bin/slurm-submit-array bin/run-R-chips-qc code/BeadArray_qc_average.R
 
 setup-dirs:
 	[[ -d tmp/work/all ]] || mkdir -p tmp/work/all
@@ -60,13 +66,23 @@ copy-filtered-data:
 	bin/util/copy-data $(chip_list) $(filtered_data_exclude_patterns) $(raw_data_dir) $(filtered_data_dir)
 
 run-approach-a-step-1:
-	 ls $(filtered_data_dir) | head -3 | \
+	 ls $(filtered_data_dir) | \
 		bin/slurm-array-submit \
 			bin/run-ng \
 			code/BeadArray_approach_a_step_1.R \
 			$(filtered_data_dir) \
 			filtered/qc \
-			filtered/results \
+			filtered/results
+
+run-method-1:
+	for n in {1..5}; do \
+	 ls $(filtered_data_dir) | \
+		bin/slurm-array-submit \
+			bin/run-ng \
+			BeadArray_method_1_step_$${n}.R \
+			$(filtered_data_dir) \
+			filtered/qc \
+			filtered/results; sleep 10; done
 
 clean:
 	-rm -rf tmp/work tmp/log tmp/slurm-array
@@ -83,6 +99,12 @@ test:
 	bin/fix-data test/fix-data/input/{Avg_Signal-7-cols.txt,BEAD_STDERR-7-cols.txt,Avg_NBEADS-7-cols.txt,Detection_Pval-7-cols.txt} \
 		> tmp/test/fix-data/result-7-cols.txt
 	diff tmp/test/fix-data/result-7-cols.txt test/fix-data/expected/result-7-cols.txt
+
+q:
+	squeue -p$(slurm_partition) --user $$LOGNAME
+
+test-array-job:
+	printf "foo\nbar\n" | SUBMIT_RANDOM_SECONDS="1" bin/slurm-submit-array bin/test-array-job
 
 
 # combine: combine-qc combine-qc-average

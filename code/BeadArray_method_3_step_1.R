@@ -116,23 +116,42 @@ det <- calculateDetection(datasumm.unlogged)
 Detection(datasumm.unlogged) <- det
 
 # To store gene expression values for all the array
-array.datasumm <- matrix(, nrow = dim(as.matrix(exprs(datasumm.unlogged)))[1], ncol = ((4*dim(as.matrix(exprs(datasumm.unlogged)))[2]) + 1))
+array.datasumm <- matrix(, nrow = dim(as.matrix(exprs(datasumm.unlogged)))[1], ncol = ((4*dim(as.matrix(exprs(datasumm.unlogged)))[2]) + 2))
 
 # To define column names
-col.datasumm = "Probe_ID"
+col.datasumm = c("Probe_ID", "Entrez_ID")
 
-# To store Probe ID information
+# To annotate Illumina IDs
+idsTosymbols = as.matrix(toTable(illuminaHumanv4ENTREZID))
+
+# To store Illumina IDs information
 array.datasumm[, 1] = row.names(exprs(datasumm.unlogged))
+
+# To get annotation for each Illumina ID
+for (i.id in 1:dim(as.matrix(array.datasumm))[1]) {
+
+  # To get the gene symbol for each Illumina ID
+  i.symbol = which(as.character(idsTosymbols[, 1]) == as.character(as.matrix(array.datasumm)[i.id, 1]))
+
+  # To store Illumina IDs annotation
+  if (length(i.symbol) == 0) {
+    array.datasumm[i.id, 2] = ""
+  }
+
+  else {
+    array.datasumm[i.id, 2] = as.character(idsTosymbols[i.symbol, 2])
+  }
+}
 
 # To write expression values similar to Genome Studio for each BeadChip
 # To read each of the array file separately
-for (j in 1:dim(as.matrix(exprs(datasumm.unlogged)))[2]) {
+for (v in 1:dim(as.matrix(exprs(datasumm.unlogged)))[2]) {
 
-  col.datasumm = c(col.datasumm, paste(sapply(strsplit(tiff.Files[j], "_Grn.tif"), "[", 1), "AVG_Signal", sep = "."), paste(sapply(strsplit(tiff.Files[j], "_Grn.tif"), "[", 1), "BEAD_STDERR", sep = "."), paste(sapply(strsplit(tiff.Files[j], "_Grn.tif"), "[", 1), "Avg_NBEADS", sep = "."), paste(sapply(strsplit(tiff.Files[j], "_Grn.tif"), "[", 1), "Detection Pval", sep = "."))
-  array.datasumm[, ((4*j) - 2)] <- exprs(datasumm.unlogged)[, j]
-  array.datasumm[, ((4*j) - 1)] <- se.exprs(datasumm.unlogged)[, j]
-  array.datasumm[, (4*j)] <- nObservations(datasumm.unlogged)[, j]
-  array.datasumm[, ((4*j) + 1)] <- Detection(datasumm.unlogged)[, j]
+  col.datasumm = c(col.datasumm, paste(sapply(strsplit(tiff.Files[v], "_Grn.tif"), "[", 1), "AVG_Signal", sep = "."), paste(sapply(strsplit(tiff.Files[v], "_Grn.tif"), "[", 1), "BEAD_STDERR", sep = "."), paste(sapply(strsplit(tiff.Files[v], "_Grn.tif"), "[", 1), "Avg_NBEADS", sep = "."), paste(sapply(strsplit(tiff.Files[v], "_Grn.tif"), "[", 1), "Detection Pval", sep = "."))
+  array.datasumm[, ((4*v) - 1)] <- exprs(datasumm.unlogged)[, v]
+  array.datasumm[, (4*v)] <- se.exprs(datasumm.unlogged)[, v]
+  array.datasumm[, ((4*v) + 1)] <- nObservations(datasumm.unlogged)[, v]
+  array.datasumm[, ((4*v) + 2)] <- Detection(datasumm.unlogged)[, v]
 
 }
 
@@ -146,28 +165,31 @@ adrToIllumina = as.matrix(toTable(illuminaHumanv4ARRAYADDRESS))
 control.probe.ids = as.matrix(makeControlProfile("Humanv4", excludeERCC = TRUE))
 
 # To store control Probe IDs gene expression data
-array.datasumm.controls <- matrix(, nrow = dim(control.probe.ids)[1], ncol = ((4*dim(as.matrix(exprs(datasumm.unlogged)))[2]) + 1))
+array.datasumm.controls <- matrix(, nrow = dim(control.probe.ids)[1], ncol = ((4*dim(as.matrix(exprs(datasumm.unlogged)))[2]) + 2))
 
 # To count the row number for control gene expression array
 n.controls = 0
 
 # To loop over each of the control Probe IDs
-for (k in 1:dim(control.probe.ids)[1]) {
+for (w in 1:dim(control.probe.ids)[1]) {
 
   # To loop over each of arrayaddress ID to Illumina ID
-  for (l in 1:dim(adrToIllumina)[1]) {
+  for (x in 1:dim(adrToIllumina)[1]) {
 
     # To match each of the control Probe ID to Illumina ID
-    if (as.character(control.probe.ids[k, 1]) == as.character(adrToIllumina[l, 2])) {
+    if (as.character(control.probe.ids[w, 1]) == as.character(adrToIllumina[x, 2])) {
 
       # To match the control Probe ID with gene expression data
-      for (m in 1:dim(as.matrix(exprs(datasumm.unlogged)))[1]) {
+      for (y in 1:dim(as.matrix(exprs(datasumm.unlogged)))[1]) {
 
-        if (as.character(adrToIllumina[l, 1]) == as.character(array.datasumm[m, 1])) {
+        if (as.character(adrToIllumina[x, 1]) == as.character(array.datasumm[y, 1])) {
 
           # To store gene expression data from control Probe IDs
           n.controls = n.controls + 1
-          array.datasumm.controls[n.controls, ] = array.datasumm[m, ]
+          array.datasumm.controls[n.controls, ] = array.datasumm[y, ]
+
+          # To over-write and store the annotation for control probes
+          array.datasumm.controls[n.controls, 2] = as.character(control.probe.ids[w, 2])
 
         }
       }
@@ -179,23 +201,23 @@ for (k in 1:dim(control.probe.ids)[1]) {
 colnames(array.datasumm.controls) <- col.datasumm
 
 # To remove duplicated control Probe_ID rows
-array.datasumm.controls.unique = as.matrix(unique(array.datasumm.controls))
+array.datasumm.controls.unique = as.matrix(array.datasumm.controls)[!duplicated(as.matrix(array.datasumm.controls[, 1])), ]
 
 # To store non-control Probe IDs gene expression data
-array.datasumm.wocontrols <- matrix(, nrow = (dim(as.matrix(exprs(datasumm.unlogged)))[1] - dim(array.datasumm.controls.unique)[1]), ncol = ((4*dim(as.matrix(exprs(datasumm.unlogged)))[2]) + 1))
+array.datasumm.wocontrols <- matrix(, nrow = (dim(as.matrix(exprs(datasumm.unlogged)))[1] - dim(array.datasumm.controls.unique)[1]), ncol = ((4*dim(as.matrix(exprs(datasumm.unlogged)))[2]) + 2))
 
 # To count the row number for without control gene expression array
 n.wocontrols = 0
 
 # To loop over gene expression array to find non-control probes
-for (n in 1:dim(as.matrix(exprs(datasumm.unlogged)))[1]) {
+for (z in 1:dim(as.matrix(exprs(datasumm.unlogged)))[1]) {
 
-  #To check if the Probe ID is a control Probe ID or not
-  if(!is.element(as.character(array.datasumm[n, 1]), as.character(array.datasumm.controls.unique[, 1]))) {
+  # To check if the Probe ID is a control Probe ID or not
+  if(!is.element(as.character(array.datasumm[z, 1]), as.character(array.datasumm.controls.unique[, 1]))) {
 
     # To store non-control Probe ID
     n.wocontrols = n.wocontrols + 1
-    array.datasumm.wocontrols[n.wocontrols, ] = array.datasumm[n, ]
+    array.datasumm.wocontrols[n.wocontrols, ] = array.datasumm[z, ]
 
   }
 }

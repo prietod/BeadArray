@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+BASE="$(readlink -f $(readlink -f $(dirname "${BASH_SOURCE}")/..))"
+
+#---------------------------------------------------------------
+# Main
+#---------------------------------------------------------------
+
+usage() {
+  echo "Usage: $(basename $BASH_SOURCE) <barcode> <script>" 1>&2
+  exit 1
+}
+
+[[ $# -ne 2 ]] && usage
+
+chip_barcode=$1; shift
+script=$1; shift
+
+script_short=$(basename ${script})
+
+DATA_DIR=${DATA_DIR:-$BASE/tmp/data/raw}
+WORK_DIR=${WORK_DIR:-$BASE/tmp/work/${script_short}}
+
+complete_dir=$WORK_DIR/complete
+failed_dir=$WORK_DIR/failed
+
+data_dir=$DATA_DIR/${chip_barcode}
+qc_dir=$WORK_DIR/chip/${chip_barcode}/qc
+
+for dir in ${complete_dir} ${failed_dir} ${qc_dir}; do
+  [[ -d ${dir} ]] && rm -rf ${dir}
+  mkdir -p ${dir}
+done
+
+$BASE/bin/run-R ${script} ${data_dir} ${qc_dir}
+
+rc=$?
+
+if [[ $rc == 0 ]]; then
+  echo "Completed successfully at $(date +%FT%T)" > ${complete_dir}/${chip_barcode}.txt
+else
+  echo "Failed with return code: $rc" 1>&1
+  exit $rc
+fi

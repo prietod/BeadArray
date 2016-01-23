@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
-sleep_seconds=$(( $RANDOM % ${1:-60} ))
+seconds=${1:-60}
 
-echo "sleeping for $sleep_seconds seconds..."
+[[ ${seconds} -eq 0 ]] && seconds=1
+
+sleep_seconds=$(( $RANDOM % ${seconds:-60} ))
 
 sleep ${sleep_seconds}
