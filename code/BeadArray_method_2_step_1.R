@@ -131,15 +131,83 @@ for (j in 1:dim(as.matrix(exprs(datasumm.unlogged)))[2]) {
   col.datasumm = c(col.datasumm, paste(sapply(strsplit(tiff.Files[j], "_Grn.tif"), "[", 1), "AVG_Signal", sep = "."), paste(sapply(strsplit(tiff.Files[j], "_Grn.tif"), "[", 1), "BEAD_STDERR", sep = "."), paste(sapply(strsplit(tiff.Files[j], "_Grn.tif"), "[", 1), "Avg_NBEADS", sep = "."), paste(sapply(strsplit(tiff.Files[j], "_Grn.tif"), "[", 1), "Detection Pval", sep = "."))
   array.datasumm[, ((4*j) - 2)] <- exprs(datasumm.unlogged)[, j]
   array.datasumm[, ((4*j) - 1)] <- se.exprs(datasumm.unlogged)[, j]
-  array.datasumm[, ((4*j))] <- nObservations(datasumm.unlogged)[, j]
+  array.datasumm[, (4*j)] <- nObservations(datasumm.unlogged)[, j]
   array.datasumm[, ((4*j) + 1)] <- Detection(datasumm.unlogged)[, j]
 
 }
 
-# To define raw names
+# To define column names
 colnames(array.datasumm) <- col.datasumm
 
+# To convert Probe IDs to Illumina IDs
+adrToIllumina = as.matrix(toTable(illuminaHumanv4ARRAYADDRESS))
+
+# To get a list of control Probe IDs
+control.probe.ids = as.matrix(makeControlProfile("Humanv4", excludeERCC = TRUE))
+
+# To store control Probe IDs gene expression data
+array.datasumm.controls <- matrix(, nrow = dim(control.probe.ids)[1], ncol = ((4*dim(as.matrix(exprs(datasumm.unlogged)))[2]) + 1))
+
+# To count the row number for control gene expression array
+n.controls = 0
+
+# To loop over each of the control Probe IDs
+for (k in 1:dim(control.probe.ids)[1]) {
+
+  # To loop over each of arrayaddress ID to Illumina ID
+  for (l in 1:dim(adrToIllumina)[1]) {
+
+    # To match each of the control Probe ID to Illumina ID
+    if (as.character(control.probe.ids[k, 1]) == as.character(adrToIllumina[l, 2])) {
+
+      # To match the control Probe ID with gene expression data
+      for (m in 1:dim(as.matrix(exprs(datasumm.unlogged)))[1]) {
+
+        if (as.character(adrToIllumina[l, 1]) == as.character(array.datasumm[m, 1])) {
+
+          # To store gene expression data from control Probe IDs
+          n.controls = n.controls + 1
+          array.datasumm.controls[n.controls, ] = array.datasumm[m, ]
+
+        }
+      }
+    }
+  }
+}
+
+# To define column names
+colnames(array.datasumm.controls) <- col.datasumm
+
+# To remove duplicated control Probe_ID rows
+array.datasumm.controls.unique = as.matrix(unique(array.datasumm.controls))
+
+# To store non-control Probe IDs gene expression data
+array.datasumm.wocontrols <- matrix(, nrow = (dim(as.matrix(exprs(datasumm.unlogged)))[1] - dim(array.datasumm.controls.unique)[1]), ncol = ((4*dim(as.matrix(exprs(datasumm.unlogged)))[2]) + 1))
+
+# To count the row number for without control gene expression array
+n.wocontrols = 0
+
+# To loop over gene expression array to find non-control probes
+for (n in 1:dim(as.matrix(exprs(datasumm.unlogged)))[1]) {
+
+  #To check if the Probe ID is a control Probe ID or not
+  if(!is.element(as.character(array.datasumm[n, 1]), as.character(array.datasumm.controls.unique[, 1]))) {
+
+    # To store non-control Probe ID
+    n.wocontrols = n.wocontrols + 1
+    array.datasumm.wocontrols[n.wocontrols, ] = array.datasumm[n, ]
+
+  }
+}
+
+# To define column names
+colnames(array.datasumm.controls.unique) <- col.datasumm
+colnames(array.datasumm.wocontrols) <- col.datasumm
+
+# To create different files with gene expression data
 write.table(array.datasumm, paste(sapply(strsplit(tiff.Files[1], "_"), "[", 1), "expression.txt", sep = "_"), sep = "\t", quote = FALSE, row.names = FALSE, col.names = TRUE)
+write.table(array.datasumm.controls.unique, paste(sapply(strsplit(tiff.Files[1], "_"), "[", 1), "control_expression.txt", sep = "_"), sep = "\t", quote = FALSE, row.names = FALSE, col.names = TRUE)
+write.table(array.datasumm.wocontrols, paste(sapply(strsplit(tiff.Files[1], "_"), "[", 1), "wo_control_expression.txt", sep = "_"), sep = "\t", quote = FALSE, row.names = FALSE, col.names = TRUE)
 write.table(exprs(datasumm.unlogged), paste(sapply(strsplit(tiff.Files[1], "_"), "[", 1), "Avg_Signal.txt", sep = "_"), sep="\t", quote = FALSE, col.names = paste(array.names, "AVG_Signal", sep = "."))
 write.table(se.exprs(datasumm.unlogged), paste(sapply(strsplit(tiff.Files[1], "_"), "[", 1), "BEAD_STDERR.txt", sep = "_"), sep="\t", quote = FALSE, col.names = paste(array.names, "BEAD_STDERR", sep = "."))
 write.table(nObservations(datasumm.unlogged), paste(sapply(strsplit(tiff.Files[1], "_"), "[", 1), "Avg_NBEADS.txt", sep = "_"), sep="\t", quote = FALSE, col.names = paste(array.names, "Avg_NBEADS", sep = "."))
