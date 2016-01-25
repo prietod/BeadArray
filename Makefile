@@ -22,14 +22,12 @@ all:
 	@echo "test-fix-data"
 
 stage-1: setup-dirs generate-chip-list copy-raw-data
-
-stage-2: run-stage-2
-
-stage-3: combine-qc combine-qc-average run-sample-filter copy-filtered-data
-
-run-stage-2:
 	cat $(chip_list) | bin/slurm-submit-array bin/run-R-chips-qc code/BeadArray_qc.R
 	cat $(chip_list) | bin/slurm-submit-array bin/run-R-chips-qc code/BeadArray_qc_average.R
+
+stage-2: combine-qc combine-qc-average run-sample-filter copy-filtered-data
+
+stage-3: run-approach-a-step-1 run-method-n-step-1
 
 setup-dirs:
 	[[ -d tmp/work/all ]] || mkdir -p tmp/work/all
@@ -46,12 +44,12 @@ copy-raw-data:
 
 combine-qc:
 	cat static/qc_header.txt > tmp/work/BeadArray_qc.R/combined/raw-qc-details.txt
-	find tmp/work/BeadArray_qc.R/chips -name '*_raw_qc_details.txt' \
+	find tmp/work/BeadArray_qc.R/chip -name '*_raw_qc_details.txt' \
 		| xargs -n1 -I{} cat {} >> tmp/work/BeadArray_qc.R/combined/raw-qc-details.txt
 
 combine-qc-average:
 	cat static/qc_header.txt > tmp/work/BeadArray_qc_average.R/combined/raw-qc-details.txt
-	find tmp/work/BeadArray_qc_average.R/chips -name '*_raw_qc_average_details.txt' \
+	find tmp/work/BeadArray_qc_average.R/chip -name '*_raw_qc_average_details.txt' \
 		| xargs -n1 -I{} cat {} >> tmp/work/BeadArray_qc_average.R/combined/raw-qc-details.txt
 
 run-sample-filter:
@@ -66,23 +64,18 @@ copy-filtered-data:
 	bin/util/copy-data $(chip_list) $(filtered_data_exclude_patterns) $(raw_data_dir) $(filtered_data_dir)
 
 run-approach-a-step-1:
-	 ls $(filtered_data_dir) | \
-		bin/slurm-array-submit \
-			bin/run-ng \
-			code/BeadArray_approach_a_step_1.R \
-			$(filtered_data_dir) \
-			filtered/qc \
-			filtered/results
+	ls $(filtered_data_dir) | \
+		bin/slurm-submit-array \
+			bin/run-R-chips-qc-results \
+			code/BeadArray_approach_a_step_1.R
 
-run-method-1:
+run-method-n-step-1:
 	for n in {1..5}; do \
 	 ls $(filtered_data_dir) | \
-		bin/slurm-array-submit \
-			bin/run-ng \
-			BeadArray_method_1_step_$${n}.R \
-			$(filtered_data_dir) \
-			filtered/qc \
-			filtered/results; sleep 10; done
+		bin/slurm-submit-array \
+			bin/run-R-chips-results \
+			code/BeadArray_method_$${n}_step_1.R; \
+			sleep 10; done
 
 clean:
 	-rm -rf tmp/work tmp/log tmp/slurm-array

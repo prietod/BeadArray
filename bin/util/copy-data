@@ -44,7 +44,7 @@ for chip_barcode in $( cat ${chip_list_file} ); do
 done
 
 if [[ -n "${chip_barcode_list}" ]]; then
-  find ${src_dir} -type f | egrep -v -f ${exclude_pattern_file} > ${find_tmp_file}
+  find ${src_dir} \! -type d | egrep -v -f ${exclude_pattern_file} > ${find_tmp_file}
 
   for chip_barcode in ${chip_barcode_list}; do
     mkdir -p ${dest_dir}/${chip_barcode}

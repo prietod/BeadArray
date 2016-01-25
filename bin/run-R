@@ -2,27 +2,19 @@
 
 BASE="$(readlink -f $(readlink -f $(dirname "${BASH_SOURCE}")/..))"
 
-[[ -f $BASE/lib/env.sh ]] && source $BASE/lib/env.sh
-[[ -f $BASE/lib/util.sh ]] && source $BASE/lib/util.sh
-[[ -f $BASE/lib/run-R-env.sh ]] && source $BASE/lib/run-R-env.sh
-[[ -f $BASE/lib/run-R-util.sh ]] && source $BASE/lib/run-R-util.sh
-
 #---------------------------------------------------------------
 # main
 #---------------------------------------------------------------
 
 script=$1; shift
 
-[[ -f $script ]] || error_exit "script: '$script' does not exist."
+if ! [[ -f $script ]]; then
+  echo "$(basename $0): Script '$script' does not exist." 1>&2
+  exit 1
+fi
 
 module load apps/R/${R_VERSION:-3.2.3}
 
 R --slave --quiet --no-restore --no-save --args "$@" < ${script}
 
-return_code=$?
-
-if [[ ${return_code} -eq 0 ]]; then
-  mark_job_complete
-else
-  error_exit "R failed with return code: ${return_code}"
-fi
+exit $?
