@@ -1,9 +1,10 @@
-# This script is written by Dr. Hemang Parikh as on January 12, 2016.
+# This script is written by Dr. Hemang Parikh as on January 26, 2016
+# The Health Informatics Institute (HII) at the University of South Florida
+
 # Illumina average local background is performed
 # Summarization is performed with un-log transformation
 # Outliers are removed using the Illumina 3 M.A.D cut-off
 # The mean and standard deviation for each bead type are reported
-
 
 # To import beadarray and illuminaHumanv4.db libraries
 suppressMessages(library(beadarray))
@@ -57,14 +58,30 @@ filter_result_dir <- toString(args[2])
 
 # To read the data using readIllumina(), which will extract the intensities from the .txt, .locs and also TIFF files
 # Annotation from https://bioconductor.org/packages/release/data/annotation/html/illuminaHumanv4.db.html
-data <- readIllumina(dir = filter_data_dir, useImages = TRUE, illuminaAnnotation = "Humanv4")
+beadarray.data <- readIllumina(dir = filter_data_dir, useImages = TRUE, illuminaAnnotation = "Humanv4")
+
+# A more flexible way to obtain transformed per-bead data from a beadLevelData object is to define a transformation function that takes as arguments the beadLevelData object and an array index. The function then manipulates the data
+# in the desired manner and returns a vector the same length as the number of beads on the array. Many of the plotting and quality assessment functions within beadarray take such a function as one of their arguments. By using such a system,
+# beadarray provides a great deal of flexibility over exactly how the data is analyzed
+# In addition to the logGreenChannelTransform function shown above, beadarray provides predefined functions for extracting the green intensities on the unlogged scale (greenChannelTransform), analogous functions for two-channel data
+# (logRedChannelTransform, redChannelTransform), and functions for computing the log-ratio between channels (logRatioTransform). In each of the function, what = "Grn" can be used to input specific intensity channel values
+# log2(getBeadData(data, array = i, what = "GrnR")) function allows to select which channel of green to be used via what option
+# To define functions to have flexibility of choosing a type of GreenChannel
+
+greenChannelTransformGrnR <- function(BLData, array, what) {
+  x = getBeadData(BLData, array = array, what = "GrnR")
+  return(x)
+}
 
 # To store array names and numbers of beads
-array.names = as.matrix(sectionNames(data))
-array.numBeads = as.matrix(numBeads(data))
+array.names = as.matrix(sectionNames(beadarray.data))
+array.numBeads = as.matrix(numBeads(beadarray.data))
 
 # To list all the TIFF files
 tiff.Files = list.files(path = filter_data_dir, pattern = "*.tif")
+
+# To change the directory to result
+setwd(filter_result_dir)
 
 # To read each of the TIFF file separately
 for (i in 1:length(array.names)) {
@@ -74,45 +91,36 @@ for (i in 1:length(array.names)) {
 
   # To find numbers of pixels of value zero in the image that must be an imaging artifact rather than a true measure of intensity for that location
   # cbind (col(TIFF)[which(TIFF == 0)], row(TIFF)[which(TIFF == 0)])
-  xcoords <- getBeadData(data, array = i, what = "GrnX")
-  ycoords <- getBeadData(data, array = i, what = "GrnY")
+  xcoords <- getBeadData(beadarray.data, array = i, what = "GrnX")
+  ycoords <- getBeadData(beadarray.data, array = i, what = "GrnY")
 
   # To calculate a robust measure of background for each array using average of the five lowest pixel values
   Brob <- illuminaBackground(TIFF, cbind(xcoords, ycoords))
-  data <- insertBeadData(data, array = i, what = "GrnRB", Brob)
+  beadarray.data <- insertBeadData(beadarray.data, array = i, what = "GrnRB", Brob)
 
   # To calculate foreground values in the normal way
   TIFF2 <- illuminaSharpen(TIFF)
 
   # To calculate foreground values
   IllF <- illuminaForeground(TIFF2, cbind(xcoords, ycoords))
-  data <- insertBeadData(data, array = i, what = "GrnF", IllF)
+  beadarray.data <- insertBeadData(beadarray.data, array = i, what = "GrnF", IllF)
 
   # To subtract the average background values to get locally background corrected intensities
-  data <- backgroundCorrectSingleSection(data, array = i, fg = "GrnF", bg = "GrnRB", newName = "GrnR")
-
-  # To change the directory to result
-  setwd(filter_result_dir)
-
-  # To move up one directory and out of result directory
-  setwd("..")
+  beadarray.data <- backgroundCorrectSingleSection(beadarray.data, array = i, fg = "GrnF", bg = "GrnRB", newName = "GrnR")
 
 }
 
-# To change the directory to result
-setwd(filter_result_dir)
-
 # All observations are extracted, transformed and then grouped together according to their ArrayAddressID. Outliers are removed and the mean and standard deviation of the remaining beads are calculated
 # The default options of summarize apply a un-log transformation, remove outliers using the Illumina 3 M.A.D cut-off and report the mean and standard deviation for each bead type
-grnchannel.unlogged <- new("illuminaChannel", transFun = greenChannelTransform, outlierFun = illuminaOutlierMethod, exprFun = function(x) mean(x, na.rm = TRUE),  varFun = function(x) sd(x, na.rm = TRUE), channelName = "G")
-datasumm.unlogged <- summarize(BLData = data, useSampleFac=FALSE, channelList = list(grnchannel.unlogged))
+grnchannel.unlogged <- new("illuminaChannel", transFun = greenChannelTransformGrnR, outlierFun = illuminaOutlierMethod, exprFun = function(x) mean(x, na.rm = TRUE), varFun = function(x) sd(x, na.rm = TRUE), channelName = "G")
+datasumm.unlogged <- summarize(BLData = beadarray.data, useSampleFac = FALSE, channelList = list(grnchannel.unlogged))
 
 
 # The detection score, or detection p-value is a standard measure for Illumina expression experiments, and can be viewed as an empirical estimate of the p-value for the null hypothesis that a particular probe in not expressed
 # These can be calculated for summarized data provided that the identity of the negative controls on the array is known using the function calculateDetection
 det <- calculateDetection(datasumm.unlogged)
 
-# To store detection counts information with probes having P-value < 0.05
+# To store detection information
 Detection(datasumm.unlogged) <- det
 
 # To store gene expression values for all the array
@@ -147,7 +155,7 @@ for (i.id in 1:dim(as.matrix(array.datasumm))[1]) {
 # To read each of the array file separately
 for (v in 1:dim(as.matrix(exprs(datasumm.unlogged)))[2]) {
 
-  col.datasumm = c(col.datasumm, paste(sapply(strsplit(tiff.Files[v], "_Grn.tif"), "[", 1), "AVG_Signal", sep = "."), paste(sapply(strsplit(tiff.Files[v], "_Grn.tif"), "[", 1), "BEAD_STDERR", sep = "."), paste(sapply(strsplit(tiff.Files[v], "_Grn.tif"), "[", 1), "Avg_NBEADS", sep = "."), paste(sapply(strsplit(tiff.Files[v], "_Grn.tif"), "[", 1), "Detection Pval", sep = "."))
+  col.datasumm = c(col.datasumm, paste(sapply(strsplit(tiff.Files[v], "_Grn.tif"), "[", 1), "AVG_Signal", sep = "."), paste(sapply(strsplit(tiff.Files[v], "_Grn.tif"), "[", 1), "BEAD_STDEV", sep = "."), paste(sapply(strsplit(tiff.Files[v], "_Grn.tif"), "[", 1), "Avg_NBEADS", sep = "."), paste(sapply(strsplit(tiff.Files[v], "_Grn.tif"), "[", 1), "Detection Pval", sep = "."))
   array.datasumm[, ((4*v) - 1)] <- exprs(datasumm.unlogged)[, v]
   array.datasumm[, (4*v)] <- se.exprs(datasumm.unlogged)[, v]
   array.datasumm[, ((4*v) + 1)] <- nObservations(datasumm.unlogged)[, v]
@@ -231,9 +239,31 @@ write.table(array.datasumm, paste(sapply(strsplit(tiff.Files[1], "_"), "[", 1), 
 write.table(array.datasumm.controls.unique, paste(sapply(strsplit(tiff.Files[1], "_"), "[", 1), "control_expression.txt", sep = "_"), sep = "\t", quote = FALSE, row.names = FALSE, col.names = TRUE)
 write.table(array.datasumm.wocontrols, paste(sapply(strsplit(tiff.Files[1], "_"), "[", 1), "wo_control_expression.txt", sep = "_"), sep = "\t", quote = FALSE, row.names = FALSE, col.names = TRUE)
 write.table(exprs(datasumm.unlogged), paste(sapply(strsplit(tiff.Files[1], "_"), "[", 1), "Avg_Signal.txt", sep = "_"), sep="\t", quote = FALSE, col.names = paste(array.names, "AVG_Signal", sep = "."))
-write.table(se.exprs(datasumm.unlogged), paste(sapply(strsplit(tiff.Files[1], "_"), "[", 1), "BEAD_STDERR.txt", sep = "_"), sep="\t", quote = FALSE, col.names = paste(array.names, "BEAD_STDERR", sep = "."))
+write.table(se.exprs(datasumm.unlogged), paste(sapply(strsplit(tiff.Files[1], "_"), "[", 1), "BEAD_STDERR.txt", sep = "_"), sep="\t", quote = FALSE, col.names = paste(array.names, "BEAD_STDEV", sep = "."))
 write.table(nObservations(datasumm.unlogged), paste(sapply(strsplit(tiff.Files[1], "_"), "[", 1), "Avg_NBEADS.txt", sep = "_"), sep="\t", quote = FALSE, col.names = paste(array.names, "Avg_NBEADS", sep = "."))
 write.table(Detection(datasumm.unlogged), paste(sapply(strsplit(tiff.Files[1], "_"), "[", 1), "Detection_Pval.txt", sep = "_"), sep="\t", quote = FALSE, col.names = paste(array.names, "Detection Pval", sep = "."))
 
-# To move up one directory and out of result directory
-setwd("..")
+# To store different files with gene expression data for lumi
+col.datasumm.controls.lumi = col.datasumm
+col.datasumm.controls.lumi[1:2] = c("controlType", "ProbeID")
+
+# To store control probes for lumi
+array.datasumm.controls.unique.lumi <- array.datasumm.controls.unique
+
+# To change the first and second columns
+array.datasumm.controls.unique.lumi[, 1] <- array.datasumm.controls.unique[, 2]
+array.datasumm.controls.unique.lumi[, 2] <- array.datasumm.controls.unique[, 1]
+
+col.datasumm.lumi = col.datasumm
+col.datasumm.lumi[1:2] = c("ProbeID", "Entrez_ID")
+
+# To store gene expression data for lumi
+array.datasumm.wocontrols.lumi <- array.datasumm.wocontrols
+
+# To define column names
+colnames(array.datasumm.controls.unique.lumi) <- col.datasumm.controls.lumi
+colnames(array.datasumm.wocontrols.lumi) <- col.datasumm.lumi
+
+# To create different files with gene expression data
+write.table(array.datasumm.controls.unique.lumi, paste(sapply(strsplit(tiff.Files[1], "_"), "[", 1), "control_expression_lumi.txt", sep = "_"), sep = "\t", quote = FALSE, row.names = FALSE, col.names = TRUE)
+write.table(array.datasumm.wocontrols.lumi, paste(sapply(strsplit(tiff.Files[1], "_"), "[", 1), "wo_control_expression_lumi.txt", sep = "_"), sep = "\t", quote = FALSE, row.names = FALSE, col.names = TRUE)

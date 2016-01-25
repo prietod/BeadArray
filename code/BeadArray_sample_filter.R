@@ -1,5 +1,7 @@
-# This script is written by Dr. Hemang Parikh as on January 12, 2016.
+# This script is written by Dr. Hemang Parikh as on January 26, 2016
+# The Health Informatics Institute (HII) at the University of South Florida
 
+# To make a list of exclude samples based on cutoff from different variables
 # To load library
 # library("doBy")
 # library("pracma")
@@ -24,7 +26,7 @@ array.qc.details = read.table(file = raw_qc_file, sep = "\t", header = TRUE)
 
 # To run a for loop to generate different plots
 # To create a box plots for different QC variables for each column
-pdf(file = "All_raw_qc_details_boxPlot.pdf", width = 11, height = 8.5)
+pdf(file = "all_raw_qc_details_boxplot.pdf", width = 11, height = 8.5)
 
 for (m in 2:dim(as.matrix(array.qc.details))[2]) {
   boxplot(array.qc.details[, m], main = "BoxPlot", ylab = names(array.qc.details)[m])
@@ -33,7 +35,7 @@ for (m in 2:dim(as.matrix(array.qc.details))[2]) {
 garbage <- dev.off()
 
 # To create a Q-Q plots for different QC variables for each column
-pdf(file = "All_raw_qc_details_qqplot.pdf", width = 11, height = 8.5)
+pdf(file = "all_raw_qc_details_qqplot.pdf", width = 11, height = 8.5)
 
 for (n in 2:dim(as.matrix(array.qc.details))[2]) {
   qqnorm(array.qc.details[, n], main = "Normal Q-Q Plot", ylab = names(array.qc.details)[n])
@@ -41,7 +43,7 @@ for (n in 2:dim(as.matrix(array.qc.details))[2]) {
 garbage <- dev.off()
 
 # To create a histogram plots for different QC variables for each column
-pdf(file = "All_raw_qc_details_histogram.pdf", width = 11, height = 8.5)
+pdf(file = "all_raw_qc_details_histogram.pdf", width = 11, height = 8.5)
 
 for (o in 2:dim(as.matrix(array.qc.details))[2]) {
   hist(array.qc.details[, o], main = "Histogram", breaks = 15, border = "black", col = "skyblue", ylab = names(array.qc.details)[o])
@@ -50,7 +52,7 @@ for (o in 2:dim(as.matrix(array.qc.details))[2]) {
 garbage <- dev.off()
 
 # To create a density plots for different QC variables for each column
-pdf(file = "All_raw_qc_details_density.pdf", width = 11, height = 8.5)
+pdf(file = "all_raw_qc_details_density.pdf", width = 11, height = 8.5)
 
 for (p in 2:dim(as.matrix(array.qc.details))[2]) {
   plot(density(array.qc.details[, p]), main = "Density", ylab = names(array.qc.details)[p])
@@ -58,7 +60,7 @@ for (p in 2:dim(as.matrix(array.qc.details))[2]) {
 garbage <- dev.off()
 
 # To create a box plots for gender specific probes (three probes are not that reliable)
-# pdf(file = "All_raw_qc_details_gender_boxPlot.pdf", width = 11, height = 8.5)
+# pdf(file = "all_raw_qc_details_gender_boxPlot.pdf", width = 11, height = 8.5)
 
 # boxplot(array.qc.details$Gender_log2_mean ~ array.qc.details$Sex, main = "BoxPlot", ylab = "Gender_log2_mean")
 # stripchart(array.qc.details$Gender_log2_mean ~ array.qc.details$Sex, vertical = TRUE, add = TRUE, pch = 21, col = "blue")
@@ -171,4 +173,4 @@ for (q in 1:dim(as.matrix(array.qc.details))[1]) {
 }
 
 # To write a table with samples ID to be removed with quality information
-write.table(array.qc.filter, file = "Exclude_sample_list.txt", append = FALSE, quote = FALSE, sep = "\t", eol = "\n", na = "NA", dec = ".", row.names = FALSE, col.names = c("Array_ID", "Quality_info", "Quality_value"))
+write.table(array.qc.filter, file = "exclude_sample_list.txt", append = FALSE, quote = FALSE, sep = "\t", eol = "\n", na = "NA", dec = ".", row.names = FALSE, col.names = c("Array_ID", "Quality_info", "Quality_value"))

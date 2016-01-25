@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+sudo bash -c 'cp /home/h/hparikh/projects/Codes/*.R /home/k/kcounts/projects/BeadArray/code'
+
+sudo chown kcounts:kcounts /home/k/kcounts/projects/BeadArray/code/*.R
+
+cd /home/k/kcounts/projects/BeadArray/code/
+
+git status
