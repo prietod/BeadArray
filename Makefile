@@ -55,7 +55,6 @@ combine-qc-average:
 run-sample-filter:
 	bin/run-sample-filter $$(pwd)/tmp/work/BeadArray_qc.R/combined raw-qc-details.txt
 	bin/run-sample-filter $$(pwd)/tmp/work/BeadArray_qc_average.R/combined raw-qc-details.txt
-	diff $$(pwd)/tmp/work/BeadArray_qc{,_average}.R/combined/raw-qc-details.txt
 	diff $$(pwd)/tmp/work/BeadArray_qc{,_average}.R/combined/Exclude_sample_list.txt
 
 copy-filtered-data:
