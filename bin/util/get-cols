@@ -1,0 +1,19 @@
+#!/usr/bin/env perl
+#
+# bin/util/get-cols <file> <number_cols> [separator]
+
+use strict;
+use warnings;
+
+my $filename = $ARGV[0];
+my $number_cols = $ARGV[1];
+my $separator = $ARGV[2] || "\t";
+
+open(my $fh, '<:encoding(UTF-8)', $filename) or die "Could not open file '$filename' $!";
+
+while (my $line = <$fh>) {
+  chomp $line;
+  my @cols = split $separator, $line;
+  printf "%s\n", join $separator, @cols[0 .. $number_cols - 1];
+}
+
