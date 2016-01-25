@@ -49,7 +49,7 @@ combine-qc:
 
 combine-qc-average:
 	cat static/qc_header.txt > tmp/work/BeadArray_qc_average.R/combined/raw-qc-details.txt
-	find tmp/work/BeadArray_qc_average.R/chip -name '*_raw_qc_average_details.txt' \
+	find tmp/work/BeadArray_qc_average.R/chip -name '*_raw_qc_details.txt' \
 		| xargs -n1 -I{} cat {} >> tmp/work/BeadArray_qc_average.R/combined/raw-qc-details.txt
 
 run-sample-filter:
