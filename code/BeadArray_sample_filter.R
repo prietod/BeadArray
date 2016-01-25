@@ -109,16 +109,16 @@ for (q in 1:dim(as.matrix(array.qc.details))[1]) {
     n_filter_count = n_filter_count + 1
   }
 
-  # To filter out samples based on having high percentage of beads masked by the BASH > 0.15
-  else if (as.numeric(array.qc.details$Bash_percentage_masked[q]) > 0.15) {
+  # To filter out samples based on having high percentage of beads masked by the BASH > 0.25
+  else if (as.numeric(array.qc.details$Bash_percentage_masked[q]) > 0.25) {
     array.qc.filter[n_filter_count, 1] = array.qc.details$Array_ID[q]
     array.qc.filter[n_filter_count, 2] = "High percentage of beads are masked by the BASH method"
     array.qc.filter[n_filter_count, 3] = as.numeric(array.qc.details$Bash_percentage_masked[q])
     n_filter_count = n_filter_count + 1
   }
 
-  # To filter out samples based on having a significant gradient effect in the intensities. It gives an indication of the level of variability across the entire surface of the chip. Bash_extended_score > 0.10
-  else if (as.numeric(array.qc.details$Bash_extended_score[q]) > 0.10) {
+  # To filter out samples based on having a significant gradient effect in the intensities. It gives an indication of the level of variability across the entire surface of the chip. Bash_extended_score > 0.35
+  else if (as.numeric(array.qc.details$Bash_extended_score[q]) > 0.35) {
     array.qc.filter[n_filter_count, 1] = array.qc.details$Array_ID[q]
     array.qc.filter[n_filter_count, 2] = "Having a significant gradient effects in the intensities"
     array.qc.filter[n_filter_count, 3] = as.numeric(array.qc.details$Bash_extended_score[q])
