@@ -18,7 +18,7 @@ script=$1; shift
 
 script_short=$(basename ${script})
 
-DATA_DIR=${DATA_DIR:-$BASE/tmp/data/raw}
+DATA_DIR=${DATA_DIR:-$BASE/tmp/data/filtered}
 WORK_DIR=${WORK_DIR:-$BASE/tmp/work/${script_short}}
 
 complete_dir=$WORK_DIR/complete

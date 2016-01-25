@@ -49,7 +49,7 @@ if [[ -n "${chip_barcode_list}" ]]; then
   for chip_barcode in ${chip_barcode_list}; do
     mkdir -p ${dest_dir}/${chip_barcode}
     for file in $( grep "/${chip_barcode}_" ${find_tmp_file}); do
-      /bin/ln -s ${file} ${dest_dir}/${chip_barcode}/$( basename ${file} )
+      /bin/ln -s $BASE/${file} ${dest_dir}/${chip_barcode}/$( basename ${file} )
     done
   done
 fi

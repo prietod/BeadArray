@@ -55,23 +55,22 @@ combine-qc-average:
 run-sample-filter:
 	bin/run-sample-filter $$(pwd)/tmp/work/BeadArray_qc.R/combined raw-qc-details.txt
 	bin/run-sample-filter $$(pwd)/tmp/work/BeadArray_qc_average.R/combined raw-qc-details.txt
-	diff $$(pwd)/tmp/work/BeadArray_qc{,_average}.R/combined/Exclude_sample_list.txt
+	sed -n '2,$$p' tmp/work/BeadArray_qc.R/combined/exclude_sample_list.txt | awk '{ print $$1 }' | sort -u > tmp/sample-filter-qc.txt
+	sed -n '2,$$p' tmp/work/BeadArray_qc_average.R/combined/exclude_sample_list.txt | awk '{ print $$1 }' | sort -u > tmp/sample-filter-qc-average.txt
+	-diff tmp/sample-filter-qc.txt tmp/sample-filter-qc-average.txt
 
 copy-filtered-data:
-	awk '{print $$1}' $$(pwd)/tmp/work/BeadArray_qc.R/combined/Exclude_sample_list.txt \
-		| sed -n '2,$$p' > $(filtered_data_exclude_patterns)
+	cat tmp/sample-filter-qc.txt tmp/sample-filter-qc-average.txt | sort -u > $(filtered_data_exclude_patterns)
 	bin/util/copy-data $(chip_list) $(filtered_data_exclude_patterns) $(raw_data_dir) $(filtered_data_dir)
 
 run-approach-a-step-1:
-	ls $(filtered_data_dir) | \
-		bin/slurm-submit-array \
+	ls $(filtered_data_dir) | bin/slurm-submit-array \
 			bin/run-R-chips-qc-results \
 			code/BeadArray_approach_a_step_1.R
 
 run-method-n-step-1:
 	for n in {1..5}; do \
-	 ls $(filtered_data_dir) | \
-		bin/slurm-submit-array \
+	 ls $(filtered_data_dir) | bin/slurm-submit-array \
 			bin/run-R-chips-results \
 			code/BeadArray_method_$${n}_step_1.R; \
 			sleep 10; done
