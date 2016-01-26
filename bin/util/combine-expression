@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+BASE="$(readlink -f $(readlink -f $(dirname "${BASH_SOURCE}")/../..))"
+
+for x in control_expression.txt wo_control_expression.txt; do
+
+  for code in \
+    BeadArray_approach_a_step_1.R \
+    BeadArray_method_1_step_1.R \
+    BeadArray_method_2_step_1.R \
+    BeadArray_method_3_step_1.R \
+    BeadArray_method_4_step_1.R \
+    BeadArray_method_5_step_1.R; do
+
+    mkdir -p $BASE/tmp/work/${code}/combined
+
+    find $BASE/tmp/work/${code}/chip -name "*[0-9]_${x}" \
+      | $BASE/bin/util/fix-data > $BASE/tmp/work/${code}/combined/${x}
+  done
+done
