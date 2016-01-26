@@ -6,40 +6,50 @@ import sys
 
 data = {}
 
-headers = []
+header = []
 
 for filename in fileinput.input():
-    with open(filename) as f:
-        header = f.readline()
-        headers.append(header.rstrip().split('\t'))
+
+    with open(filename.rstrip()) as f:
+        line = f.readline()
+        header.extend(line.rstrip().split('\t')[2:])
 
         for line in f.readlines():
             columns = line.rstrip().split('\t')
             primary_key = columns[0]
-            values = columns[1:]
+            secondary_key = columns[1]
+            values = columns[2:]
 
             if primary_key not in data:
-                data[primary_key] = []
+                data[primary_key] = { 'secondary_key': secondary_key, 'values': [] }
 
-            data[primary_key].append(values)
-
-# print re-oriented header
-
-num_cols = len(headers[0])
-
-line = [ str(headers[file][column]) for column in range(num_cols) for file in range(4) ]
-line.insert(0, 'Probe_ID')
-print('\t'.join(line))
+            data[primary_key]['values'].extend(values)
 
 
-# print re-oriented values
+header.insert(0, 'Probe_ID')
+header.insert(1, 'Entrez_ID')
+print('\t'.join(header))
 
-for k in sorted(data.iterkeys()):
-    try:
-        number_cols = len(data[k][file])
-        line = [ str(data[k][file][column]) for column in range(num_cols) for file in range(4) ]
-        line.insert(0, k)
-        print('\t'.join(line))
-    except:
-        sys.stderr.write('Error: Key: ' + k )
-        sys.exit(1)
+for primary_key in sorted(data.iterkeys()):
+    line = [ primary_key ]
+    line.append(data[primary_key]['secondary_key'])
+    line.extend(data[primary_key]['values'])
+    print('\t'.join(line))
+
+
+#
+#line = [ str(headers[file][column]) for column in range(num_cols) for file in range(4) ]
+#line.insert(0, 'Probe_ID')
+#print('\t'.join(line))
+#
+#
+## print re-oriented values
+#
+#    try:
+#        number_cols = len(data[k][file])
+#        line = [ str(data[k][file][column]) for column in range(num_cols) for file in range(4) ]
+#        line.insert(0, k)
+#        print('\t'.join(line))
+#    except:
+#        sys.stderr.write('Error: Key: ' + k )
+#        sys.exit(1)

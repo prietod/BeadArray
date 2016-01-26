@@ -82,14 +82,11 @@ cancel-all:
 	scancel -p$(slurm_partition) --signal=9 --full --user $$LOGNAME
 
 test:
-	mkdir -p tmp/test/fix-data
-	bin/fix-data test/fix-data/input/{Avg_Signal.txt,BEAD_STDERR.txt,Avg_NBEADS.txt,Detection_Pval.txt} \
-		> tmp/test/fix-data/result.txt
-	diff tmp/test/fix-data/result.txt test/fix-data/expected/result.txt
-	mkdir -p tmp/test/fix-data
-	bin/fix-data test/fix-data/input/{Avg_Signal-7-cols.txt,BEAD_STDERR-7-cols.txt,Avg_NBEADS-7-cols.txt,Detection_Pval-7-cols.txt} \
-		> tmp/test/fix-data/result-7-cols.txt
-	diff tmp/test/fix-data/result-7-cols.txt test/fix-data/expected/result-7-cols.txt
+	mkdir -p tmp/test/combine-expression
+	for n in 123 456 789; do \
+		echo test/fix-data/input/$${n}-control-expression.txt; done \
+		| bin/util/fix-data > tmp/test/combined-control-expression.txt
+	diff tmp/test/combined-control-expression.txt test/fix-data/expected/combined-control-expression.txt
 
 q:
 	squeue -p$(slurm_partition) --user $$LOGNAME
