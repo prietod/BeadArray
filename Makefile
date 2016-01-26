@@ -125,4 +125,3 @@ test-array-job:
 #
 # qc-average-clean-all:
 # 	-rm -rf tmp/{work,complete}/BeadArray_qc_average
-#
