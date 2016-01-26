@@ -2,19 +2,26 @@
 
 BASE="$(readlink -f $(readlink -f $(dirname "${BASH_SOURCE}")/../..))"
 
-for x in control_expression.txt wo_control_expression.txt; do
+scripts="
+BeadArray_approach_a_step_1.R
+BeadArray_method_1_step_1.R
+BeadArray_method_2_step_1.R
+BeadArray_method_3_step_1.R
+BeadArray_method_4_step_1.R
+BeadArray_method_5_step_1.R
+"
 
-  for code in \
-    BeadArray_approach_a_step_1.R \
-    BeadArray_method_1_step_1.R \
-    BeadArray_method_2_step_1.R \
-    BeadArray_method_3_step_1.R \
-    BeadArray_method_4_step_1.R \
-    BeadArray_method_5_step_1.R; do
+expression_files="
+control_expression.txt
+control_expression_lumi.txt
+wo_control_expression.txt
+wo_control_expression_lumi.txt
+"
 
-    mkdir -p $BASE/tmp/work/${code}/combined
+for expression_file in ${expression_files}; do
+  for script in ${scripts}; do
+    mkdir -p $BASE/tmp/work/${script}/combined
 
-    find $BASE/tmp/work/${code}/chip -name "*[0-9]_${x}" \
-      | $BASE/bin/util/fix-data > $BASE/tmp/work/${code}/combined/${x}
+    echo srun --time="0-02:00:00" --partition=hii02 --mem=32G --cpus-per-task=2 $BASE/bin/util/combine-expression-job.sh ${script} ${expression_file}
   done
 done

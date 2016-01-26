@@ -1,5 +1,6 @@
 .PHONY: test
 
+base = $$(pwd)
 slurm_partition = hii02
 jinfiniti_data_dir = /hiidata/teddy/data/jinfiniti/gene_expression
 raw_data_dir = tmp/data/raw
@@ -29,6 +30,8 @@ stage-2: combine-qc combine-qc-average run-sample-filter copy-filtered-data
 
 stage-3: run-approach-a-step-1 run-method-n-step-1
 
+stage-4: combine-expression
+
 setup-dirs:
 	[[ -d tmp/work/all ]] || mkdir -p tmp/work/all
 	[[ -d $(raw_data_dir) ]] || mkdir -p $(raw_data_dir)
@@ -51,6 +54,9 @@ combine-qc-average:
 	cat static/qc_header.txt > tmp/work/BeadArray_qc_average.R/combined/raw-qc-details.txt
 	find tmp/work/BeadArray_qc_average.R/chip -name '*_raw_qc_details.txt' \
 		| xargs -n1 -I{} cat {} >> tmp/work/BeadArray_qc_average.R/combined/raw-qc-details.txt
+
+combine-expression:
+	bin/util/combine-expression
 
 run-sample-filter:
 	bin/run-sample-filter $$(pwd)/tmp/work/BeadArray_qc.R/combined raw-qc-details.txt
@@ -93,6 +99,16 @@ q:
 
 test-array-job:
 	printf "foo\nbar\n" | SUBMIT_RANDOM_SECONDS="1" bin/slurm-submit-array bin/test-array-job
+
+check-combined-expression:
+	for script in \
+		BeadArray_approach_a_step_1.R \
+		BeadArray_method_1_step_1.R \
+		BeadArray_method_2_step_1.R \
+		BeadArray_method_3_step_1.R \
+		BeadArray_method_4_step_1.R \
+		BeadArray_method_5_step_1.R; do \
+			find $(base)/tmp/work/$${script}/combined -type f | xargs ls -l; done
 
 
 # combine: combine-qc combine-qc-average
