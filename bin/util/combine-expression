@@ -4,24 +4,26 @@ BASE="$(readlink -f $(readlink -f $(dirname "${BASH_SOURCE}")/../..))"
 
 scripts="
 BeadArray_approach_a_step_1.R
-BeadArray_method_1_step_1.R
-BeadArray_method_2_step_1.R
-BeadArray_method_3_step_1.R
-BeadArray_method_4_step_1.R
-BeadArray_method_5_step_1.R
 "
 
 expression_files="
-control_expression.txt
-control_expression_lumi.txt
 wo_control_expression.txt
-wo_control_expression_lumi.txt
 "
 
 for expression_file in ${expression_files}; do
   for script in ${scripts}; do
     mkdir -p $BASE/tmp/work/${script}/combined
 
-    srun --time="0-02:00:00" --partition=hii02 --mem=32G --cpus-per-task=2 $BASE/bin/util/combine-expression-job.sh ${script} ${expression_file}
+    sbatch \
+      --ntasks=1 \
+      --job-name="${script}-${expression_file}" \
+      --output=$BASE/tmp/log/${script}-${expression_file}.log \
+      --mem=120G \
+      --cpus-per-task=2 \
+      --time=0-02:00:00 \
+      --partition=hii02 \
+      --wrap="$BASE/bin/util/combine-expression-job.sh ${script} ${expression_file}"
   done
 done
+
+
