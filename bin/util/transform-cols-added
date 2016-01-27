@@ -16,13 +16,13 @@ excluded_array_ids = []
 
 with open(exclude_file) as f:
     for line in f.readlines():
-      excluded_array_ids.append(line.rstrip())
+      excluded_array_ids.append(line.rstrip('\n'))
 
 with open(cols_added_file) as f:
 
     # header
     line = f.readline()
-    columns = line.rstrip().split('\t')
+    columns = line.rstrip('\n').split('\t')
     header = [ col for col in columns if col not in excluded_fields ]
     header.insert(0,'Array_ID')
 
@@ -43,7 +43,7 @@ with open(cols_added_file) as f:
         comments,
         casestatus,
         sex,
-        age_in_months ) = line.rstrip().split('\t')
+        age_in_months ) = line.rstrip('\n').split('\t')
 
         columns = [ chip_barcode + '_' + array,
                     subject_id, vial_barcode_number, test_name, donor_number,

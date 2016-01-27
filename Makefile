@@ -33,7 +33,13 @@ stage-3: run-approach-a-step-1 run-method-n-step-1
 stage-4: combine-expression
 
 stage-5:
-	step/approach-a-step-2
+	bin/util/transform-cols-added \
+		/hiidata/projects/BeadArray/cols_added.tsv \
+		$(base)/tmp/work/all/exclude-data-filtered.txt > tmp/work/all/BeadArray_phenotype_details.txt
+	for f in BeadArray_approach_a_step_1.R BeadArray_method_{1..5}_step_1.R; do \
+		cp tmp/work/all/BeadArray_phenotype_details.txt tmp/work/$${f}/combined; done
+
+#step/approach-a-step-2
 
 setup-dirs:
 	[[ -d tmp/work/all ]] || mkdir -p tmp/work/all

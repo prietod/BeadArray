@@ -22,6 +22,6 @@ for expression_file in ${expression_files}; do
   for script in ${scripts}; do
     mkdir -p $BASE/tmp/work/${script}/combined
 
-    echo srun --time="0-02:00:00" --partition=hii02 --mem=32G --cpus-per-task=2 $BASE/bin/util/combine-expression-job.sh ${script} ${expression_file}
+    srun --time="0-02:00:00" --partition=hii02 --mem=32G --cpus-per-task=2 $BASE/bin/util/combine-expression-job.sh ${script} ${expression_file}
   done
 done

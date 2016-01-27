@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+BASE="$(readlink -f $(readlink -f $(dirname "${BASH_SOURCE}")/..))"
+
+
+sbatch \
+  --ntasks=1 \
+  --job-name="approach-a-step-2" \
+  --output=$BASE/tmp/log/approach-a-step-2.log \
+  --mem=120G \
+  --cpus-per-task=2 \
+  --time=0-16:00:00 \
+  --partition=hii02 \
+  --wrap="R_LIBS=$HOME/lib/R/3.2.3 $BASE/bin/run-R \
+    $BASE/code/BeadArray_approach_a_step_2.R \
+    $BASE/tmp/work/BeadArray_approach_a_step_1.R/combined"
