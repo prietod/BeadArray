@@ -1,0 +1,81 @@
+#!/usr/bin/env python
+
+from pprint import pprint
+import fileinput
+import sys
+
+header = []
+rows = []
+
+cols_added_file = sys.argv[1]
+exclude_file = sys.argv[2]
+
+excluded_fields = [ 'draw_dte', 'Date_Received_Sample', 'Date_of_Evaluation' ]
+
+excluded_array_ids = []
+
+with open(exclude_file) as f:
+    for line in f.readlines():
+      excluded_array_ids.append(line.rstrip())
+
+with open(cols_added_file) as f:
+
+    # header
+    line = f.readline()
+    columns = line.rstrip().split('\t')
+    header = [ col for col in columns if col not in excluded_fields ]
+    header.insert(0,'Array_ID')
+
+    # rows
+    for line in f.readlines():
+        (subject_id,
+        vial_barcode_number,
+        test_name,
+        donor_number,
+        box,
+        row,
+        chip_barcode,
+        array,
+        draw_dte,
+        sample_status,
+        date_received_sample,
+        date_of_evaluation,
+        comments,
+        casestatus,
+        sex,
+        age_in_months ) = line.rstrip().split('\t')
+
+        columns = [ chip_barcode + '_' + array,
+                    subject_id, vial_barcode_number, test_name, donor_number,
+                    box, row, chip_barcode, array, sample_status, comments,
+                    casestatus, sex, age_in_months ]
+
+        columns = [col if col != '' else 'NA' for col in columns]
+
+        rows.append(columns)
+
+print('\t'.join(header))
+
+for row in rows:
+  if row[0] not in excluded_array_ids:
+     print('\t'.join(row))
+
+#          primary_key = columns[0]
+#          secondary_key = columns[1]
+#          values = columns[2:]
+#
+#          if primary_key not in data:
+#              data[primary_key] = { 'secondary_key': secondary_key, 'values': [] }
+#
+#          data[primary_key]['values'].extend(values)
+#
+#
+#header.insert(0, 'Probe_ID')
+#header.insert(1, 'Entrez_ID')
+#print('\t'.join(header))
+#
+#for primary_key in sorted(data.iterkeys()):
+#  line = [ primary_key ]
+#  line.append(data[primary_key]['secondary_key'])
+#  line.extend(data[primary_key]['values'])
+#  print('\t'.join(line))

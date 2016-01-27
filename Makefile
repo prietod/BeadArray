@@ -32,6 +32,9 @@ stage-3: run-approach-a-step-1 run-method-n-step-1
 
 stage-4: combine-expression
 
+stage-5:
+	step/approach-a-step-2
+
 setup-dirs:
 	[[ -d tmp/work/all ]] || mkdir -p tmp/work/all
 	[[ -d $(raw_data_dir) ]] || mkdir -p $(raw_data_dir)
@@ -87,7 +90,13 @@ clean:
 cancel-all:
 	scancel -p$(slurm_partition) --signal=9 --full --user $$LOGNAME
 
-test:
+test-transform-cols-added:
+	mkdir -p tmp/test/transform-cols-added
+	bin/util/transform-cols-added test/transform-cols-added/input.tsv \
+		test/transform-cols-added/exclude-data-filtered.txt > tmp/test/transform-cols-added/output.tsv
+	diff tmp/test/transform-cols-added/output.tsv test/transform-cols-added/expected.tsv
+
+test-fix-data:
 	mkdir -p tmp/test/combine-expression
 	for n in 123 456 789; do \
 		echo test/fix-data/input/$${n}-control-expression.txt; done \
