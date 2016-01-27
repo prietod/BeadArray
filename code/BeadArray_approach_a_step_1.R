@@ -3,7 +3,7 @@
 
 # Median local background is performed
 # BASH and HULK methods are used for beads artifact detection
-# Summarization is performed with un-log transformation because neqc requires gene expression values to be un-log
+# Summarization is performed with un-log transformation because neqc requires gene expression values to be un-logged
 # Outliers are removed using the Illumina 3 M.A.D cut-off
 # The mean and standard deviation for each bead type are reported
 
@@ -489,7 +489,7 @@ write.table(array.datasumm, paste(sapply(strsplit(tiff.Files[1], "_"), "[", 1), 
 write.table(array.datasumm.controls.unique, paste(sapply(strsplit(tiff.Files[1], "_"), "[", 1), "control_expression.txt", sep = "_"), sep = "\t", quote = FALSE, row.names = FALSE, col.names = TRUE)
 write.table(array.datasumm.wocontrols, paste(sapply(strsplit(tiff.Files[1], "_"), "[", 1), "wo_control_expression.txt", sep = "_"), sep = "\t", quote = FALSE, row.names = FALSE, col.names = TRUE)
 write.table(exprs(datasumm.unlogged), paste(sapply(strsplit(tiff.Files[1], "_"), "[", 1), "Avg_Signal.txt", sep = "_"), sep="\t", quote = FALSE, col.names = paste(array.names, "AVG_Signal", sep = "."))
-write.table(se.exprs(datasumm.unlogged), paste(sapply(strsplit(tiff.Files[1], "_"), "[", 1), "BEAD_STDERR.txt", sep = "_"), sep="\t", quote = FALSE, col.names = paste(array.names, "BEAD_STDEV", sep = "."))
+write.table(se.exprs(datasumm.unlogged), paste(sapply(strsplit(tiff.Files[1], "_"), "[", 1), "BEAD_STDEV.txt", sep = "_"), sep="\t", quote = FALSE, col.names = paste(array.names, "BEAD_STDEV", sep = "."))
 write.table(nObservations(datasumm.unlogged), paste(sapply(strsplit(tiff.Files[1], "_"), "[", 1), "Avg_NBEADS.txt", sep = "_"), sep="\t", quote = FALSE, col.names = paste(array.names, "Avg_NBEADS", sep = "."))
 write.table(Detection(datasumm.unlogged), paste(sapply(strsplit(tiff.Files[1], "_"), "[", 1), "Detection_Pval.txt", sep = "_"), sep="\t", quote = FALSE, col.names = paste(array.names, "Detection Pval", sep = "."))
 

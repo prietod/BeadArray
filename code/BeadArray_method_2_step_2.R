@@ -8,14 +8,14 @@
 # The mean and standard deviation for each bead type are reported
 
 # In beadarray
-# Background normalization using normal-exponential convolution using negative controls (neqc)
+# No background normalization
 # Quantile normalization
 # Log2 transformation
 
 # In lumi
 # No background normalization
-# Variance stabilizing transformation
-# Robust spline normalization
+# Log2 transformation
+# Quantile normalization
 
 # To import beadarray, lumi and illuminaHumanv4.db libraries
 suppressMessages(library(beadarray))
@@ -75,100 +75,50 @@ setwd(filter_combined_result_dir)
 # To read the gene expression data from the *.txt files
 # Annotation from https://bioconductor.org/packages/release/data/annotation/html/illuminaHumanv4.db.html
 # To read data for beadarray
-data.gene <- read.ilmn(path = filter_combined_result_dir, ctrlpath = filter_combined_result_dir, files = "wo_control_expression.txt", ctrlfiles = "control_expression.txt", probeid = "Probe_ID", annotation = "Entrez_ID", other.columns = c("Detection Pval", "Avg_NBEADS", "BEAD_STDEV"))
+data.gene <- readBeadSummaryData(dataFile = "wo_control_expression.txt", ProbeID = "Probe_ID", skip = 0, columns = list(exprs = "AVG_Signal", se.exprs = "BEAD_STDEV", nObservations = "Avg_NBEADS", Detection = "Detection Pval"), annoCols = c("Entrez_ID"))
 data.pheno <- read.table(file = "BeadArray_phenotype_details.txt", sep = "\t", header = TRUE)
 
-# To get status of genes distributions
-# table(data.gene$genes$Status)
-
-# To estimate the proportion of probes which are expressed above the level of the negative controls
-proportion.expr <- propexpr(data.gene)
-
-# To apply the neqc function to calibrate the background level, normalize and transform the intensities
-# neqc requires data that have not been log-transformed
-# Perform normexp background normalization using negative control probes and quantile normalization using negative and positive control probes
-data.gene.norm <- neqc(data.gene, negctrl = "negative", regular = "regular", detection.p = "Detection Pval")
-
-# To run a for loop to generate different plots
-# To create a box plots for the regular probes and negative control probes before normalization and the regular probes after normalization
-pdf(file = "all_normalization_boxplot.pdf", width = 11, height = 8.5)
-
-# To define i for looping
-i = 1
-
-while(i < dim(as.matrix(data.gene.norm))[2]) {
-
-  # To generate box plots for 10 arrays at a time
-  # To get an integer value of number of arrays
-  i.arrays = as.integer((dim(as.matrix(data.gene.norm))[2])/10)
-
-  # To compare if the arrays the last 10 arrays or not
-  if (i < (i.arrays*10)) {
-
-    # To create a box plots for the regular probes and negative control probes before normalization and the regular probes after normalization
-    par(mfrow = c(3,1))
-    boxplot(log2(data.gene$E[data.gene$genes$Status == "regular", i:(10*i)]), range = 0, las = 2, xlab = "", ylab = expression(log[2](intensity)), main = "Regular probes")
-    boxplot(log2(data.gene$E[data.gene$genes$Status == "negative", i:(10*i)]), range = 0, las = 2, xlab = "", ylab = expression(log[2](intensity)), main = "Negative control probes")
-    boxplot(data.gene.norm$E[, i:(10*i)], range = 0, ylab = expression(log[2](intensity)), las = 2, xlab = "", main = "Regular probes, NEQC normalized")
-
-  }
-
-  else {
-
-    # To create a box plots for the regular probes and negative control probes before normalization and the regular probes after normalization
-    par(mfrow = c(3,1))
-    boxplot(log2(data.gene$E[data.gene$genes$Status == "regular", i:(dim(as.matrix(data.gene.norm))[2])]), range = 0, las = 2, xlab = "", ylab = expression(log[2](intensity)), main = "Regular probes")
-    boxplot(log2(data.gene$E[data.gene$genes$Status == "negative", i:(dim(as.matrix(data.gene.norm))[2])]), range = 0, las = 2, xlab = "", ylab = expression(log[2](intensity)), main = "Negative control probes")
-    boxplot(data.gene.norm$E[, i:(dim(as.matrix(data.gene.norm))[2])], range = 0, ylab = expression(log[2](intensity)), las = 2, xlab = "", main = "Regular probes, NEQC normalized")
-
-  }
-
-  # To add 10 to a while loop
-  i = i + 10
-
-}
-
-garbage <- dev.off()
-
-
+# To apply the normaliseIllumina function to normalize and transform the intensities
+# Perform no background normalization, log2 transformation and quantile normalization
+data.gene.norm <- normaliseIllumina(data.gene, transform = "log2", method = "quantile")
 
 # Multidimensional scaling (MDS), assesses sample similarity based on pair-wise distances between samples. Ideally, sample should separate based on biological variables (RNA source, sex, treatment etc.) but often technical effects
 # (such as samples processed together on the same BeadChip) may dominate
 # To generate the MDS plot
 pdf(file = "all_mds_plot_after_normalization.pdf", width = 11, height = 8.5)
-plotMDS(data.gene.norm$E)
+plotMDS(exprs(data.gene.norm))
 garbage <- dev.off()
 
 # To check the effects of boxes in MDS plot
 pdf(file = "all_mds_box_effects_after_normalization.pdf", width = 11, height = 8.5)
-plotMDS(data.gene.norm$E, labels = data.pheno$Box)
+plotMDS(exprs(data.gene.norm), labels = data.pheno$Box)
 garbage <- dev.off()
 
 # To check the effects of BeadChips in MDS plot
 pdf(file = "all_mds_beadchip_effects_after_normalization.pdf", width = 11, height = 8.5)
-plotMDS(data.gene.norm$E, labels = data.pheno$Chip_Barcode)
+plotMDS(exprs(data.gene.norm), labels = data.pheno$Chip_Barcode)
 garbage <- dev.off()
 
 # To check the effects of case-controls in MDS plot
 pdf(file = "all_mds_case_control_effects_after_normalization.pdf", width = 11, height = 8.5)
-plotMDS(data.gene.norm$E, labels = data.pheno$casestatus)
+plotMDS(exprs(data.gene.norm), labels = data.pheno$casestatus)
 garbage <- dev.off()
 
 # To check the effects of sex in MDS plot
 pdf(file = "all_mds_sex_effects_after_normalization.pdf", width = 11, height = 8.5)
-plotMDS(data.gene.norm$E, labels = data.pheno$Sex)
+plotMDS(exprs(data.gene.norm), labels = data.pheno$Sex)
 garbage <- dev.off()
 
 # To check the effects of donors in MDS plot
 pdf(file = "all_mds_donors_effects_after_normalization.pdf", width = 11, height = 8.5)
-plotMDS(data.gene.norm$E, labels = data.pheno$Donor_Number)
+plotMDS(exprs(data.gene.norm), labels = data.pheno$Donor_Number)
 garbage <- dev.off()
 
 # To retrieve quality information and verify that probes annotated as "Bad" or "No Match" generally have lower signal
-ids.arrays <- as.character(rownames(data.gene.norm))
+ids.arrays <- as.character(rownames(exprs(data.gene.norm)))
 qual <- unlist(mget(ids.arrays, illuminaHumanv4PROBEQUALITY, ifnotfound = NA))
 arrays.qual = table(qual)
-ave.signal.arrays = rowMeans(data.gene.norm$E)
+ave.signal.arrays = rowMeans(exprs(data.gene.norm))
 
 # To make a box plot with array probe quality information
 pdf(file = "all_probe_quality_after_normalization.pdf", width = 11, height = 8.5)
@@ -188,37 +138,37 @@ data.gene.norm.filt <- data.gene.norm[!rem, ]
 
 
 # To make a set of highly-variable probes and cluster the samples
-iqr <- apply(data.gene.norm.filt$E, 1, IQR, na.rm = TRUE)
+iqr <- apply(exprs(data.gene.norm.filt), 1, IQR, na.rm = TRUE)
 top.var <- order(iqr, decreasing = TRUE)[1:500]
 
 # To generate the cluster plot
 pdf(file = "all_cluster_plot_after_normalization.pdf", width = 11, height = 8.5)
-plot(hclust(dist(t(data.gene.norm.filt$E[top.var,]))))
+plot(hclust(dist(t(exprs(data.gene.norm.filt)[top.var,]))))
 garbage <- dev.off()
 
 # To check the effects of boxes in cluster plot
 pdf(file = "all_cluster_box_effects_after_normalization.pdf", width = 11, height = 8.5)
-plot(hclust(dist(t(data.gene.norm.filt$E[top.var,]))), labels = data.pheno$Box)
+plot(hclust(dist(t(exprs(data.gene.norm.filt)[top.var,]))), labels = data.pheno$Box)
 garbage <- dev.off()
 
 # To check the effects of BeadChips in cluster plot
 pdf(file = "all_cluster_beadchip_effects_after_normalization.pdf", width = 11, height = 8.5)
-plot(hclust(dist(t(data.gene.norm.filt$E[top.var,]))), labels = data.pheno$Chip_Barcode)
+plot(hclust(dist(t(exprs(data.gene.norm.filt)[top.var,]))), labels = data.pheno$Chip_Barcode)
 garbage <- dev.off()
 
 # To check the effects of case-controls in cluster plot
 pdf(file = "all_cluster_case_control_effects_after_normalization.pdf", width = 11, height = 8.5)
-plot(hclust(dist(t(data.gene.norm.filt$E[top.var,]))), labels = data.pheno$casestatus)
+plot(hclust(dist(t(exprs(data.gene.norm.filt)[top.var,]))), labels = data.pheno$casestatus)
 garbage <- dev.off()
 
 # To check the effects of sex in cluster plot
 pdf(file = "all_cluster_sex_effects_after_normalization.pdf", width = 11, height = 8.5)
-plot(hclust(dist(t(data.gene.norm.filt$E[top.var,]))), labels = data.pheno$Sex)
+plot(hclust(dist(t(exprs(data.gene.norm.filt)[top.var,]))), labels = data.pheno$Sex)
 garbage <- dev.off()
 
 # To check the effects of donors in cluster plot
 pdf(file = "all_cluster_donors_effects_after_normalization.pdf", width = 11, height = 8.5)
-plot(hclust(dist(t(data.gene.norm.filt$E[top.var,]))), labels = data.pheno$Donor_Number)
+plot(hclust(dist(t(exprs(data.gene.norm.filt)[top.var,]))), labels = data.pheno$Donor_Number)
 garbage <- dev.off()
 
 
@@ -226,32 +176,32 @@ garbage <- dev.off()
 
 # To generate the heatmap
 pdf(file = "all_heatmap_plot_after_normalization.pdf", width = 11, height = 8.5)
-heatmap(data.gene.norm.filt$E[top.var,])
+heatmap(exprs(data.gene.norm.filt)[top.var,])
 garbage <- dev.off()
 
 # To check the effects of boxes in heatmap
 pdf(file = "all_heatmap_box_effects_after_normalization.pdf", width = 11, height = 8.5)
-heatmap(data.gene.norm.filt$E[top.var,], labCol = data.pheno$Box)
+heatmap(exprs(data.gene.norm.filt)[top.var,], labCol = data.pheno$Box)
 garbage <- dev.off()
 
 # To check the effects of BeadChips in heatmap
 pdf(file = "all_heatmap_beadchip_effects_after_normalization.pdf", width = 11, height = 8.5)
-heatmap(data.gene.norm.filt$E[top.var,], labCol = data.pheno$Chip_Barcode)
+heatmap(exprs(data.gene.norm.filt)[top.var,], labCol = data.pheno$Chip_Barcode)
 garbage <- dev.off()
 
 # To check the effects of case-controls in heatmap
 pdf(file = "all_heatmap_case_control_effects_after_normalization.pdf", width = 11, height = 8.5)
-heatmap(data.gene.norm.filt$E[top.var,], labCol = data.pheno$casestatus)
+heatmap(exprs(data.gene.norm.filt)[top.var,], labCol = data.pheno$casestatus)
 garbage <- dev.off()
 
 # To check the effects of sex in heatmap
 pdf(file = "all_heatmap_sex_effects_after_normalization.pdf", width = 11, height = 8.5)
-heatmap(data.gene.norm.filt$E[top.var,], labCol = data.pheno$Sex)
+heatmap(exprs(data.gene.norm.filt)[top.var,], labCol = data.pheno$Sex)
 garbage <- dev.off()
 
 # To check the effects of donors in heatmap
 pdf(file = "all_heatmap_donors_effects_after_normalization.pdf", width = 11, height = 8.5)
-heatmap(data.gene.norm.filt$E[top.var,], labCol = data.pheno$Donor_Number)
+heatmap(exprs(data.gene.norm.filt)[top.var,], labCol = data.pheno$Donor_Number)
 garbage <- dev.off()
 
 
@@ -259,10 +209,10 @@ garbage <- dev.off()
 idsTosymbols = as.matrix(toTable(illuminaHumanv4ENTREZID))
 
 # To store gene expression values for all the array
-array.normalized <- matrix(, nrow = dim(as.matrix(data.gene.norm))[1], ncol = (dim(as.matrix(data.gene.norm))[2] + 2))
+array.normalized <- matrix(, nrow = dim(as.matrix(exprs(data.gene.norm)))[1], ncol = (dim(as.matrix(exprs(data.gene.norm)))[2] + 2))
 
 # To store Illumina IDs information
-array.normalized[, 1] = row.names(data.gene.norm)
+array.normalized[, 1] = row.names(exprs(data.gene.norm))
 
 # To get annotation for each Illumina ID
 for (j.id in 1:dim(as.matrix(array.normalized))[1]) {
@@ -281,14 +231,14 @@ for (j.id in 1:dim(as.matrix(array.normalized))[1]) {
 }
 
 # To define column names
-colnames(array.normalized) <- c("Probe_ID", "Entrez_ID", colnames(data.gene.norm))
+colnames(array.normalized) <- c("Probe_ID", "Entrez_ID", colnames(exprs(data.gene.norm)))
 
 
 # To store gene expression values for all the array
-array.normalized.filt <- matrix(, nrow = dim(as.matrix(data.gene.norm.filt))[1], ncol = (dim(as.matrix(data.gene.norm.filt))[2] + 2))
+array.normalized.filt <- matrix(, nrow = dim(as.matrix(exprs(data.gene.norm.filt)))[1], ncol = (dim(as.matrix(exprs(data.gene.norm.filt)))[2] + 2))
 
 # To store Illumina IDs information
-array.normalized.filt[, 1] = row.names(data.gene.norm.filt)
+array.normalized.filt[, 1] = row.names(exprs(data.gene.norm.filt))
 
 # To get annotation for each Illumina ID
 for (k.id in 1:dim(as.matrix(array.normalized.filt))[1]) {
@@ -307,11 +257,11 @@ for (k.id in 1:dim(as.matrix(array.normalized.filt))[1]) {
 }
 
 # To define column names
-colnames(array.normalized.filt) <- c("Probe_ID", "Entrez_ID", colnames(data.gene.norm.filt))
+colnames(array.normalized.filt) <- c("Probe_ID", "Entrez_ID", colnames(exprs(data.gene.norm.filt)))
 
 # To gene expression values
-array.normalized[, 3:dim(as.matrix(array.normalized))[2]] = data.gene.norm$E[, 1:dim(as.matrix(data.gene.norm))[2]]
-array.normalized.filt[, 3:dim(as.matrix(array.normalized.filt))[2]] = data.gene.norm.filt$E[, 1:dim(as.matrix(data.gene.norm.filt))[2]]
+array.normalized[, 3:dim(as.matrix(array.normalized))[2]] = exprs(data.gene.norm)[, 1:dim(as.matrix(exprs(data.gene.norm)))[2]]
+array.normalized.filt[, 3:dim(as.matrix(array.normalized.filt))[2]] = exprs(data.gene.norm.filt)[, 1:dim(as.matrix(exprs(data.gene.norm.filt)))[2]]
 
 # To create different files with gene expression data
 write.table(array.normalized, "expression_normalized.txt", sep = "\t", quote = FALSE, row.names = FALSE, col.names = TRUE)
@@ -323,7 +273,7 @@ n_donor.1 = 0
 
 # To get the donors information
 # To run a for loop for all the samples
-for (donor.1.info in 1:dim(as.matrix(data.gene.norm))[2]) {
+for (donor.1.info in 1:dim(as.matrix(exprs(data.gene.norm)))[2]) {
 
   # To filter out samples based on donor information
   if ((!is.na(as.character(data.pheno$Donor_Number[donor.1.info]))) & ((as.character(data.pheno$Donor_Number[donor.1.info])) == as.character("Donor 1"))) {
@@ -338,7 +288,7 @@ n_donor.2 = 0
 
 # To get the donors information
 # To run a for loop for all the samples
-for (donor.2.info in 1:dim(as.matrix(data.gene.norm))[2]) {
+for (donor.2.info in 1:dim(as.matrix(exprs(data.gene.norm)))[2]) {
 
   # To filter out samples based on donor information
   if ((!is.na(as.character(data.pheno$Donor_Number[donor.2.info]))) & ((as.character(data.pheno$Donor_Number[donor.2.info])) == as.character("Donor 2"))) {
@@ -379,48 +329,48 @@ n_donor.1.col.names.filt = col.names.header
 n_donor.2.col.names.filt = col.names.header
 n_wo.donors.col.names.filt = col.names.header
 
-for (donor.data in 1:dim(as.matrix(data.gene.norm))[2]) {
+for (donor.data in 1:dim(as.matrix(exprs(data.gene.norm)))[2]) {
 
   # To filter out samples based on donor information
-  if (as.character(colnames(data.gene.norm)[donor.data]) %in% as.character(as.matrix(donor.1))) {
+  if (as.character(colnames(exprs(data.gene.norm))[donor.data]) %in% as.character(as.matrix(donor.1))) {
     n_donor.1.col = n_donor.1.col + 1
     array.normalized.donor.1[, n_donor.1.col] = array.normalized[, (2 + donor.data)]
-    n_donor.1.col.names = c(n_donor.1.col.names, as.character(colnames(data.gene.norm)[donor.data]))
+    n_donor.1.col.names = c(n_donor.1.col.names, as.character(colnames(exprs(data.gene.norm))[donor.data]))
   }
 
-  else if (as.character(colnames(data.gene.norm)[donor.data]) %in% as.character(as.matrix(donor.2))) {
+  else if (as.character(colnames(exprs(data.gene.norm))[donor.data]) %in% as.character(as.matrix(donor.2))) {
     n_donor.2.col = n_donor.2.col + 1
     array.normalized.donor.2[, n_donor.2.col] = array.normalized[, (2 + donor.data)]
-    n_donor.2.col.names = c(n_donor.2.col.names, as.character(colnames(data.gene.norm)[donor.data]))
+    n_donor.2.col.names = c(n_donor.2.col.names, as.character(colnames(exprs(data.gene.norm))[donor.data]))
   }
 
   else {
     n_wo.donors.col = n_wo.donors.col + 1
     array.normalized.wo.donors[, n_wo.donors.col] = array.normalized[, (2 + donor.data)]
-    n_wo.donors.col.names = c(n_wo.donors.col.names, as.character(colnames(data.gene.norm)[donor.data]))
+    n_wo.donors.col.names = c(n_wo.donors.col.names, as.character(colnames(exprs(data.gene.norm))[donor.data]))
   }
 
 }
 
-for (donor.data.filt in 1:dim(as.matrix(data.gene.norm.filt))[2]) {
+for (donor.data.filt in 1:dim(as.matrix(exprs(data.gene.norm.filt)))[2]) {
 
   # To filter out samples based on donor information
-  if (as.character(colnames(data.gene.norm.filt)[donor.data.filt]) %in% as.character(as.matrix(donor.1))) {
+  if (as.character(colnames(exprs(data.gene.norm.filt))[donor.data.filt]) %in% as.character(as.matrix(donor.1))) {
     n_donor.1.col.filt = n_donor.1.col.filt + 1
     array.normalized.filt.donor.1[, n_donor.1.col.filt] = array.normalized.filt[, (2 + donor.data.filt)]
-    n_donor.1.col.names.filt = c(n_donor.1.col.names.filt, as.character(colnames(data.gene.norm.filt)[donor.data.filt]))
+    n_donor.1.col.names.filt = c(n_donor.1.col.names.filt, as.character(colnames(exprs(data.gene.norm.filt))[donor.data.filt]))
   }
 
-  else if (as.character(colnames(data.gene.norm.filt)[donor.data.filt]) %in% as.character(as.matrix(donor.2))) {
+  else if (as.character(colnames(exprs(data.gene.norm.filt))[donor.data.filt]) %in% as.character(as.matrix(donor.2))) {
     n_donor.2.col.filt = n_donor.2.col.filt + 1
     array.normalized.filt.donor.2[, n_donor.2.col.filt] = array.normalized.filt[, (2 + donor.data.filt)]
-    n_donor.2.col.names.filt = c(n_donor.2.col.names.filt, as.character(colnames(data.gene.norm.filt)[donor.data.filt]))
+    n_donor.2.col.names.filt = c(n_donor.2.col.names.filt, as.character(colnames(exprs(data.gene.norm.filt))[donor.data.filt]))
   }
 
   else {
     n_wo.donors.col.filt = n_wo.donors.col.filt + 1
     array.normalized.filt.wo.donors[, n_wo.donors.col.filt] = array.normalized.filt[, (2 + donor.data.filt)]
-    n_wo.donors.col.names.filt = c(n_wo.donors.col.names.filt, as.character(colnames(data.gene.norm.filt)[donor.data.filt]))
+    n_wo.donors.col.names.filt = c(n_wo.donors.col.names.filt, as.character(colnames(exprs(data.gene.norm.filt))[donor.data.filt]))
   }
 
 }
@@ -604,48 +554,48 @@ plot(data.gene.lumi, what = 'sampleRelation', method = "mds")
 garbage <- dev.off()
 
 
-# To perform variance stabilizing transform (VST)
-data.gene.lumi.t <- suppressWarnings(lumiT(data.gene.lumi, method = "vst", verbose = FALSE))
+# To perform log2 transform
+data.gene.lumi.t <- suppressWarnings(lumiT(data.gene.lumi, method = "log2", verbose = FALSE))
 
 # To run a for loop to generate different plots
 # To create a vst transformation plot
-pdf(file = "all_vst_transformation_before_normalization_lumi.pdf", width = 11, height = 8.5)
+# pdf(file = "all_vst_transformation_before_normalization_lumi.pdf", width = 11, height = 8.5)
 
 # To define m.lumi for looping
-m.lumi = 1
+# m.lumi = 1
 
-while(m.lumi < dim(as.matrix(data.gene.lumi.t))[2]) {
+# while(m.lumi < dim(as.matrix(data.gene.lumi.t))[2]) {
 
   # To generate box plots for 10 arrays at a time
   # To get an integer value of number of arrays
-  m.arrays.lumi = as.integer((dim(as.matrix(data.gene.lumi.t))[2])/10)
+  # m.arrays.lumi = as.integer((dim(as.matrix(data.gene.lumi.t))[2])/10)
 
   # To compare if the arrays the last 10 arrays or not
-  if (m.lumi < (m.arrays.lumi*10)) {
+  # if (m.lumi < (m.arrays.lumi*10)) {
 
     # To create a box plots for the regular probes and negative control probes before normalization and the regular probes after normalization
-    plot.trans <- plotVST(data.gene.lumi.t[, m.lumi:(10*m.lumi)])
-    matplot(log2(plot.trans$untransformed), plot.trans$transformed, main = "compare VST and log2 transform")
+    # plot.trans <- plotVST(data.gene.lumi.t[, m.lumi:(10*m.lumi)])
+    # matplot(log2(plot.trans$untransformed), plot.trans$transformed, main = "compare VST and log2 transform")
 
-  }
+  # }
 
-  else {
+  # else {
 
     # To create a box plots for the regular probes and negative control probes before normalization and the regular probes after normalization
-    plot.trans <- plotVST(data.gene.lumi.t[, m.lumi:(dim(as.matrix(data.gene.lumi.t))[2])])
-    matplot(log2(plot.trans$untransformed), plot.trans$transformed, main = "compare VST and log2 transform")
+    # plot.trans <- plotVST(data.gene.lumi.t[, m.lumi:(dim(as.matrix(data.gene.lumi.t))[2])])
+    # matplot(log2(plot.trans$untransformed), plot.trans$transformed, main = "compare VST and log2 transform")
 
-  }
+  # }
 
   # To add 10 to a while loop
-  m.lumi = m.lumi + 10
+  # m.lumi = m.lumi + 10
 
-}
+# }
 
-garbage <- dev.off()
+# garbage <- dev.off()
 
-# To perform robust spline normalization
-data.gene.lumi.n <- lumiN(data.gene.lumi.t, method = "rsn", verbose = FALSE)
+# Perform no background normalization and quantile normalization
+data.gene.lumi.n <- lumiN(data.gene.lumi.t, method = "quantile", verbose = FALSE)
 
 # To perform quality control estimation after normalization
 data.gene.lumi.n.q <- lumiQ(data.gene.lumi.n)
