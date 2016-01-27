@@ -60,17 +60,16 @@ if ! [[ -x "${program}" ]]; then
 fi
 
 job_id=$(
-
-sbatch \
-  --ntasks=1 \
-  --job-name="${program_short}" \
-  --output=${log_dir}/${datestamp}/task/%a.log \
-  --array=1-${array_count} \
-  --mem=$SUBMIT_MEM_MB \
-  --cpus-per-task=$SUBMIT_CPUS_PER_TASK \
-  --time=$SUBMIT_TIME \
-  --partition=$SUBMIT_PARTITION \
-  --wrap="${sleep_command}; ${program} \$( $BASE/bin/util/lookup-array-map ${array_map} ) $*" \
+  sbatch \
+    --ntasks=1 \
+    --job-name="${program_short}" \
+    --output=${log_dir}/${datestamp}/task/%a.log \
+    --array=1-${array_count} \
+    --mem=$SUBMIT_MEM_MB \
+    --cpus-per-task=$SUBMIT_CPUS_PER_TASK \
+    --time=$SUBMIT_TIME \
+    --partition=$SUBMIT_PARTITION \
+    --wrap="${sleep_command}; ${program} \$( $BASE/bin/util/lookup-array-map ${array_map} ) $*" \
   | awk '{print $NF}'
 )
 
