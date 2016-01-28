@@ -8,11 +8,23 @@ header = []
 rows = []
 
 cols_added_file = sys.argv[1]
-exclude_file = sys.argv[2]
+map_info_file = sys.argv[2]
+exclude_file = sys.argv[3]
 
 excluded_fields = [ 'draw_dte', 'Date_Received_Sample', 'Date_of_Evaluation' ]
 
 excluded_array_ids = []
+
+map_info_data = {}
+
+with open(map_info_file) as f:
+    map_info_header = f.readline()
+    for line in f.readlines():
+        map_info_columns = line.rstrip('\n').split('\t')
+        donor_number = map_info_columns[3]
+        array_id = map_info_columns[6] + '_' + map_info_columns[7]
+        if donor_number != '':
+            map_info_data[array_id] = donor_number
 
 with open(exclude_file) as f:
     for line in f.readlines():
@@ -45,7 +57,12 @@ with open(cols_added_file) as f:
         sex,
         age_in_months ) = line.rstrip('\n').split('\t')
 
-        columns = [ chip_barcode + '_' + array,
+        array_id = chip_barcode + '_' + array
+
+        if map_info_data.get(array_id):
+            donor_number = map_info_data[array_id]
+
+        columns = [ array_id,
                     subject_id, vial_barcode_number, test_name, donor_number,
                     box, row, chip_barcode, array, sample_status, comments,
                     casestatus, sex, age_in_months ]
@@ -59,23 +76,3 @@ print('\t'.join(header))
 for row in rows:
   if row[0] not in excluded_array_ids:
      print('\t'.join(row))
-
-#          primary_key = columns[0]
-#          secondary_key = columns[1]
-#          values = columns[2:]
-#
-#          if primary_key not in data:
-#              data[primary_key] = { 'secondary_key': secondary_key, 'values': [] }
-#
-#          data[primary_key]['values'].extend(values)
-#
-#
-#header.insert(0, 'Probe_ID')
-#header.insert(1, 'Entrez_ID')
-#print('\t'.join(header))
-#
-#for primary_key in sorted(data.iterkeys()):
-#  line = [ primary_key ]
-#  line.append(data[primary_key]['secondary_key'])
-#  line.extend(data[primary_key]['values'])
-#  print('\t'.join(line))

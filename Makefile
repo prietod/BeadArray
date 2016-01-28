@@ -93,7 +93,9 @@ cancel-all:
 
 test-transform-cols-added:
 	mkdir -p tmp/test/transform-cols-added
-	bin/util/transform-cols-added test/transform-cols-added/input.tsv \
+	bin/util/transform-cols-added \
+		test/transform-cols-added/input.tsv \
+		test/transform-cols-added/map_info.txt \
 		test/transform-cols-added/exclude-data-filtered.txt > tmp/test/transform-cols-added/output.tsv
 	diff tmp/test/transform-cols-added/output.tsv test/transform-cols-added/expected.tsv
 
