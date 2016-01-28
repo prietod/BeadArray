@@ -4,10 +4,18 @@ BASE="$(readlink -f $(readlink -f $(dirname "${BASH_SOURCE}")/../..))"
 
 scripts="
 BeadArray_approach_a_step_1.R
+BeadArray_method_1_step_1.R
+BeadArray_method_2_step_1.R
+BeadArray_method_3_step_1.R
+BeadArray_method_4_step_1.R
+BeadArray_method_5_step_1.R
 "
 
 expression_files="
+control_expression.txt
+control_expression_lumi.txt
 wo_control_expression.txt
+wo_control_expression_lumi.txt
 "
 
 for expression_file in ${expression_files}; do

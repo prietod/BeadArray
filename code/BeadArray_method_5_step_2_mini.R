@@ -8,53 +8,18 @@
 # The mean and standard deviation for each bead type are reported
 
 # In beadarray
-# No function for local regression (loess) normalization
+# No function for variance stabilizing transformation
 
 # In lumi
 # No background normalization
 # Variance stabilizing transformation
-# Local regression (loess) normalization
+# Quantile normalization
 
 # To import beadarray, lumi and illuminaHumanv4.db libraries
 suppressMessages(library(beadarray))
 suppressMessages(library(illuminaHumanv4.db))
 suppressMessages(library(lumi))
 suppressMessages(library(limma))
-
-# Versions of R packages: sessionInfo() or packageVersion("illuminaHumanv4.db")
-# beadarray_2.20.0
-# illuminaHumanv4.db_1.26.0
-# org.Hs.eg.db_3.2.3
-# RSQLite_1.0.0
-# DBI_0.3.1
-# AnnotationDbi_1.32.3
-# IRanges_2.4.6
-# S4Vectors_0.8.5
-# ggplot2_2.0.0
-# Biobase_2.30.0
-# BiocGenerics_0.16.1
-# Rcpp_0.12.2
-# XVector_0.10.0
-# magrittr_1.5
-# GenomicRanges_1.22.3
-# zlibbioc_1.16.0
-# munsell_0.4.2
-# colorspace_1.2-6
-# stringr_1.0.0
-# plyr_1.8.3
-# GenomeInfoDb_1.6.1
-# tools_3.2.3
-# base64_1.2
-# grid_3.2.3
-# gtable_0.1.2
-# reshape2_1.4.1
-# limma_3.26.3
-# stringi_1.0-1
-# BeadDataPackR_1.22.0
-# scales_0.3.0
-# illuminaio_0.12.0
-# lumi_2.22.0
-# limma_3.26.3
 
 #------------------------------------------------------------------------
 # Get cli args and assign appropriate variables
@@ -76,7 +41,6 @@ setwd(filter_combined_result_dir)
 data.gene <- readBeadSummaryData(dataFile = "wo_control_expression.txt", ProbeID = "Probe_ID", skip = 0, columns = list(exprs = "AVG_Signal", se.exprs = "BEAD_STDEV", nObservations = "Avg_NBEADS", Detection = "Detection Pval"), annoCols = c("Entrez_ID"))
 data.pheno <- read.table(file = "BeadArray_phenotype_details.txt", sep = "\t", header = TRUE)
 
-
 ###########################################################################################################################################
 # To perform analysis using lumi package
 
@@ -86,285 +50,14 @@ data.gene.lumi <- lumiR("wo_control_expression_lumi.txt", sep = NULL, detectionT
 controlFile.lumi <- "control_expression_lumi.txt"
 data.control.lumi <- addControlData2lumi(controlFile.lumi, data.gene.lumi)
 
-# To run a for loop to generate different plots
-# To create a density plot
-pdf(file = "all_density_before_normalization_lumi.pdf", width = 11, height = 8.5)
-
-# To define i.lumi for looping
-i.lumi = 1
-
-while(i.lumi < dim(as.matrix(data.gene.lumi))[2]) {
-
-  # To generate box plots for 10 arrays at a time
-  # To get an integer value of number of arrays
-  i.arrays.lumi = as.integer((dim(as.matrix(data.gene.lumi))[2])/10)
-
-  # To compare if the arrays the last 10 arrays or not
-  if (i.lumi < (i.arrays.lumi*10)) {
-
-    # To create a box plots for the regular probes and negative control probes before normalization and the regular probes after normalization
-    plot(data.gene.lumi[, i.lumi:(10*i.lumi)], what = "density")
-
-  }
-
-  else {
-
-    # To create a box plots for the regular probes and negative control probes before normalization and the regular probes after normalization
-    plot(data.gene.lumi[, i.lumi:(dim(as.matrix(data.gene.lumi))[2])], what = "density")
-
-  }
-
-  # To add 10 to a while loop
-  i.lumi = i.lumi + 10
-
-}
-
-garbage <- dev.off()
-
-
-# To run a for loop to generate different plots
-# To create a Cumulative Distribution Function (CDF) plot
-pdf(file = "all_cdf_before_normalization_lumi.pdf", width = 11, height = 8.5)
-
-# To define j.lumi for looping
-j.lumi = 1
-
-while(j.lumi < dim(as.matrix(data.gene.lumi))[2]) {
-
-  # To generate box plots for 10 arrays at a time
-  # To get an integer value of number of arrays
-  j.arrays.lumi = as.integer((dim(as.matrix(data.gene.lumi))[2])/10)
-
-  # To compare if the arrays the last 10 arrays or not
-  if (j.lumi < (j.arrays.lumi*10)) {
-
-    # To create a box plots for the regular probes and negative control probes before normalization and the regular probes after normalization
-    plotCDF(data.gene.lumi[, j.lumi:(10*j.lumi)], reverse = TRUE)
-
-  }
-
-  else {
-
-    # To create a box plots for the regular probes and negative control probes before normalization and the regular probes after normalization
-    plotCDF(data.gene.lumi[, j.lumi:(dim(as.matrix(data.gene.lumi))[2])], reverse = TRUE)
-
-  }
-
-  # To add 10 to a while loop
-  j.lumi = j.lumi + 10
-
-}
-
-garbage <- dev.off()
-
-
-# To run a for loop to generate different plots
-# To create a housekeeping plot
-pdf(file = "all_housekeeping_before_normalization_lumi.pdf", width = 11, height = 8.5)
-
-# To define k.lumi for looping
-k.lumi = 1
-
-while(k.lumi < dim(as.matrix(data.gene.lumi))[2]) {
-
-  # To generate box plots for 10 arrays at a time
-  # To get an integer value of number of arrays
-  k.arrays.lumi = as.integer((dim(as.matrix(data.gene.lumi))[2])/10)
-
-  # To compare if the arrays the last 10 arrays or not
-  if (k.lumi < (k.arrays.lumi*10)) {
-
-    # To create a box plots for the regular probes and negative control probes before normalization and the regular probes after normalization
-    plotHousekeepingGene(data.control.lumi[, k.lumi:(10*k.lumi)])
-
-  }
-
-  else {
-
-    # To create a box plots for the regular probes and negative control probes before normalization and the regular probes after normalization
-    plotHousekeepingGene(data.control.lumi[, k.lumi:(dim(as.matrix(data.gene.lumi))[2])])
-
-  }
-
-  # To add 10 to a while loop
-  k.lumi = k.lumi + 10
-
-}
-
-garbage <- dev.off()
-
-
-
-# To run a for loop to generate different plots
-# To create a stringency gene plot
-pdf(file = "all_stringency_gene_before_normalization_lumi.pdf", width = 11, height = 8.5)
-
-# To define l.lumi for looping
-l.lumi = 1
-
-while(l.lumi < dim(as.matrix(data.gene.lumi))[2]) {
-
-  # To generate box plots for 10 arrays at a time
-  # To get an integer value of number of arrays
-  l.arrays.lumi = as.integer((dim(as.matrix(data.gene.lumi))[2])/10)
-
-  # To compare if the arrays the last 10 arrays or not
-  if (l.lumi < (l.arrays.lumi*10)) {
-
-    # To create a box plots for the regular probes and negative control probes before normalization and the regular probes after normalization
-    plotStringencyGene(data.control.lumi[, l.lumi:(10*l.lumi)])
-
-  }
-
-  else {
-
-    # To create a box plots for the regular probes and negative control probes before normalization and the regular probes after normalization
-    plotStringencyGene(data.control.lumi[, l.lumi:(dim(as.matrix(data.gene.lumi))[2])])
-
-  }
-
-  # To add 10 to a while loop
-  l.lumi = l.lumi + 10
-
-}
-
-garbage <- dev.off()
-
-# To create a sample relations plot
-pdf(file = "all_sample_relations_before_normalization_lumi.pdf", width = 11, height = 8.5)
-plot(data.gene.lumi, what = 'sampleRelation')
-garbage <- dev.off()
-
-pdf(file = "all_sample_relations_mds_before_normalization_lumi.pdf", width = 11, height = 8.5)
-plot(data.gene.lumi, what = 'sampleRelation', method = "mds")
-garbage <- dev.off()
-
-
 # To perform variance stabilizing transformation
 data.gene.lumi.t <- suppressWarnings(lumiT(data.gene.lumi, method = "vst", verbose = FALSE))
 
-# To run a for loop to generate different plots
-# To create a vst transformation plot
-pdf(file = "all_vst_transformation_before_normalization_lumi.pdf", width = 11, height = 8.5)
-
-# To define m.lumi for looping
-m.lumi = 1
-
-while(m.lumi < dim(as.matrix(data.gene.lumi.t))[2]) {
-
-  # To generate box plots for 10 arrays at a time
-  # To get an integer value of number of arrays
-  m.arrays.lumi = as.integer((dim(as.matrix(data.gene.lumi.t))[2])/10)
-
-  # To compare if the arrays the last 10 arrays or not
-  if (m.lumi < (m.arrays.lumi*10)) {
-
-    # To create a box plots for the regular probes and negative control probes before normalization and the regular probes after normalization
-    plot.trans <- plotVST(data.gene.lumi.t[, m.lumi:(10*m.lumi)])
-    matplot(log2(plot.trans$untransformed), plot.trans$transformed, main = "compare VST and log2 transform")
-
-  }
-
-  else {
-
-    # To create a box plots for the regular probes and negative control probes before normalization and the regular probes after normalization
-    plot.trans <- plotVST(data.gene.lumi.t[, m.lumi:(dim(as.matrix(data.gene.lumi.t))[2])])
-    matplot(log2(plot.trans$untransformed), plot.trans$transformed, main = "compare VST and log2 transform")
-
-  }
-
-  # To add 10 to a while loop
-  m.lumi = m.lumi + 10
-
-}
-
-garbage <- dev.off()
-
-# Perform no background normalization and local regression (loess) normalization
-data.gene.lumi.n <- lumiN(data.gene.lumi.t, method = "loess", verbose = FALSE)
+# Perform no background normalization and quantile normalization
+data.gene.lumi.n <- lumiN(data.gene.lumi.t, method = "quantile", verbose = FALSE)
 
 # To perform quality control estimation after normalization
 data.gene.lumi.n.q <- lumiQ(data.gene.lumi.n)
-
-# To run a for loop to generate different plots
-# To create a density plot
-pdf(file = "all_density_after_normalization_lumi.pdf", width = 11, height = 8.5)
-
-# To define n.lumi for looping
-n.lumi = 1
-
-while(n.lumi < dim(as.matrix(data.gene.lumi.n.q))[2]) {
-
-  # To generate box plots for 10 arrays at a time
-  # To get an integer value of number of arrays
-  n.arrays.lumi = as.integer((dim(as.matrix(data.gene.lumi.n.q))[2])/10)
-
-  # To compare if the arrays the last 10 arrays or not
-  if (n.lumi < (n.arrays.lumi*10)) {
-
-    # To create a box plots for the regular probes and negative control probes before normalization and the regular probes after normalization
-    plot(data.gene.lumi.n.q[, n.lumi:(10*n.lumi)], what = "density")
-
-  }
-
-  else {
-
-    # To create a box plots for the regular probes and negative control probes before normalization and the regular probes after normalization
-    plot(data.gene.lumi.n.q[, n.lumi:(dim(as.matrix(data.gene.lumi.n.q))[2])], what = "density")
-
-  }
-
-  # To add 10 to a while loop
-  n.lumi = n.lumi + 10
-
-}
-
-garbage <- dev.off()
-
-
-# To run a for loop to generate different plots
-# To create a boxplot plot
-pdf(file = "all_boxplot_after_normalization_lumi.pdf", width = 11, height = 8.5)
-
-# To define o.lumi for looping
-o.lumi = 1
-
-while(o.lumi < dim(as.matrix(data.gene.lumi.n.q))[2]) {
-
-  # To generate box plots for 10 arrays at a time
-  # To get an integer value of number of arrays
-  o.arrays.lumi = as.integer((dim(as.matrix(data.gene.lumi.n.q))[2])/10)
-
-  # To compare if the arrays the last 10 arrays or not
-  if (o.lumi < (o.arrays.lumi*10)) {
-
-    # To create a box plots for the regular probes and negative control probes before normalization and the regular probes after normalization
-    plot(data.gene.lumi.n.q[, o.lumi:(10*o.lumi)], what = "boxplot")
-
-  }
-
-  else {
-
-    # To create a box plots for the regular probes and negative control probes before normalization and the regular probes after normalization
-    plot(data.gene.lumi.n.q[, o.lumi:(dim(as.matrix(data.gene.lumi.n.q))[2])], what = "boxplot")
-
-  }
-
-  # To add 10 to a while loop
-  o.lumi = o.lumi + 10
-
-}
-
-garbage <- dev.off()
-
-# To create a sample relations plot
-pdf(file = "all_sample_relations_after_normalization_lumi.pdf", width = 11, height = 8.5)
-plot(data.gene.lumi.n.q, what = 'sampleRelation')
-garbage <- dev.off()
-
-pdf(file = "all_sample_relations_mds_after_normalization_lumi.pdf", width = 11, height = 8.5)
-plot(data.gene.lumi.n.q, what = 'sampleRelation', method = "mds")
-garbage <- dev.off()
 
 # To annotate Illumina IDs
 idsTosymbols.lumi = as.matrix(toTable(illuminaHumanv4ENTREZID))

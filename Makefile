@@ -28,7 +28,7 @@ stage-1: setup-dirs generate-chip-list copy-raw-data
 
 stage-2: combine-qc combine-qc-average run-sample-filter copy-filtered-data
 
-stage-3: run-approach-a-step-1 run-method-n-step-1
+stage-3: run-method-n-step-1 run-approach-a-step-1
 
 stage-4: combine-expression
 
@@ -60,6 +60,7 @@ combine-qc-average:
 
 combine-expression:
 	bin/util/combine-expression
+
 
 run-sample-filter:
 	bin/run-sample-filter $$(pwd)/tmp/work/BeadArray_qc.R/combined raw-qc-details.txt
