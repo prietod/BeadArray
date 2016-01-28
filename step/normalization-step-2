@@ -13,6 +13,7 @@ script_prefixes="
 
 $BASE/bin/util/transform-cols-added \
   /hiidata/projects/BeadArray/cols_added.tsv \
+  /hiidata/teddy/data/jinfiniti/gene_expression/map_info.txt \
   $BASE/tmp/work/all/exclude-data-filtered.txt \
   > $BASE/tmp/work/all/BeadArray_phenotype_details.txt
 
