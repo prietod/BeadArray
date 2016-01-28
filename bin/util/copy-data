@@ -21,6 +21,10 @@ filter_excluded() {
   local filter_file=${1}
 }
 
+path_is_absolute() {
+  echo $1 | grep -q '^/'
+}
+
 [[ $# -ne 4 ]] && usage
 
 chip_list_file=${1}
@@ -49,7 +53,11 @@ if [[ -n "${chip_barcode_list}" ]]; then
   for chip_barcode in ${chip_barcode_list}; do
     mkdir -p ${dest_dir}/${chip_barcode}
     for file in $( grep "/${chip_barcode}_" ${find_tmp_file}); do
-      /bin/ln -s $BASE/${file} ${dest_dir}/${chip_barcode}/$( basename ${file} )
+      if path_is_absolute ${file}; then
+        /bin/ln -s ${file} ${dest_dir}/${chip_barcode}/$( basename ${file} )
+      else
+        /bin/ln -s $BASE/${file} ${dest_dir}/${chip_barcode}/$( basename ${file} )
+      fi
     done
   done
 fi

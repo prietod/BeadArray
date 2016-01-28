@@ -6,7 +6,6 @@ import sys
 
 data = {}
 header = []
-last_len = 'start'
 
 for filename in fileinput.input():
 
@@ -34,14 +33,6 @@ for primary_key in sorted(data.iterkeys()):
     line = [ primary_key ]
     line.append(data[primary_key]['secondary_key'])
     line.extend(data[primary_key]['values'])
-    line_len = len(line)
-
-    if last_len != 'start' and line_len != last_len:
-      sys.stderr.write("Line length does not match:")
-      sys.stderr.write('\t'.join(line))
-      sys.exit(1)
-    else:
-      last_len = line_len
 
     print('\t'.join(line))
 
