@@ -48,7 +48,7 @@ data.pheno <- read.table(file = "BeadArray_phenotype_details.txt", sep = "\t", h
 # To read data for lumi
 data.gene.lumi <- lumiR("wo_control_expression_lumi.txt", sep = "\t", detectionTh = 0.01, na.rm = TRUE, convertNuID = FALSE, lib.mapping = NULL, dec = '.', parseColumnName = FALSE, checkDupId = TRUE, QC = TRUE, columnNameGrepPattern = list(exprs = 'AVG_Signal', se.exprs = 'BEAD_STDEV', detection = 'Detection Pval', beadNum = 'Avg_NBEADS'), inputAnnotation = TRUE, annotationColumn = c('Entrez_ID'))
 controlFile.lumi <- "control_expression_lumi.txt"
-data.control.lumi <- addControlData2lumi(controlFile.lumi, data.gene.lumi)
+data.control.lumi <- addControlData2lumi((getControlData(controlFile.lumi, sep = "\t")), data.gene.lumi)
 
 # To perform variance stabilizing transformation
 data.gene.lumi.t <- suppressWarnings(lumiT(data.gene.lumi, method = "vst", verbose = FALSE))
