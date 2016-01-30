@@ -99,12 +99,9 @@ test-transform-cols-added:
 		test/transform-cols-added/exclude-data-filtered.txt > tmp/test/transform-cols-added/output.tsv
 	diff tmp/test/transform-cols-added/output.tsv test/transform-cols-added/expected.tsv
 
-test-fix-data:
-	mkdir -p tmp/test/combine-expression
-	for n in 123 456 789; do \
-		echo test/fix-data/input/$${n}-control-expression.txt; done \
-		| bin/util/fix-data > tmp/test/combined-control-expression.tsv
-	diff tmp/test/combined-control-expression.tsv test/fix-data/expected/combined-control-expression.tsv
+test:
+	bin/test/combine-expression-data
+
 
 q:
 	squeue -p$(slurm_partition) --user $$LOGNAME

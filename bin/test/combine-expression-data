@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+BASE="$(readlink -f $(readlink -f $(dirname "${BASH_SOURCE}")/../..))"
+
+echo_files() {
+  local mode=$1
+  for f in ${BASE}/test/combine-expression-data/${mode}/input-*;
+    do echo $f
+  done
+}
+
+tmp_dir=${BASE}/tmp/test
+
+mkdir -p ${tmp_dir}
+
+for mode in default lumi; do
+  output=${tmp_dir}/control-expression-data-${mode}.tsv
+  expected=${BASE}/test/combine-expression-data/${mode}/expected-combined.tsv
+
+  echo_files ${mode} | ${BASE}/bin/util/combine-expression-data ${mode} > ${output}
+
+  echo diff ${output} ${expected}
+       diff ${output} ${expected}
+done
+

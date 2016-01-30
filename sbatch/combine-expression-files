@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+script=$1
+mode=$2
+file=$3
+
+
+find ${BASE}/tmp/work/${script}/chip -name "*[0-9]_${file}" \
+  | ${BASE}/bin/util/combine-expression-data ${mode} \
+  | grep -v '\<NA\>' > ${BASE}/tmp/work/${script}/combined/${file}

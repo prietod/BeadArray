@@ -137,7 +137,7 @@ n_donor.1.lumi = 0
 for (donor.1.info.lumi in 1:dim(as.matrix(data.gene.lumi.n.q))[2]) {
 
   # To filter out samples based on donor information
-  if ((!is.na(as.character(data.pheno$Donor_Number[donor.1.info.lumi]))) & ((as.character(data.pheno$Donor_Number[donor.1.info.lumi])) == as.character("Donor 1"))) {
+  if ((!is.na(as.character(data.pheno$Donor_Number[donor.1.info.lumi]))) & ((as.character(data.pheno$Donor_Number[donor.1.info.lumi])) == as.character("Donor-1"))) {
       n_donor.1.lumi = n_donor.1.lumi + 1
       donor.1.lumi[n_donor.1.lumi, 1] = as.character(as.matrix(data.pheno)[donor.1.info.lumi, 1])
   }
@@ -152,7 +152,7 @@ n_donor.2.lumi = 0
 for (donor.2.info.lumi in 1:dim(as.matrix(data.gene.lumi.n.q))[2]) {
 
   # To filter out samples based on donor information
-  if ((!is.na(as.character(data.pheno$Donor_Number[donor.2.info.lumi]))) & ((as.character(data.pheno$Donor_Number[donor.2.info.lumi])) == as.character("Donor 2"))) {
+  if ((!is.na(as.character(data.pheno$Donor_Number[donor.2.info.lumi]))) & ((as.character(data.pheno$Donor_Number[donor.2.info.lumi])) == as.character("Donor-2"))) {
     n_donor.2.lumi = n_donor.2.lumi + 1
     donor.2.lumi[n_donor.2.lumi, 1] = as.character(as.matrix(data.pheno)[donor.2.info.lumi, 1])
   }

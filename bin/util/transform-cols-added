@@ -24,7 +24,7 @@ with open(map_info_file) as f:
         donor_number = map_info_columns[3]
         array_id = map_info_columns[6] + '_' + map_info_columns[7]
         if donor_number != '':
-            map_info_data[array_id] = donor_number
+            map_info_data[array_id] = donor_number.replace(' ', '-') # remove spaces as R does not like them in read.table()
 
 with open(exclude_file) as f:
     for line in f.readlines():

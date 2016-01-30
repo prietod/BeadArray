@@ -130,7 +130,7 @@ n_donor.1 = 0
 for (donor.1.info in 1:dim(as.matrix(exprs(data.gene.norm)))[2]) {
 
   # To filter out samples based on donor information
-  if ((!is.na(as.character(data.pheno$Donor_Number[donor.1.info]))) & ((as.character(data.pheno$Donor_Number[donor.1.info])) == as.character("Donor 1"))) {
+  if ((!is.na(as.character(data.pheno$Donor_Number[donor.1.info]))) & ((as.character(data.pheno$Donor_Number[donor.1.info])) == as.character("Donor-1"))) {
       n_donor.1 = n_donor.1 + 1
       donor.1[n_donor.1, 1] = as.character(as.matrix(data.pheno)[donor.1.info, 1])
   }
@@ -145,7 +145,7 @@ n_donor.2 = 0
 for (donor.2.info in 1:dim(as.matrix(exprs(data.gene.norm)))[2]) {
 
   # To filter out samples based on donor information
-  if ((!is.na(as.character(data.pheno$Donor_Number[donor.2.info]))) & ((as.character(data.pheno$Donor_Number[donor.2.info])) == as.character("Donor 2"))) {
+  if ((!is.na(as.character(data.pheno$Donor_Number[donor.2.info]))) & ((as.character(data.pheno$Donor_Number[donor.2.info])) == as.character("Donor-2"))) {
     n_donor.2 = n_donor.2 + 1
     donor.2[n_donor.2, 1] = as.character(as.matrix(data.pheno)[donor.2.info, 1])
   }

@@ -1,0 +1,73 @@
+#!/usr/bin/env python
+#
+# combine-expression-data [lumi]
+#
+# Reads tab-separated <chip>_control_expression.txt and <chip>_wo_control_expression.txt
+# files and combines them based on a primary key. The filelist must be sent via <STDIN>.
+#
+# By default, the header format used to combine files is:
+#
+# Field-1:             Probe_ID (Primary Key)
+# Field-2:             Entrez_ID
+# Field-3 to Field-N:  Column Descriptions
+#
+# If a command-line argument of "lumi" is provided, this alternate header format is used:
+#
+# Field-1:             controlType
+# Field-2:             ProbeID (Primary Key)
+# Field-3 to Field-N:  Column Descriptions
+#
+#--------------------------------------------------------------------------------------------
+
+import sys
+
+if len(sys.argv) == 2 and sys.argv[1]  == 'lumi':
+  primary_key_field = 1
+  secondary_info_field = 0
+  header_0 = 'controlType'
+  header_1 = 'ProbeID'
+else:
+  primary_key_field = 0
+  secondary_info_field = 1
+  header_0 = 'Probe_ID'
+  header_1 = 'Entrez_ID'
+
+
+data = {}
+header = []
+
+for filename in sys.stdin.readlines():
+
+    with open(filename.rstrip('\n')) as f:
+        line = f.readline()
+        header.extend(line.rstrip('\n').split('\t')[2:])
+
+        for line in f.readlines():
+            fields = line.rstrip('\n').split('\t')
+            primary_key = fields[primary_key_field]
+            secondary_info = fields[secondary_info_field]
+            values = fields[2:]
+
+            if primary_key not in data:
+                data[primary_key] = {
+                    'secondary_info': secondary_info,
+                    'values': []
+                }
+
+            data[primary_key]['values'].extend(values)
+
+header.insert(0, header_0)
+header.insert(1, header_1)
+
+print('\t'.join(header))
+
+for primary_key in sorted(data.iterkeys()):
+    line = [None, None]
+
+    line[primary_key_field] = primary_key
+    line[secondary_info_field] = data[primary_key]['secondary_info']
+
+    line.extend(data[primary_key]['values'])
+
+    print('\t'.join(line))
+
