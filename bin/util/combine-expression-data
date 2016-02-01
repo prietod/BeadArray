@@ -1,15 +1,17 @@
 #!/usr/bin/env python
 #
-# combine-expression-data [lumi]
+# combine-expression-data [lumi-wo|lumi]
 #
-# Reads tab-separated <chip>_control_expression.txt and <chip>_wo_control_expression.txt
-# files and combines them based on a primary key. The filelist must be sent via <STDIN>.
+# Reads tab-separated control_expression data for BeadArray Chips and combines them
+# into one file based on a primary key. The list of individual files is provided via <STDIN>.
 #
 # By default, the header format used to combine files is:
 #
 # Field-1:             Probe_ID (Primary Key)
 # Field-2:             Entrez_ID
 # Field-3 to Field-N:  Column Descriptions
+#
+# If a command-line argument of "lumi-wo" Field-1 Header will be changed from Probe_ID to ProbeID.
 #
 # If a command-line argument of "lumi" is provided, this alternate header format is used:
 #
@@ -21,17 +23,19 @@
 
 import sys
 
-if len(sys.argv) == 2 and sys.argv[1]  == 'lumi':
-  primary_key_field = 1
-  secondary_info_field = 0
-  header_0 = 'controlType'
-  header_1 = 'ProbeID'
-else:
-  primary_key_field = 0
-  secondary_info_field = 1
-  header_0 = 'Probe_ID'
-  header_1 = 'Entrez_ID'
+primary_key_field = 0
+secondary_info_field = 1
+header_0 = 'Probe_ID'
+header_1 = 'Entrez_ID'
 
+if len(sys.argv) == 2 and sys.argv[1] == 'lumi':
+    primary_key_field = 1
+    secondary_info_field = 0
+    header_0 = 'controlType'
+    header_1 = 'ProbeID'
+
+elif len(sys.argv) == 2 and sys.argv[1] == 'lumi-wo':
+    header_0 = 'ProbeID'
 
 data = {}
 header = []

@@ -15,7 +15,7 @@ expression_file_specs="
 default:control_expression.txt
 default:wo_control_expression.txt
 lumi:control_expression_lumi.txt
-lumi:wo_control_expression_lumi.txt
+lumi-wo:wo_control_expression_lumi.txt
 "
 
 for line in ${expression_file_specs}; do
