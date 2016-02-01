@@ -59,6 +59,7 @@ if [[ -n "${chip_barcode_list}" ]]; then
         /bin/ln -s $BASE/${file} ${dest_dir}/${chip_barcode}/$( basename ${file} )
       fi
     done
+    /bin/rmdir ${dest_dir}/${chip_barcode} 2>/dev/null # remove any blank directories
   done
 fi
 
