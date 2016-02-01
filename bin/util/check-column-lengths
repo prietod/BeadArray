@@ -1,0 +1,31 @@
+#!/usr/bin/env python2
+
+import sys
+
+filename = sys.argv[1]
+
+#filename = '/home/h/hparikh/projects/BeadArray/tmp/work/BeadArray_method_1_step_1.R/combined/wo_control_expression.txt'
+
+column_map = {}
+
+with open(filename) as f:
+    header = f.readline().rstrip('\n').split('\t')
+    header_columns = str(len(header))
+
+    for line in f.readlines():
+        fields = line.rstrip('\n').split('\t')
+        number_of_fields = str(len(fields))
+
+        if number_of_fields not in column_map:
+            column_map[number_of_fields] = 1
+        else:
+            column_map[number_of_fields] = column_map[number_of_fields] + 1
+
+print("")
+print("filename: " + filename)
+print("  header: " + header_columns)
+
+for key in sorted(column_map.iterkeys()):
+    print "          " + key + ": " + str(column_map[key])
+
+print("")

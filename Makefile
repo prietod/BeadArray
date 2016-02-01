@@ -61,7 +61,6 @@ combine-qc-average:
 combine-expression:
 	bin/util/combine-expression
 
-
 run-sample-filter:
 	bin/run-sample-filter $$(pwd)/tmp/work/BeadArray_qc.R/combined raw-qc-details.txt
 	bin/run-sample-filter $$(pwd)/tmp/work/BeadArray_qc_average.R/combined raw-qc-details.txt
@@ -101,6 +100,14 @@ test-transform-cols-added:
 
 test:
 	bin/test/combine-expression-data
+
+check-column-lengths:
+	for script in BeadArray_approach_a_step_1.R BeadArray_method_{1..5}_step_1.R; do \
+		bin/util/check-column-lengths tmp/work/$${script}/combined/control_expression.txt; \
+		bin/util/check-column-lengths tmp/work/$${script}/combined/wo_control_expression.txt; \
+		bin/util/check-column-lengths tmp/work/$${script}/combined/control_expression_lumi.txt; \
+		bin/util/check-column-lengths tmp/work/$${script}/combined/wo_control_expression_lumi.txt; \
+	done
 
 
 q:
