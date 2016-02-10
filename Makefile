@@ -117,7 +117,7 @@ check-column-lengths:
 
 
 q:
-	squeue --user $$LOGNAME --format="%.12i %32j %.8T %.10M %.9l %.6D %20R %E"
+	squeue --user $$LOGNAME --format="%.18i %32j %.8T %.10M %.9l %.6D %20R %E"
 	@#squeue -p$(slurm_partition) --user $$LOGNAME --format="%.18i %.9P %40j %.8u %.8T %.10M %.9l %.6D %R %E"
 
 test-array-job:

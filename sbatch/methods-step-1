@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+set -x
+
+source ${BASE}/lib/env.sh
+source ${BASE}/lib/util.sh
+
+get_chip_barcode() {
+  sed -n "${SLURM_ARRAY_TASK_ID}p" ${chip_list}
+}
+
+script=$1
+data_dir=$2
+work_dir=$3
+chip_list=$4
+
+chip_barcode=$( get_chip_barcode )
+
+data_dir=${data_dir}/${chip_barcode}
+chip_work_dir=${work_dir}/chip/${chip_barcode}
+
+mkdir -p ${chip_work_dir}
+
+${BASE}/bin/run-R ${script} ${data_dir} ${chip_work_dir}
+
+exit $?
