@@ -15,6 +15,8 @@ sbatch-submit() {
   [[ -f ${script} ]] || error_exit "Script '${script}' not found."
   [[ -x ${script} ]] || error_exit "Script '${script}' not executable."
 
+  set -x
+
   job_id=$( sbatch \
              --job-name=${job_name} \
              --output=${log_spec} \
@@ -24,6 +26,10 @@ sbatch-submit() {
   ensure_dir ${SLURM_STATE_DIR}
 
   echo ${job_id} > ${SLURM_STATE_DIR}/${job_name}-job_id.txt
+
+  sleep 1
+
+  set +x
 }
 
 run() {
