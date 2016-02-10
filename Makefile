@@ -22,6 +22,12 @@ all:
 	@echo "qc-average-clean-all"
 	@echo "test-fix-data"
 
+log:
+	@sacct -S $$(date -d '24 hours ago' '+%FT%T' ) --format "jobid%-16,start,jobname%-50,elapsed,state"
+
+clean-tmp:
+	-mkdir -p .tmp && mv tmp/* .tmp && rm -rf .tmp &
+
 stage-1: setup-dirs generate-chip-list copy-raw-data
 	cat $(chip_list) | bin/slurm-submit-array bin/run-R-chips-qc code/BeadArray_qc.R
 	cat $(chip_list) | bin/slurm-submit-array bin/run-R-chips-qc code/BeadArray_qc_average.R
@@ -111,7 +117,8 @@ check-column-lengths:
 
 
 q:
-	squeue -p$(slurm_partition) --user $$LOGNAME
+	squeue --user $$LOGNAME --format="%.12i %32j %.8T %.10M %.9l %.6D %20R %E"
+	@#squeue -p$(slurm_partition) --user $$LOGNAME --format="%.18i %.9P %40j %.8u %.8T %.10M %.9l %.6D %R %E"
 
 test-array-job:
 	printf "foo\nbar\n" | SUBMIT_RANDOM_SECONDS="1" bin/slurm-submit-array bin/test-array-job

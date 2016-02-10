@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+
+set -x
+
+source ${BASE}/lib/env.sh
+source ${BASE}/lib/util.sh
+
+dirs="
+${WORK_DIR}/raw-qc/combined
+${WORK_DIR}/raw-qc-average/combined
+"
+
+exclude_sample_list="exclude_sample_list.txt"
+
+for dir in ${dirs}; do sed -n '2,$p' ${dir}/${exclude_sample_list} | awk '{ print $1 }'; done \
+  | sort -u > ${EXCLUDE_ALL_PATTERN_FILE}
+
+{ cat ${EXCLUDE_ALL_PATTERN_FILE};
+  ${BASE}/bin/util/generate-chip-list ${JINFINITI_DATA_DIR}/map_info.txt donor-array; } \
+  | sort -u > ${EXCLUDE_DONOR_PATTERN_FILE}
+
+{ cat ${EXCLUDE_ALL_PATTERN_FILE};
+  ${BASE}/bin/util/generate-chip-list ${JINFINITI_DATA_DIR}/map_info.txt non-donor-array; } \
+  | sort -u > ${EXCLUDE_NON_DONOR_PATTERN_FILE}
+
+/bin/mkdir -vp \
+  ${FILTERED_DATA_DIR}/all \
+  ${FILTERED_DATA_DIR}/donor \
+  ${FILTERED_DATA_DIR}/non-donor
+
+${BASE}/bin/util/copy-data \
+  ${RAW_CHIP_LIST} ${EXCLUDE_ALL_PATTERN_FILE} ${RAW_DATA_DIR} ${FILTERED_DATA_DIR}/all
+
+${BASE}/bin/util/copy-data \
+  ${RAW_CHIP_LIST} ${EXCLUDE_DONOR_PATTERN_FILE} ${RAW_DATA_DIR} ${FILTERED_DATA_DIR}/non-donor
+
+${BASE}/bin/util/copy-data \
+  ${RAW_CHIP_LIST} ${EXCLUDE_NON_DONOR_PATTERN_FILE} ${RAW_DATA_DIR} ${FILTERED_DATA_DIR}/donor
+

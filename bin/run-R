@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 
-BASE="$(readlink -f $(readlink -f $(dirname "${BASH_SOURCE}")/..))"
+export BASE="${BASE:-$(readlink -f $(dirname "${BASH_SOURCE}")/..)}"
+
+source ${BASE}/lib/env.sh
+source ${BASE}/lib/util.sh
 
 #---------------------------------------------------------------
 # main
@@ -17,4 +20,10 @@ module load apps/R/${R_VERSION:-3.2.3}
 
 R --slave --quiet --no-restore --no-save --args "$@" < ${script}
 
-exit $?
+rc=$?
+
+echo
+echo "------------------------------------------------------------------------------------------"
+echo "${script} - exit code: ${rc}"
+
+exit ${rc}

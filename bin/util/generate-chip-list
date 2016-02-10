@@ -8,7 +8,7 @@ error() { echo "$ME - Error: "$@"" 1>&2; }
 error_exit() { error "$@"; exit 1; }
 
 usage() {
-  echo "Usage: $ME <map_info>" 1>&2
+  echo "Usage: $ME <map_info> [all|donor|non-donor]" 1>&2
   exit 1
 }
 
@@ -38,10 +38,33 @@ for f in $fields; do
   field_map[$f]=$((++n))
 done
 
-[[ $# != 1 ]] && usage
+[[ $# != 1 && $# != 2 ]] && usage
 
 map_info=${1}
 
+mode=${2:-all}
+
 [[ -f ${map_info} ]] || error_exit "map_info file '${map_info}' does not exist."
 
-strip_header < ${map_info} | awk -F'\t' "{ print \$${field_map[chip_barcode]} }" | sort -u
+case ${mode} in
+  all)
+    strip_header < ${map_info} | awk -F'\t' "{ print \$${field_map[chip_barcode]} }"
+  ;;
+
+  all-array)
+    strip_header < ${map_info} \
+      | awk -F'\t' "{ print \$${field_map[chip_barcode]}\"_\"\$${field_map[array]} }"
+  ;;
+
+  donor-array)
+    strip_header < ${map_info} \
+      | awk -F'\t' "{ if (\$${field_map[donor_number]} != \"\") print \$${field_map[chip_barcode]}\"_\"\$${field_map[array]} }"
+  ;;
+
+  non-donor-array)
+    strip_header < ${map_info} \
+      | awk -F'\t' "{ if (\$${field_map[donor_number]} == \"\") print \$${field_map[chip_barcode]}\"_\"\$${field_map[array]} }"
+  ;;
+
+esac | sort -u
+

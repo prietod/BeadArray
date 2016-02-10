@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+set -x
+
+source ${BASE}/lib/env.sh
+source ${BASE}/lib/util.sh
+
+for n in raw-qc raw-qc-average; do
+  ensure_dir ${WORK_DIR}/${n}/combined
+
+  # Add header
+  cat ${BASE}/static/qc_header.txt > ${WORK_DIR}/${n}/combined/raw-qc-details.txt
+
+  # Combine
+  find ${WORK_DIR}/${n}/chip -name '*_raw_qc_details.txt' \
+    | xargs -n1 -I{} cat {} >> ${WORK_DIR}/${n}/combined/raw-qc-details.txt
+done
