@@ -1,7 +1,8 @@
-# This script is written by Dr. Hemang Parikh as on January 26, 2016
-# The Health Informatics Institute (HII) at the University of South Florida
+# This script is written by Dr. Hemang Parikh as on February 04, 2016
+# The Health Informatics Institute (HII) at the University of South Florida, Tampa, FL
 
-# To use the medianBackground instead of illuminaBackground
+# To use the medianBackground instead of illuminaBackground for Illumina BeadArray technology
+# To perform QC based on several box plots for each sample and generate a matrix of several QC variables
 
 # To import beadarray and illuminaHumanv4.db libraries
 suppressMessages(library(beadarray))
@@ -50,6 +51,7 @@ args <- commandArgs(trailingOnly = TRUE)
 raw_data_dir <- toString(args[1])
 raw_qc_dir <- toString(args[2])
 
+# To create a directory manually
 # dir.create(paste(getwd(), "/raw_qc/", sep = ""), showWarnings = TRUE, recursive = FALSE, mode = "0777")
 
 # To read the data using readIllumina(), which will extract the intensities from the .txt, .locs and also TIFF files
@@ -59,10 +61,10 @@ beadarray.data <- readIllumina(dir = raw_data_dir, useImages = TRUE, illuminaAnn
 # A more flexible way to obtain transformed per-bead data from a beadLevelData object is to define a transformation function that takes as arguments the beadLevelData object and an array index. The function then manipulates the data
 # in the desired manner and returns a vector the same length as the number of beads on the array. Many of the plotting and quality assessment functions within beadarray take such a function as one of their arguments. By using such a system,
 # beadarray provides a great deal of flexibility over exactly how the data is analyzed
-# In addition to the logGreenChannelTransform function shown above, beadarray provides predefined functions for extracting the green intensities on the unlogged scale (greenChannelTransform), analogous functions for two-channel data
+# In addition to the logGreenChannelTransform function shown below, beadarray provides predefined functions for extracting the green intensities on the unlogged scale (greenChannelTransform), analogous functions for two-channel data
 # (logRedChannelTransform, redChannelTransform), and functions for computing the log-ratio between channels (logRatioTransform). In each of the function, what = "Grn" can be used to input specific intensity channel values
 # log2(getBeadData(data, array = i, what = "GrnR")) function allows to select which channel of green to be used via what option
-# To define functions to have flexibility of choosing a type of GreenChannel
+# To define functions to have flexibilities of choosing a type of GreenChannels
 logGreenChannelTransformGrnR <- function(BLData, array, what) {
   x = getBeadData(BLData, array = array, what = "GrnR")
   return(log2(x))
@@ -80,11 +82,11 @@ greenChannelTransformGrnHulk <- function(BLData, array, what) {
 }
 
 # To store array names and numbers of beads
-array.names = as.matrix(sectionNames(beadarray.data))
-array.numBeads = as.matrix(numBeads(beadarray.data))
+array.names <- as.matrix(sectionNames(beadarray.data))
+array.numBeads <- as.matrix(numBeads(beadarray.data))
 
 # To list all the TIFF files
-tiff.Files = list.files(path = raw_data_dir, pattern = "*.tif")
+tiff.Files <- list.files(path = raw_data_dir, pattern = "*.tif")
 
 # To store green intensities for all the array which will be used for the box plot
 array.GreenInt <- matrix(, nrow = max(array.numBeads), ncol = length(array.names))
@@ -156,8 +158,8 @@ pdf(file = paste(sapply(strsplit(tiff.Files[1], "_"), "[", 1), "boxplot.pdf", se
 boxplot(beadarray.data, transFun = logGreenChannelTransformGrnR, col = "green", ylab = expression(log[2](intensity)), las = 2, outline = FALSE, main = sapply(strsplit(tiff.Files[1], "_"), "[", 1))
 garbage <- dev.off()
 
-# To store percentile values of log2 of number of beads, GreenChannel intensities percentiles, control probe detection function that returns the percentage of each control type that are significantly expressed above background level for
-# all the array
+# To store percentile values of log2 of number of beads, GreenChannel intensities percentiles, control probe detection values based on the percentage of each control type that are significantly expressed above background level for
+# all the array. To store different QC variables
 array.qcvalues = matrix(, nrow = length(array.names), ncol = 65)
 
 # BASH performs three types of artifact detection in the style of the affmetrix-oriented Harsh-light package: Compact analysis identifies large clusters of outliers, where each outlying bead must be an immediate neighbor of another
@@ -200,10 +202,10 @@ for (j in 1:length(array.names)) {
   # Ratio of number of masked beads to total number of beads
   array.qcvalues[j, 15] = (BASHoutput$QC[[1]]/table(getBeadData(beadarray.data, what = "wts", array = j))[[2]])
 
-  # The Extended score returned by BASH is an indication of the level of variability across the entire surface of the chip. If this value is large it may indicate a significant gradient effect in the intensities
+  # The extended score returned by BASH is an indication of the level of variability across the entire surface of the chip. If this value is large it may indicate a significant gradient effect in the intensities
   array.qcvalues[j, 16] = BASHoutput$QC[[2]]
 
-  # The Extended score returned by BASH in the previous use case gives an indication of the level of variability across the entire surface of the chip. If this value is large it may indicate a significant gradient effect in the intensities
+  # The extended score returned by BASH in the previous use case gives an indication of the level of variability across the entire surface of the chip. If this value is large it may indicate a significant gradient effect in the intensities
   # The HULK function can be used to smooth out any gradients that are present
   # HULK uses information about neighboring beads, but rather than mask them out as in BASH, it adjusts the log-intensities by the weighted average of residual values within a local neighborhood
   HULKoutput <- suppressMessages(HULK(beadarray.data, array = j, weightName = "wts", transFun = logGreenChannelTransformGrnR, outlierFun = illuminaOutlierMethod))
@@ -281,7 +283,8 @@ array.qcvalues[, 35] = as.matrix(qcReport)[, 14]
 
 
 # All observations are extracted, transformed and then grouped together according to their ArrayAddressID. Outliers are removed and the mean and standard deviation of the remaining beads are calculated
-# The default options of summarize apply a log2 transformation, remove outliers using the Illumina 3 M.A.D cut-off and report the mean and standard deviation for each bead type
+# The default options of summarize apply unlogged transformation, remove outliers using the Illumina 3 M.A.D cut-off and report the mean and standard deviation for each bead type
+# To use GrnHulk data instead of Grn
 grnchannel.unlogged <- new("illuminaChannel", transFun = greenChannelTransformGrnHulk, outlierFun = illuminaOutlierMethod, exprFun = function(x) mean(x, na.rm = TRUE), varFun = function(x) sd(x, na.rm = TRUE), channelName = "G")
 grnchannel.logged <- new("illuminaChannel", transFun = logGreenChannelTransform, outlierFun = illuminaOutlierMethod, exprFun = function(x) mean(x, na.rm = TRUE), varFun = function(x) sd(x, na.rm = TRUE), channelName = "log2G")
 datasumm.unlogged <- summarize(BLData = beadarray.data, useSampleFac = FALSE, weightNames = "wts", removeUnMappedProbes = TRUE, channelList = list(grnchannel.unlogged))
@@ -378,4 +381,3 @@ Detection(datasumm.unlogged) <- det
 
 # To write an entire QC table
 write.table(array.qcvalues, file = paste(sapply(strsplit(tiff.Files[1], "_"), "[", 1), "raw_qc_details.txt", sep = "_"), append = FALSE, quote = FALSE, sep = "\t", eol = "\n", na = "NA", dec = ".", row.names = array.names, col.names = FALSE)
-

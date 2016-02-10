@@ -1,7 +1,8 @@
-# This script is written by Dr. Hemang Parikh as on January 26, 2016
-# The Health Informatics Institute (HII) at the University of South Florida
+# This script is written by Dr. Hemang Parikh as on February 04, 2016
+# The Health Informatics Institute (HII) at the University of South Florida, Tampa, FL
 
-# To make a list of exclude samples based on cutoff from different variables
+# To make a list of exclude samples based on cutoff from different QC variables
+
 # To load library
 # library("doBy")
 # library("pracma")
@@ -22,7 +23,7 @@ setwd(data_dir)
 
 # To filter out samples based on the different QC variables
 # To read the qc data from a text file
-array.qc.details = read.table(file = raw_qc_file, sep = "\t", header = TRUE)
+array.qc.details <- read.table(file = raw_qc_file, sep = "\t", header = TRUE)
 
 # To run a for loop to generate different plots
 # To create a box plots for different QC variables for each column
@@ -60,6 +61,7 @@ for (p in 2:dim(as.matrix(array.qc.details))[2]) {
 garbage <- dev.off()
 
 # To create a box plots for gender specific probes (three probes are not that reliable)
+# Gender specific probes are not useful for QC as there are only three probes and variability is very high with each of the group
 # pdf(file = "all_raw_qc_details_gender_boxPlot.pdf", width = 11, height = 8.5)
 
 # boxplot(array.qc.details$Gender_log2_mean ~ array.qc.details$Sex, main = "BoxPlot", ylab = "Gender_log2_mean")
@@ -85,7 +87,7 @@ n_pass_count = 1
 # To run a for loop for all the samples
 for (q in 1:dim(as.matrix(array.qc.details))[1]) {
 
-  # To filter out samples based on having percentage of detection probes values < 20
+  # To filter out samples based on having percentage of detection probes values < 0.20
   if (as.numeric(array.qc.details$Percent_detect_probes[q]) < 0.20) {
     array.qc.filter[n_filter_count, 1] = array.qc.details$Array_ID[q]
     array.qc.filter[n_filter_count, 2] = "Low percentage of detected probes"
@@ -149,6 +151,7 @@ for (q in 1:dim(as.matrix(array.qc.details))[1]) {
     n_filter_count = n_filter_count + 1
   }
 
+  # Gender specific probes are not useful for QC as there are only three probes and variability is very high with each of the group
   # To filter out samples based on female cutoff > female.cutoff
 #   else if ((!is.na(as.character(array.qc.details$Sex[q]))) & (strcmp(as.character(array.qc.details$Sex[q]), "Female")) & (as.numeric(array.qc.details$Gender_log2_mean[q]) > female.cutoff)) {
 #     array.qc.filter[n_filter_count, 1] = array.qc.details$Array_ID[q]
@@ -165,12 +168,12 @@ for (q in 1:dim(as.matrix(array.qc.details))[1]) {
 #     n_filter_count = n_filter_count + 1
 #   }
 
-  # To pass to next sample
+  # To pass to next sample; to calculate total numbers of passed samples
   else {
     n_pass_count = n_pass_count + 1
   }
 
 }
 
-# To write a table with samples ID to be removed with quality information
+# To write a table with samples IDs to be removed with quality information
 write.table(array.qc.filter, file = "exclude_sample_list.txt", append = FALSE, quote = FALSE, sep = "\t", eol = "\n", na = "NA", dec = ".", row.names = FALSE, col.names = c("Array_ID", "Quality_info", "Quality_value"))

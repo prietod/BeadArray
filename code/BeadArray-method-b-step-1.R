@@ -1,10 +1,11 @@
-# This script is written by Dr. Hemang Parikh as on January 26, 2016
-# The Health Informatics Institute (HII) at the University of South Florida
+# This script is written by Dr. Hemang Parikh as on February 04, 2016
+# The Health Informatics Institute (HII) at the University of South Florida, Tampa, FL
 
-# Illumina average local background is performed
-# Summarization is performed with un-log transformation
+# Median local background is performed
+# No BASH and HULK methods are used for beads artifact detection
+# Summarization is performed with un-log transformation because neqc requires gene expression values to be un-logged
 # Outliers are removed using the Illumina 3 M.A.D cut-off
-# The median and standard errors for each bead type are reported
+# The mean and standard deviation for each bead type are reported for summarization
 
 # To import beadarray and illuminaHumanv4.db libraries
 suppressMessages(library(beadarray))
@@ -62,25 +63,21 @@ beadarray.data <- readIllumina(dir = filter_data_dir, useImages = TRUE, illumina
 # A more flexible way to obtain transformed per-bead data from a beadLevelData object is to define a transformation function that takes as arguments the beadLevelData object and an array index. The function then manipulates the data
 # in the desired manner and returns a vector the same length as the number of beads on the array. Many of the plotting and quality assessment functions within beadarray take such a function as one of their arguments. By using such a system,
 # beadarray provides a great deal of flexibility over exactly how the data is analyzed
-# In addition to the logGreenChannelTransform function shown above, beadarray provides predefined functions for extracting the green intensities on the unlogged scale (greenChannelTransform), analogous functions for two-channel data
+# In addition to the logGreenChannelTransform function shown below, beadarray provides predefined functions for extracting the green intensities on the unlogged scale (greenChannelTransform), analogous functions for two-channel data
 # (logRedChannelTransform, redChannelTransform), and functions for computing the log-ratio between channels (logRatioTransform). In each of the function, what = "Grn" can be used to input specific intensity channel values
 # log2(getBeadData(data, array = i, what = "GrnR")) function allows to select which channel of green to be used via what option
-# To define functions to have flexibility of choosing a type of GreenChannel
-
+# To define functions to have flexibilities of choosing a type of GreenChannels
 greenChannelTransformGrnR <- function(BLData, array, what) {
   x = getBeadData(BLData, array = array, what = "GrnR")
   return(x)
 }
 
 # To store array names and numbers of beads
-array.names = as.matrix(sectionNames(beadarray.data))
-array.numBeads = as.matrix(numBeads(beadarray.data))
+array.names <- as.matrix(sectionNames(beadarray.data))
+array.numBeads <- as.matrix(numBeads(beadarray.data))
 
 # To list all the TIFF files
-tiff.Files = list.files(path = filter_data_dir, pattern = "*.tif")
-
-# To change the directory to result
-setwd(filter_result_dir)
+tiff.Files <- list.files(path = filter_data_dir, pattern = "*.tif")
 
 # To read each of the TIFF file separately
 for (i in 1:length(array.names)) {
@@ -93,8 +90,8 @@ for (i in 1:length(array.names)) {
   xcoords <- getBeadData(beadarray.data, array = i, what = "GrnX")
   ycoords <- getBeadData(beadarray.data, array = i, what = "GrnY")
 
-  # To calculate a robust measure of background for each array using average of the five lowest pixel values
-  Brob <- illuminaBackground(TIFF, cbind(xcoords, ycoords))
+  # To calculate a robust measure of background for each array using median of the five lowest pixel values
+  Brob <- medianBackground(TIFF, cbind(xcoords, ycoords))
   beadarray.data <- insertBeadData(beadarray.data, array = i, what = "GrnRB", Brob)
 
   # To calculate foreground values in the normal way
@@ -104,16 +101,26 @@ for (i in 1:length(array.names)) {
   IllF <- illuminaForeground(TIFF2, cbind(xcoords, ycoords))
   beadarray.data <- insertBeadData(beadarray.data, array = i, what = "GrnF", IllF)
 
-  # To subtract the average background values to get locally background corrected intensities
+  # To subtract the median background values to get locally background corrected intensities
   beadarray.data <- backgroundCorrectSingleSection(beadarray.data, array = i, fg = "GrnF", bg = "GrnRB", newName = "GrnR")
 
 }
 
-# All observations are extracted, transformed and then grouped together according to their ArrayAddressID. Outliers are removed and the median and standard errors of the remaining beads are calculated
-# The default options of summarize apply a un-log transformation, remove outliers using the Illumina 3 M.A.D cut-off and report the median and standard errors for each bead type
-grnchannel.unlogged <- new("illuminaChannel", transFun = greenChannelTransformGrnR, outlierFun = illuminaOutlierMethod, exprFun = function(x) median(x, na.rm = TRUE), varFun = function(x) mad(x, na.rm = TRUE), channelName = "G")
-datasumm.unlogged <- summarize(BLData = beadarray.data, useSampleFac = FALSE, channelList = list(grnchannel.unlogged))
+# Certain probes located on the Y chromosome are beneficial in discriminating the gender of samples in a population; these probes can be incorporated into a QC report
+# Make sure that probes are the same between Humanv4 vs. Humanv3
+cprof <- suppressMessages(makeControlProfile("Humanv4"))
+sexprof <- data.frame("ArrayAddress" = c("5270068", "1400139", "6860102"), "Tag" = rep("Gender", 3))
+cprof <- rbind(cprof, sexprof)
 
+# To summarize the control intensities for the each array, then tabulate the mean and standard deviation of all control probes on every array
+qcReport <- suppressMessages(makeQCTable(beadarray.data, controlProfile = cprof))
+beadarray.data <- insertSectionData(beadarray.data, what = "BeadLevelQC", data = qcReport)
+
+# All observations are extracted, transformed and then grouped together according to their ArrayAddressID. Outliers are removed and the mean and standard deviation of the remaining beads are calculated
+# The default options of summarize apply unlogged transformation, remove outliers using the Illumina 3 M.A.D cut-off and report the mean and standard deviation for each bead type
+# To use GrnR data instead of Grn
+grnchannel.unlogged <- new("illuminaChannel", transFun = greenChannelTransformGrnR, outlierFun = illuminaOutlierMethod, exprFun = function(x) mean(x, na.rm = TRUE), varFun = function(x) sd(x, na.rm = TRUE), channelName = "G")
+datasumm.unlogged <- summarize(BLData = beadarray.data, useSampleFac = FALSE, removeUnMappedProbes = TRUE, channelList = list(grnchannel.unlogged))
 
 # The detection score, or detection p-value is a standard measure for Illumina expression experiments, and can be viewed as an empirical estimate of the p-value for the null hypothesis that a particular probe in not expressed
 # These can be calculated for summarized data provided that the identity of the negative controls on the array is known using the function calculateDetection
@@ -121,6 +128,9 @@ det <- calculateDetection(datasumm.unlogged)
 
 # To store detection information
 Detection(datasumm.unlogged) <- det
+
+# To change the directory to results
+setwd(filter_result_dir)
 
 # To store gene expression values for all the array
 array.datasumm <- matrix(, nrow = dim(as.matrix(exprs(datasumm.unlogged)))[1], ncol = ((4*dim(as.matrix(exprs(datasumm.unlogged)))[2]) + 2))
