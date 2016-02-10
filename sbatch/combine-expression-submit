@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+
+set -x
+
+source ${BASE}/lib/env.sh
+source ${BASE}/lib/util.sh
+
+expression_file_specs="
+default:control_expression.txt
+default:wo_control_expression.txt
+lumi:control_expression_lumi.txt
+lumi-wo:wo_control_expression_lumi.txt
+"
+
+datasets="
+all
+donor
+non-donor
+"
+
+for dataset in ${datasets}; do
+  for method in ${METHODS}; do
+    for line in ${expression_file_specs}; do
+      mode=$(echo $line | awk -F: '{print $1}')
+      file=$(echo $line | awk -F: '{print $2}')
+
+      method_name="method-${method}-step-1-${dataset}"
+      job_name="combine-expression-${method_name}"
+      job_dir="${WORK_DIR}/${method_name}"
+
+      mkdir -p ${job_dir}/combined
+
+      sbatch-submit "${job_name}" \
+        "--mem=120G --cpus-per-task=4 --time=0-04:00:00" \
+        "${BASE}/sbatch/combine-expression" \
+          ${job_dir} \
+          ${mode} \
+          ${file}
+    done
+  done
+done

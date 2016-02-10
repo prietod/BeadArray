@@ -83,6 +83,14 @@ methods-step-1() {
     "${BASE}/sbatch/methods-step-1-submit"
 }
 
+combine-expression() {
+  local sbatch_args="--dependency=afterok:$(get_job_ids 'methods-step-1')"
+
+  sbatch-submit "combine-expression" \
+    "${sbatch_args} --mem=4G --cpus-per-task=1 --time=0-01:00:00" \
+    "${BASE}/sbatch/combine-expression-submit"
+}
+
 install-R-libs() {
   if ! [[ -d ${R_LIBS} ]]; then
     mkdir -p ${R_LIBS}
@@ -90,28 +98,67 @@ install-R-libs() {
   fi
 }
 
-#-------------------------------------------------------------------------
+#------------------------------------------------------------------------------------
 # Main
-#-------------------------------------------------------------------------
+#------------------------------------------------------------------------------------
 
-run "install-R-libs" # done
+#------------------------------------------------------------------------------------
+# Install supporting R libraries in $R_LIBS (bioconductor.org w/ lumi and beadarray)
+#------------------------------------------------------------------------------------
 
-run "generate-raw-chip-list" # done
+run "install-R-libs"
 
-run "copy-raw-data" # done
+#------------------------------------------------------------------------------------
+# Generate raw list of chips to copy
+#------------------------------------------------------------------------------------
 
-run "run-raw-qc" # done
+run "generate-raw-chip-list"
 
-run "combine-qc-details" # done
+#------------------------------------------------------------------------------------
+# Copy each chip into a raw data folder
+#------------------------------------------------------------------------------------
 
-run "sample-filter" # done
+run "copy-raw-data"
 
-run "copy-filtered-data" # done
+#------------------------------------------------------------------------------------
+# Run raw-qc and raw-qc-average R Scripts to determine quality
+#------------------------------------------------------------------------------------
 
-run "methods-step-1" # done
+run "run-raw-qc"
 
-exit 0
+#------------------------------------------------------------------------------------
+# Combine individual chip QC scores for each qc method into aggregate files
+#------------------------------------------------------------------------------------
 
-run "combine-expression-data" # all, donor, wo-donor
+run "combine-qc-details"
 
-run "run-methods-step-2"
+#------------------------------------------------------------------------------------
+# Run R script to generate a list of <chip>_<array> candidates to remove due to
+# qc scoring.
+#------------------------------------------------------------------------------------
+
+run "sample-filter"
+
+#------------------------------------------------------------------------------------
+# Copy over <chip>_<array> files which passed QC into all, donor, and non-donor
+# filtered data folders.
+#------------------------------------------------------------------------------------
+
+run "copy-filtered-data"
+
+#------------------------------------------------------------------------------------
+# Submit method-a-step1, method-b-step-1, etc. for all, donor, and non-donor filtered
+# data folders.
+#------------------------------------------------------------------------------------
+
+run "methods-step-1"
+
+#------------------------------------------------------------------------------------
+# Combine expression files for each chip for each method-a-step1, method-b-step-1,
+# etc. for all, donor, and non-donor filtered data folders.
+#------------------------------------------------------------------------------------
+
+run "combine-expression"
+
+#------------------------------------------------------------------------------------
+# run "run-methods-step-2"
