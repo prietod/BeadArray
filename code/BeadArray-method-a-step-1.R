@@ -54,8 +54,8 @@ args <- commandArgs(trailingOnly = TRUE)
 
 # To create three directories within for storing qc data and results
 filter_data_dir <- toString(args[1])
-filter_qc_dir <- toString(args[2])
-filter_result_dir <- toString(args[3])
+filter_result_dir <- toString(args[2])
+filter_qc_dir <- toString(args[3])
 
 # To read the data using readIllumina(), which will extract the intensities from the .txt, .locs and also TIFF files
 # Annotation from https://bioconductor.org/packages/release/data/annotation/html/illuminaHumanv4.db.html
