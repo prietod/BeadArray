@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+source ${BASE}/lib/env.sh
+source ${BASE}/lib/util.sh
+
+datasets="
+all
+donor
+non-donor
+"
+
+for dataset in ${datasets}; do
+  ${BASE}/bin/util/transform-cols-added \
+    /hiidata/projects/BeadArray/cols_added.tsv \
+    /hiidata/teddy/data/jinfiniti/gene_expression/map_info.txt \
+    ${WORK_DIR}/common/exclude-${dataset}.txt \
+  > ${WORK_DIR}/common/BeadArray_phenotype_details-${dataset}.txt
+done

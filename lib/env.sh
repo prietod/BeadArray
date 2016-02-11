@@ -17,7 +17,7 @@ setvar EXCLUDE_ALL_PATTERN_FILE       "$BASE/tmp/work/common/exclude-all.txt"
 setvar EXCLUDE_NON_DONOR_PATTERN_FILE "$BASE/tmp/work/common/exclude-non-donor.txt"
 setvar EXCLUDE_DONOR_PATTERN_FILE     "$BASE/tmp/work/common/exclude-donor.txt"
 
-setvar METHODS                        "$(echo {a..p})"
+setvar METHODS                        "${METHODS:-$(echo {a..p})}"
 
 setvar STATE_DIR                      "$BASE/tmp/state"
 setvar R_VERSION                      "3.2.3"

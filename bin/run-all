@@ -5,8 +5,13 @@ export BASE="$(readlink -f $(dirname "${BASH_SOURCE}")/..)"
 source ${BASE}/lib/env.sh
 source ${BASE}/lib/util.sh
 
-# Generate a simple list of chip barcodes from the metadata file provided by Jinifiti
-#
+install-R-libs() {
+  if ! [[ -d ${R_LIBS} ]]; then
+    mkdir -p ${R_LIBS}
+    ${BASE}/bin/run-R ${BASE}/bin/util/install-R-libs.R
+  fi
+}
+
 generate-raw-chip-list() {
   ensure_dir $(dirname ${RAW_CHIP_LIST})
   if [[ "$TEST_MODE" == 'true' ]]; then
@@ -91,11 +96,12 @@ combine-expression() {
     "${BASE}/sbatch/combine-expression-submit"
 }
 
-install-R-libs() {
-  if ! [[ -d ${R_LIBS} ]]; then
-    mkdir -p ${R_LIBS}
-    ${BASE}/bin/run-R ${BASE}/bin/util/install-R-libs.R
-  fi
+phenotype-details() {
+  local sbatch_args="--dependency=afterok:$(get_job_ids 'combine-expression')"
+
+  sbatch-submit "phenotype-details" \
+    "${sbatch_args} --mem=32G --cpus-per-task=2 --time=0-01:00:00" \
+    "${BASE}/sbatch/transform-cols-added"
 }
 
 #------------------------------------------------------------------------------------
@@ -109,7 +115,7 @@ install-R-libs() {
 run "install-R-libs"
 
 #------------------------------------------------------------------------------------
-# Generate raw list of chips to copy
+# Generate a simple list of chip barcodes from the metadata file provided by Jinifiti
 #------------------------------------------------------------------------------------
 
 run "generate-raw-chip-list"
@@ -161,4 +167,11 @@ run "methods-step-1"
 run "combine-expression"
 
 #------------------------------------------------------------------------------------
-# run "run-methods-step-2"
+# Generate phenotype_details files for all, donor, and non-donor for methods-step-2
+#------------------------------------------------------------------------------------
+
+run "phenotype-details"
+
+#------------------------------------------------------------------------------------
+# run "methods-step-2"
+
