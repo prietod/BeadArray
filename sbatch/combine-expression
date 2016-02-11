@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-work_dir=$1
+job_dir=$1
 mode=$2
 file=$3
 
-find ${work_dir}/chip -name "*[0-9]_${file}" \
+find ${job_dir}/chip -name "*[0-9]_${file}" \
   | ${BASE}/bin/util/combine-expression-data ${mode} \
-  | grep -v '\<NA\>' > ${work_dir}/combined/${file}
+  | grep -v '\<NA\>' > ${job_dir}/combined/${file}
