@@ -16,11 +16,12 @@ chip_list=$4
 
 chip_barcode=$( get_chip_barcode )
 
+chip_dir=${data_dir}/${chip_barcode}
 results_dir=${job_dir}/chip/${chip_barcode}/results
 qc_dir=${job_dir}/chip/${chip_barcode}/qc
 
 mkdir -p ${results_dir} ${qc_dir}
 
-${BASE}/bin/run-R ${script} ${data_dir} ${results_dir} ${qc_dir} # qc_dir is only implemented in method-a currently
+${BASE}/bin/run-R ${script} ${chip_dir} ${results_dir} ${qc_dir} # qc_dir is only implemented in method-a currently
 
 exit $?

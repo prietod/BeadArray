@@ -47,7 +47,7 @@ run-raw-qc() {
 }
 
 combine-qc-details() {
-  local sbatch_args="--dependency=afterok:$(get_job_ids 'raw-qc' 'raw-qc-average')"
+  [[ -z "$DEP_OFF" ]] && local sbatch_args="--dependency=afterok:$(get_job_ids 'raw-qc' 'raw-qc-average')"
 
   sbatch-submit "combine-qc-details" \
     "${sbatch_args} --mem=16G --cpus-per-task=2 --time=0-01:00:00" \
@@ -55,7 +55,7 @@ combine-qc-details() {
 }
 
 sample-filter() {
-  local sbatch_args="--dependency=afterok:$(get_job_ids 'combine-qc-details')"
+  [[ -z "$DEP_OFF" ]] && local sbatch_args="--dependency=afterok:$(get_job_ids 'combine-qc-details')"
 
   sbatch-submit "sample-filter-qc" \
     "${sbatch_args} --mem=32G --cpus-per-task=4 --time=0-01:00:00" \
@@ -73,7 +73,7 @@ sample-filter() {
 }
 
 copy-filtered-data() {
-  local sbatch_args="--dependency=afterok:$(get_job_ids 'sample-filter-qc' 'sample-filter-qc-average')"
+  [[ -z "$DEP_OFF" ]] && local sbatch_args="--dependency=afterok:$(get_job_ids 'sample-filter-qc' 'sample-filter-qc-average')"
 
   sbatch-submit "copy-filtered-data" \
     "${sbatch_args} --mem=32G --cpus-per-task=4 --time=0-01:00:00" \
@@ -81,7 +81,7 @@ copy-filtered-data() {
 }
 
 methods-step-1() {
-  local sbatch_args="--dependency=afterok:$(get_job_ids 'copy-filtered-data')"
+  [[ -z "$DEP_OFF" ]] && local sbatch_args="--dependency=afterok:$(get_job_ids 'copy-filtered-data')"
 
   sbatch-submit "submit-methods-step-1" \
     "${sbatch_args} --mem=4G --cpus-per-task=1 --time=0-01:00:00" \
@@ -89,7 +89,7 @@ methods-step-1() {
 }
 
 combine-expression() {
-  local sbatch_args="--dependency=afterok:$(get_job_ids 'methods-step-1')"
+  [[ -z "$DEP_OFF" ]] && local sbatch_args="--dependency=afterok:$(get_job_ids 'methods-step-1')"
 
   sbatch-submit "combine-expression" \
     "${sbatch_args} --mem=4G --cpus-per-task=1 --time=0-01:00:00" \
@@ -97,7 +97,7 @@ combine-expression() {
 }
 
 phenotype-details() {
-  local sbatch_args="--dependency=afterok:$(get_job_ids 'combine-expression')"
+  [[ -z "$DEP_OFF" ]] && local sbatch_args="--dependency=afterok:$(get_job_ids 'combine-expression')"
 
   sbatch-submit "phenotype-details" \
     "${sbatch_args} --mem=32G --cpus-per-task=2 --time=0-01:00:00" \
@@ -158,6 +158,8 @@ run "copy-filtered-data"
 #------------------------------------------------------------------------------------
 
 run "methods-step-1"
+
+exit 0
 
 #------------------------------------------------------------------------------------
 # Combine expression files for each chip for each method-a-step1, method-b-step-1,
