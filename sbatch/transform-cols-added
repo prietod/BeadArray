@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -x
+
 source ${BASE}/lib/env.sh
 source ${BASE}/lib/util.sh
 

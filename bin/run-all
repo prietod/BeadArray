@@ -159,7 +159,6 @@ run "copy-filtered-data"
 
 run "methods-step-1"
 
-exit 0
 
 #------------------------------------------------------------------------------------
 # Combine expression files for each chip for each method-a-step1, method-b-step-1,

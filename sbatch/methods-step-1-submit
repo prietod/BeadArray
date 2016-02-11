@@ -5,7 +5,7 @@ set -x
 source ${BASE}/lib/env.sh
 source ${BASE}/lib/util.sh
 
-datasets="all donor non-donor"
+datasets="donor all non-donor"
 
 for dataset in ${datasets}; do
   array_count=$( ls ${FILTERED_DATA_DIR}/${dataset} | wc -l )

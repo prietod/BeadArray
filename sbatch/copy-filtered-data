@@ -29,6 +29,7 @@ for dir in ${dirs}; do sed -n '2,$p' ${dir}/${exclude_sample_list} | awk '{ prin
   ${BASE}/bin/util/generate-chip-list ${JINFINITI_DATA_DIR}/map_info.txt non-donor-array; } \
   | sort -u > ${EXCLUDE_DONOR_PATTERN_FILE}
 
+exit 0
 
 for dataset in ${datasets}; do
   /bin/mkdir -vp ${FILTERED_DATA_DIR}/${dataset}
