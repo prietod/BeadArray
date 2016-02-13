@@ -18,6 +18,7 @@ setvar EXCLUDE_NON_DONOR_PATTERN_FILE "$BASE/tmp/work/common/exclude-non-donor.t
 setvar EXCLUDE_DONOR_PATTERN_FILE     "$BASE/tmp/work/common/exclude-donor.txt"
 
 setvar METHODS                        "${METHODS:-$(echo {a..p})}"
+setvar DATASETS                       "${DATASETS:-donor non-donor all}"
 
 setvar STATE_DIR                      "$BASE/tmp/state"
 setvar R_VERSION                      "3.2.3"

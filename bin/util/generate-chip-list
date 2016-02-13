@@ -11,7 +11,7 @@ error() { echo "$ME - Error: "$@"" 1>&2; }
 error_exit() { error "$@"; exit 1; }
 
 usage() {
-  echo "Usage: $ME <map_info> [all|donor|non-donor]" 1>&2
+  echo "Usage: $ME <map_info> [all|all-array|donor-array|non-donor-array|donor-array-with-donor]" 1>&2
   exit 1
 }
 
@@ -34,6 +34,10 @@ date_received_sample
 date_of_evaluation
 comments
 "
+
+filter_chips() {
+  egrep -v "9250939039|3998787097|3998787101"
+}
 
 declare -A field_map
 
@@ -65,6 +69,12 @@ case ${mode} in
                         print \$${field_map[chip_barcode]}\"_\"\$${field_map[array]} }"
   ;;
 
+  donor-array-with-donor)
+    strip_header < ${map_info} \
+      | awk -F'\t' "{ if (\$${field_map[donor_number]} != \"\" && \$${field_map[donor_number]} != \"NA\") \
+                        print \$${field_map[chip_barcode]}\"_\"\$${field_map[array]} \" \" \$${field_map[donor_number]} }"
+  ;;
+
   non-donor-array)
     strip_header < ${map_info} \
       | awk -F'\t' "{ if (\$${field_map[donor_number]} == \"\" || \$${field_map[donor_number]} == \"NA\") \
@@ -74,6 +84,6 @@ case ${mode} in
   *) echo "mode: '${mode}' not recognized. Exiting" 1>&2; exit 1;
   ;;
 
-esac | egrep -v '9250939039|3998787097|3998787101' | sort -u
+esac | filter_chips | sort -u
 
 

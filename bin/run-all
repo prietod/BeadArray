@@ -105,9 +105,7 @@ phenotype-details() {
 }
 
 methods-step-2() {
-  local datasets="donor non-donor all"
-
-  for dataset in ${datasets}; do
+  for dataset in ${DATASETS}; do
     for method in ${METHODS}; do
       /bin/cp \
         ${WORK_DIR}/common/BeadArray_phenotype_details-${dataset}.txt \
@@ -134,12 +132,31 @@ run "install-R-libs"
 
 #------------------------------------------------------------------------------------
 # Generate a simple list of chip barcodes from the metadata file provided by Jinifiti
+#
+# input:
+#   ${JINFINITI_DATA_DIR}/map_info.txt
+#
+# output:
+#   ${RAW_CHIP_LIST} # default: "${BASE}/tmp/work/common/chip-list-raw.txt"
+#
 #------------------------------------------------------------------------------------
 
 run "generate-raw-chip-list"
 
 #------------------------------------------------------------------------------------
-# Copy each chip into a raw data folder
+# Name: copy-raw-data
+#
+# Description: Copy each <chip>-<array> into a raw data folder based on <chip>
+#
+# Parameters:
+#   - ${RAW_CHIP_LIST}              # default: "${BASE}/tmp/work/common/chip-list-raw.txt"
+#   - ${RAW_DATA_EXCLUDE_PATTERNS}  # default: "${BASE}/static/exclude-data-raw.txt"
+#   - ${JINFINITI_DATA_DIR}         # default: "/hiidata/teddy/data/jinfiniti/gene_expression"
+#   - ${RAW_DATA_DIR}               # default: "${BASE}/tmp/data/raw"
+#
+# Mutation:
+#   - Populates RAW_DATA_DIR w/ the appropriate <chip>/<prefix>_<array>[_<suffix>].<ext> files.
+#
 #------------------------------------------------------------------------------------
 
 run "copy-raw-data"

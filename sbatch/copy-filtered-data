@@ -12,8 +12,6 @@ ${WORK_DIR}/raw-qc-average/combined
 
 exclude_sample_list="exclude_sample_list.txt"
 
-datasets="all donor non-donor"
-
 for dir in ${dirs}; do sed -n '2,$p' ${dir}/${exclude_sample_list} | awk '{ print $1 }'; done \
   | sort -u > ${EXCLUDE_ALL_PATTERN_FILE}
 
@@ -27,7 +25,7 @@ for dir in ${dirs}; do sed -n '2,$p' ${dir}/${exclude_sample_list} | awk '{ prin
 { cat ${EXCLUDE_ALL_PATTERN_FILE}; ${BASE}/bin/util/generate-chip-list non-donor-array; } \
   | sort -u > ${EXCLUDE_DONOR_PATTERN_FILE}
 
-for dataset in ${datasets}; do
+for dataset in ${DATASETS}; do
   /bin/mkdir -vp ${FILTERED_DATA_DIR}/${dataset}
 
   ${BASE}/bin/util/copy-data \

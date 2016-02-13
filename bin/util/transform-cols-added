@@ -1,4 +1,15 @@
 #!/usr/bin/env python
+#----------------------------------------------------------------------------------------------
+#
+# Usage: ./bin/util/transform-cols-added <cols_added_file> <map_info_file> <exclude_patterns>
+#
+# Cycle over all rows in cols_added_file (which contains Donor-Number) and merge in
+# donor information and exclude any entries that are in the <exclude_patterns> list.
+#
+# Outside this script output is generally re-directed to
+#   ${WORK_DIR}/common/BeadArray_phenotype_details-<all|donor|non-donor>.txt
+#
+#----------------------------------------------------------------------------------------------
 
 from pprint import pprint
 import fileinput
@@ -23,7 +34,7 @@ with open(map_info_file) as f:
         map_info_columns = line.rstrip('\n').split('\t')
         donor_number = map_info_columns[3]
         array_id = map_info_columns[6] + '_' + map_info_columns[7]
-        if donor_number != '':
+        if donor_number != '' and donor_number != 'NA':
             map_info_data[array_id] = donor_number.replace(' ', '-') # remove spaces as R does not like them in read.table()
 
 with open(exclude_file) as f:

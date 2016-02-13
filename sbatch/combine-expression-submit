@@ -12,13 +12,7 @@ lumi:control_expression_lumi.txt
 lumi-wo:wo_control_expression_lumi.txt
 "
 
-datasets="
-donor
-non-donor
-all
-"
-
-for dataset in ${datasets}; do
+for dataset in ${DATASETS}; do
   for method in ${METHODS}; do
     for line in ${expression_file_specs}; do
       mode=$(echo $line | awk -F: '{print $1}')

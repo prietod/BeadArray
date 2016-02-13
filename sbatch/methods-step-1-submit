@@ -5,9 +5,7 @@ set -x
 source ${BASE}/lib/env.sh
 source ${BASE}/lib/util.sh
 
-datasets="donor all non-donor"
-
-for dataset in ${datasets}; do
+for dataset in ${DATASETS}; do
   array_count=$( ls ${FILTERED_DATA_DIR}/${dataset} | wc -l )
   ls ${FILTERED_DATA_DIR}/${dataset} > ${WORK_DIR}/common/chip-list-${dataset}.txt
 

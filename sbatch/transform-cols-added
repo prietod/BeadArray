@@ -5,13 +5,7 @@ set -x
 source ${BASE}/lib/env.sh
 source ${BASE}/lib/util.sh
 
-datasets="
-all
-donor
-non-donor
-"
-
-for dataset in ${datasets}; do
+for dataset in ${DATASETS}; do
   ${BASE}/bin/util/transform-cols-added \
     /hiidata/projects/BeadArray/cols_added.tsv \
     /hiidata/teddy/data/jinfiniti/gene_expression/map_info.txt \
