@@ -18,7 +18,7 @@ generate-raw-chip-list() {
      $BASE/bin/util/generate-chip-list ${JINFINITI_DATA_DIR}/map_info.txt \
        | sort --random-sort | head -8 > ${RAW_CHIP_LIST}
    else
-     $BASE/bin/util/generate-chip-list ${JINFINITI_DATA_DIR}/map_info.txt > ${RAW_CHIP_LIST}
+     $BASE/bin/util/generate-chip-list all > ${RAW_CHIP_LIST}
   fi
 }
 

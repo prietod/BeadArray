@@ -43,9 +43,9 @@ done
 
 [[ $# != 1 && $# != 2 ]] && usage
 
-map_info=${1}
+mode=${1:-all}
 
-mode=${2:-all}
+map_info=${2:-"${JINFINITI_DATA_DIR}/map_info.txt"}
 
 [[ -f ${map_info} ]] || error_exit "map_info file '${map_info}' does not exist."
 
@@ -61,14 +61,17 @@ case ${mode} in
 
   donor-array)
     strip_header < ${map_info} \
-      | awk -F'\t' "{ if (\$${field_map[donor_number]} != \"\" && (\$${field_map[donor_number]} != \"NA\") \
+      | awk -F'\t' "{ if (\$${field_map[donor_number]} != \"\" && \$${field_map[donor_number]} != \"NA\") \
                         print \$${field_map[chip_barcode]}\"_\"\$${field_map[array]} }"
   ;;
 
   non-donor-array)
     strip_header < ${map_info} \
-      | awk -F'\t' "{ if (\$${field_map[donor_number]} == \"\") || (\$${field_map[donor_number]} == \"NA\" \
+      | awk -F'\t' "{ if (\$${field_map[donor_number]} == \"\" || \$${field_map[donor_number]} == \"NA\") \
                         print \$${field_map[chip_barcode]}\"_\"\$${field_map[array]} }"
+  ;;
+
+  *) echo "mode: '${mode}' not recognized. Exiting" 1>&2; exit 1;
   ;;
 
 esac | egrep -v '9250939039|3998787097|3998787101' | sort -u

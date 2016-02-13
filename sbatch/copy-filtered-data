@@ -19,14 +19,12 @@ for dir in ${dirs}; do sed -n '2,$p' ${dir}/${exclude_sample_list} | awk '{ prin
 
 ## Note: Flip logic - look up the "donor" arrays to create a "non-donor" exclude pattern file
 
-{ cat ${EXCLUDE_ALL_PATTERN_FILE};
-  ${BASE}/bin/util/generate-chip-list ${JINFINITI_DATA_DIR}/map_info.txt donor-array; } \
+{ cat ${EXCLUDE_ALL_PATTERN_FILE}; ${BASE}/bin/util/generate-chip-list donor-array; } \
   | sort -u > ${EXCLUDE_NON_DONOR_PATTERN_FILE}
 
 ## Note: Flip logic - look up the "non-donor" arrays to create a donor exclude pattern file
 
-{ cat ${EXCLUDE_ALL_PATTERN_FILE};
-  ${BASE}/bin/util/generate-chip-list ${JINFINITI_DATA_DIR}/map_info.txt non-donor-array; } \
+{ cat ${EXCLUDE_ALL_PATTERN_FILE}; ${BASE}/bin/util/generate-chip-list non-donor-array; } \
   | sort -u > ${EXCLUDE_DONOR_PATTERN_FILE}
 
 for dataset in ${datasets}; do
