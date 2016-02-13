@@ -13,9 +13,9 @@ lumi-wo:wo_control_expression_lumi.txt
 "
 
 datasets="
-all
 donor
 non-donor
+all
 "
 
 for dataset in ${datasets}; do

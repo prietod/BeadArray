@@ -25,7 +25,7 @@ setvar TEST_MODE                      "${TEST_MODE:-false}"
 setvar LOG_DIR                        "$BASE/tmp/log"
 setvar WORK_DIR                       "$BASE/tmp/work"
 
-setvar R_LIBS                         "${BASE}/.R/lib/${R_VERSION}"
+setvar R_LIBS                         "${HOME}/lib/R/${R_VERSION}"
 
 # Our own variables we use when running Slurm
 setvar SLURM_MEM                      "16G"

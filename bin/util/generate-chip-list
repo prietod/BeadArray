@@ -3,6 +3,9 @@
 BASE="$(readlink -f $(readlink -f $(dirname "${BASH_SOURCE}")/../..))"
 ME="$(basename ${BASH_SOURCE})"
 
+source ${BASE}/lib/env.sh
+source ${BASE}/lib/util.sh
+
 error() { echo "$ME - Error: "$@"" 1>&2; }
 
 error_exit() { error "$@"; exit 1; }
@@ -58,13 +61,16 @@ case ${mode} in
 
   donor-array)
     strip_header < ${map_info} \
-      | awk -F'\t' "{ if (\$${field_map[donor_number]} != \"\") print \$${field_map[chip_barcode]}\"_\"\$${field_map[array]} }"
+      | awk -F'\t' "{ if (\$${field_map[donor_number]} != \"\" && (\$${field_map[donor_number]} != \"NA\") \
+                        print \$${field_map[chip_barcode]}\"_\"\$${field_map[array]} }"
   ;;
 
   non-donor-array)
     strip_header < ${map_info} \
-      | awk -F'\t' "{ if (\$${field_map[donor_number]} == \"\") print \$${field_map[chip_barcode]}\"_\"\$${field_map[array]} }"
+      | awk -F'\t' "{ if (\$${field_map[donor_number]} == \"\") || (\$${field_map[donor_number]} == \"NA\" \
+                        print \$${field_map[chip_barcode]}\"_\"\$${field_map[array]} }"
   ;;
 
-esac | sort -u
+esac | egrep -v '9250939039|3998787097|3998787101' | sort -u
+
 

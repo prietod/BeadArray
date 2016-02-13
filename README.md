@@ -24,3 +24,10 @@
 - `tmp/log/<job_name>.log` - Slurm log for each job.
 
 - `tmp/log/<job_name>/<n>.log` - Slurm logs for each task in an array job.
+
+## Notes
+
+combine-expression()
+  sbatch/combine-expression
+    echo ./tmp/work/method-a-step-1-all/chip/9250939009/results/9250939009_control_expression_lumi.txt \
+      | ./bin/util/combine-expression-data lumi
