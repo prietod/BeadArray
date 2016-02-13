@@ -104,6 +104,24 @@ phenotype-details() {
     "${BASE}/sbatch/transform-cols-added"
 }
 
+methods-step-2() {
+  local datasets="donor non-donor all"
+
+  for dataset in ${datasets}; do
+    for method in ${METHODS}; do
+      /bin/cp \
+        ${WORK_DIR}/common/BeadArray_phenotype_details-${dataset}.txt \
+        ${WORK_DIR}/method-${method}-step-1-${dataset}/combined/BeadArray_phenotype_details.txt
+
+      sbatch-submit "method-${method}-step-2-${dataset}" \
+        "--mem=120G --cpus-per-task=4 --time=7-00:00:00" \
+        "${BASE}/bin/run-R" \
+        "${BASE}/code/BeadArray-method-${method}-step-2.R" \
+        "${WORK_DIR}/method-${method}-step-1-${dataset}/combined"
+    done
+  done
+}
+
 #------------------------------------------------------------------------------------
 # Main
 #------------------------------------------------------------------------------------
@@ -159,7 +177,6 @@ run "copy-filtered-data"
 
 run "methods-step-1"
 
-
 #------------------------------------------------------------------------------------
 # Combine expression files for each chip for each method-a-step1, method-b-step-1,
 # etc. for all, donor, and non-donor filtered data folders.
@@ -174,5 +191,8 @@ run "combine-expression"
 run "phenotype-details"
 
 #------------------------------------------------------------------------------------
-# run "methods-step-2"
+# methods-step-2
+#------------------------------------------------------------------------------------
+
+run "methods-step-2"
 
