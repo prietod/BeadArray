@@ -12,7 +12,7 @@ ${WORK_DIR}/raw-qc-average/combined
 
 exclude_sample_list="exclude_sample_list.txt"
 
-for dir in ${dirs}; do sed -n '2,$p' ${dir}/${exclude_sample_list} | awk '{ print $1 }'; done \
+{ cat ${RAW_DATA_EXCLUDE_PATTERNS}; for dir in ${dirs}; do sed -n '2,$p' ${dir}/${exclude_sample_list} | awk '{ print $1 }'; done; } \
   | sort -u > ${EXCLUDE_ALL_PATTERN_FILE}
 
 ## Note: Flip logic - look up the "donor" arrays to create a "non-donor" exclude pattern file

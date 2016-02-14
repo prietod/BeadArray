@@ -96,12 +96,12 @@ combine-expression() {
     "${BASE}/sbatch/combine-expression-submit"
 }
 
-phenotype-details() {
+generate-phenotype-details() {
   [[ -z "$DEP_OFF" ]] && local sbatch_args="--dependency=afterok:$(get_job_ids 'combine-expression')"
 
-  sbatch-submit "phenotype-details" \
+  sbatch-submit "generate-phenotype-details" \
     "${sbatch_args} --mem=32G --cpus-per-task=2 --time=0-01:00:00" \
-    "${BASE}/sbatch/transform-cols-added"
+    "${BASE}/sbatch/generate-phenotype-details"
 }
 
 methods-step-2() {
@@ -120,96 +120,108 @@ methods-step-2() {
   done
 }
 
+main() {
+
+  #------------------------------------------------------------------------------------
+  # Install supporting R libraries in $R_LIBS (bioconductor.org w/ lumi and beadarray)
+  #------------------------------------------------------------------------------------
+
+  run "install-R-libs"
+
+  #------------------------------------------------------------------------------------
+  # Generate a simple list of chip barcodes from the metadata file provided by Jinifiti
+  #
+  # input:
+  #   ${JINFINITI_DATA_DIR}/map_info.txt
+  #
+  # output:
+  #   ${RAW_CHIP_LIST} # default: "${BASE}/tmp/work/common/chip-list-raw.txt"
+  #
+  #------------------------------------------------------------------------------------
+
+  run "generate-raw-chip-list"
+
+  #------------------------------------------------------------------------------------
+  # Name: copy-raw-data
+  #
+  # Description: Copy each <chip>-<array> into a raw data folder based on <chip>
+  #
+  # Parameters:
+  #   - ${RAW_CHIP_LIST}              # default: "${BASE}/tmp/work/common/chip-list-raw.txt"
+  #   - ${RAW_DATA_EXCLUDE_PATTERNS}  # default: "${BASE}/static/exclude-data-raw.txt"
+  #   - ${JINFINITI_DATA_DIR}         # default: "/hiidata/teddy/data/jinfiniti/gene_expression"
+  #   - ${RAW_DATA_DIR}               # default: "${BASE}/tmp/data/raw"
+  #
+  # Mutation:
+  #   - Populates RAW_DATA_DIR w/ the appropriate <chip>/<prefix>_<array>[_<suffix>].<ext> files.
+  #
+  #------------------------------------------------------------------------------------
+
+  run "copy-raw-data"
+
+  #------------------------------------------------------------------------------------
+  # Run raw-qc and raw-qc-average R Scripts to determine quality
+  #------------------------------------------------------------------------------------
+
+  run "run-raw-qc"
+
+  #------------------------------------------------------------------------------------
+  # Combine individual chip QC scores for each qc method into aggregate files
+  #------------------------------------------------------------------------------------
+
+  run "combine-qc-details"
+
+  #------------------------------------------------------------------------------------
+  # Run R script to generate a list of <chip>_<array> candidates to remove due to
+  # qc scoring.
+  #------------------------------------------------------------------------------------
+
+  run "sample-filter"
+
+  #------------------------------------------------------------------------------------
+  # Copy over <chip>_<array> files which passed QC into all, donor, and non-donor
+  # filtered data folders.
+  #------------------------------------------------------------------------------------
+
+  run "copy-filtered-data"
+
+  #------------------------------------------------------------------------------------
+  # Submit method-a-step1, method-b-step-1, etc. for all, donor, and non-donor filtered
+  # data folders.
+  #------------------------------------------------------------------------------------
+
+  run "methods-step-1"
+
+  #------------------------------------------------------------------------------------
+  # Combine expression files for each chip for each method-a-step1, method-b-step-1,
+  # etc. for all, donor, and non-donor filtered data folders.
+  #------------------------------------------------------------------------------------
+
+  run "combine-expression"
+
+  #------------------------------------------------------------------------------------
+  # Generate phenotype_details files for all, donor, and non-donor for methods-step-2
+  #------------------------------------------------------------------------------------
+
+  run "generate-phenotype-details"
+
+  #------------------------------------------------------------------------------------
+  # methods-step-2
+  #------------------------------------------------------------------------------------
+
+  run "methods-step-2"
+}
+
+
 #------------------------------------------------------------------------------------
 # Main
 #------------------------------------------------------------------------------------
 
-#------------------------------------------------------------------------------------
-# Install supporting R libraries in $R_LIBS (bioconductor.org w/ lumi and beadarray)
-#------------------------------------------------------------------------------------
-
-run "install-R-libs"
-
-#------------------------------------------------------------------------------------
-# Generate a simple list of chip barcodes from the metadata file provided by Jinifiti
-#
-# input:
-#   ${JINFINITI_DATA_DIR}/map_info.txt
-#
-# output:
-#   ${RAW_CHIP_LIST} # default: "${BASE}/tmp/work/common/chip-list-raw.txt"
-#
-#------------------------------------------------------------------------------------
-
-run "generate-raw-chip-list"
-
-#------------------------------------------------------------------------------------
-# Name: copy-raw-data
-#
-# Description: Copy each <chip>-<array> into a raw data folder based on <chip>
-#
-# Parameters:
-#   - ${RAW_CHIP_LIST}              # default: "${BASE}/tmp/work/common/chip-list-raw.txt"
-#   - ${RAW_DATA_EXCLUDE_PATTERNS}  # default: "${BASE}/static/exclude-data-raw.txt"
-#   - ${JINFINITI_DATA_DIR}         # default: "/hiidata/teddy/data/jinfiniti/gene_expression"
-#   - ${RAW_DATA_DIR}               # default: "${BASE}/tmp/data/raw"
-#
-# Mutation:
-#   - Populates RAW_DATA_DIR w/ the appropriate <chip>/<prefix>_<array>[_<suffix>].<ext> files.
-#
-#------------------------------------------------------------------------------------
-
-run "copy-raw-data"
-
-#------------------------------------------------------------------------------------
-# Run raw-qc and raw-qc-average R Scripts to determine quality
-#------------------------------------------------------------------------------------
-
-run "run-raw-qc"
-
-#------------------------------------------------------------------------------------
-# Combine individual chip QC scores for each qc method into aggregate files
-#------------------------------------------------------------------------------------
-
-run "combine-qc-details"
-
-#------------------------------------------------------------------------------------
-# Run R script to generate a list of <chip>_<array> candidates to remove due to
-# qc scoring.
-#------------------------------------------------------------------------------------
-
-run "sample-filter"
-
-#------------------------------------------------------------------------------------
-# Copy over <chip>_<array> files which passed QC into all, donor, and non-donor
-# filtered data folders.
-#------------------------------------------------------------------------------------
-
-run "copy-filtered-data"
-
-#------------------------------------------------------------------------------------
-# Submit method-a-step1, method-b-step-1, etc. for all, donor, and non-donor filtered
-# data folders.
-#------------------------------------------------------------------------------------
-
-run "methods-step-1"
-
-#------------------------------------------------------------------------------------
-# Combine expression files for each chip for each method-a-step1, method-b-step-1,
-# etc. for all, donor, and non-donor filtered data folders.
-#------------------------------------------------------------------------------------
-
-run "combine-expression"
-
-#------------------------------------------------------------------------------------
-# Generate phenotype_details files for all, donor, and non-donor for methods-step-2
-#------------------------------------------------------------------------------------
-
-run "phenotype-details"
-
-#------------------------------------------------------------------------------------
-# methods-step-2
-#------------------------------------------------------------------------------------
-
-run "methods-step-2"
-
+if [[ $# -gt 0 ]]; then
+  for name in "$@"; do
+    [[ -f ${STATE_DIR}/${name} ]] && /bin/rm ${STATE_DIR}/${name}
+    run "$name"
+  done
+else
+  main
+fi

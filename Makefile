@@ -28,6 +28,9 @@ log:
 clean-tmp:
 	-mkdir -p .tmp && mv tmp/* .tmp && rm -rf .tmp &
 
+rerun-phenotype:
+	bin/run-all
+
 stage-1: setup-dirs generate-chip-list copy-raw-data
 	cat $(chip_list) | bin/slurm-submit-array bin/run-R-chips-qc code/BeadArray_qc.R
 	cat $(chip_list) | bin/slurm-submit-array bin/run-R-chips-qc code/BeadArray_qc_average.R
@@ -96,71 +99,12 @@ clean:
 cancel-all:
 	scancel -p$(slurm_partition) --signal=9 --full --user $$LOGNAME
 
-test-transform-cols-added:
-	mkdir -p tmp/test/transform-cols-added
-	bin/util/transform-cols-added \
-		test/transform-cols-added/input.tsv \
-		test/transform-cols-added/map_info.txt \
-		test/transform-cols-added/exclude-data-filtered.txt > tmp/test/transform-cols-added/output.tsv
-	diff tmp/test/transform-cols-added/output.tsv test/transform-cols-added/expected.tsv
-
 test:
 	bin/test/combine-expression-data
 
-check-column-lengths:
-	for script in BeadArray_approach_a_step_1.R BeadArray_method_{1..5}_step_1.R; do \
-		bin/util/check-column-lengths tmp/work/$${script}/combined/control_expression.txt; \
-		bin/util/check-column-lengths tmp/work/$${script}/combined/wo_control_expression.txt; \
-		bin/util/check-column-lengths tmp/work/$${script}/combined/control_expression_lumi.txt; \
-		bin/util/check-column-lengths tmp/work/$${script}/combined/wo_control_expression_lumi.txt; \
-	done
-
+check:
+	bin/check-all
 
 q:
 	squeue --user $$LOGNAME --format="%.18i %52j %.8T %.10M %.9l %.6D %20R %E"
 	@#squeue -p$(slurm_partition) --user $$LOGNAME --format="%.18i %.9P %40j %.8u %.8T %.10M %.9l %.6D %R %E"
-
-test-array-job:
-	printf "foo\nbar\n" | SUBMIT_RANDOM_SECONDS="1" bin/slurm-submit-array bin/test-array-job
-
-check-combined-expression:
-	for script in \
-		BeadArray_approach_a_step_1.R \
-		BeadArray_method_1_step_1.R \
-		BeadArray_method_2_step_1.R \
-		BeadArray_method_3_step_1.R \
-		BeadArray_method_4_step_1.R \
-		BeadArray_method_5_step_1.R; do \
-			find $(base)/tmp/work/$${script}/combined -type f | xargs ls -l; done
-
-
-# combine: combine-qc combine-qc-average
-#
-# test-fix-data:
-# 	mkdir -p tmp/test/fix-data
-# 	bin/fix-data test/fix-data/input/{Avg_Signal.txt,BEAD_STDERR.txt,Avg_NBEADS.txt,Detection_Pval.txt} \
-# 		> tmp/test/fix-data/result.txt
-# 	diff tmp/test/fix-data/result.txt test/fix-data/expected/result.txt
-#
-# test-fix-data-7-cols:
-# 	mkdir -p tmp/test/fix-data
-# 	bin/fix-data test/fix-data/input/{Avg_Signal-7-cols.txt,BEAD_STDERR-7-cols.txt,Avg_NBEADS-7-cols.txt,Detection_Pval-7-cols.txt} \
-#
-# qc:
-# 	bin/util/get-mapinfo -u chip_barcode | bin/slurm-submit code/BeadArray_qc.R
-#
-# qc-average:
-# 	bin/util/get-mapinfo -u chip_barcode | bin/slurm-submit code/BeadArray_qc_average.R
-#
-# test:
-# 	scancel -phii02 --signal=9 --full --user $$LOGNAME --name BeadArray_test
-# 	-rm -rf tmp/{work,log,complete}/BeadArray_test &
-# 	sleep 10
-# 	bin/util/get-mapinfo -u chip_barcode | sort -R | head -7 | SUBMIT_RANDOM_SECONDS=10 bin/slurm-submit code/BeadArray_test.R
-# 	sleep 10; find tmp/log/BeadArray_test/current/ -type f -name '*.log' | xargs tail -f
-#
-# qc-clean-all:
-# 	-rm -rf tmp/{work,complete}/BeadArray_qc
-#
-# qc-average-clean-all:
-# 	-rm -rf tmp/{work,complete}/BeadArray_qc_average

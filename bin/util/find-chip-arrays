@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+dir=$1
+
+find ${dir} -type l | perl -p -e 's/.*(\d{10})_([A-Z]).*/\1_\2/' | sort -u

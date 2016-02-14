@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+
+set -x
+
+source ${BASE}/lib/env.sh
+source ${BASE}/lib/util.sh
+
+${BASE}/bin/util/generate-phenotype-details \
+  /hiidata/projects/BeadArray/cols_added.tsv \
+  /hiidata/teddy/data/jinfiniti/gene_expression/map_info.txt \
+  > ${WORK_DIR}/common/BeadArray_phenotype_details.txt
+
+for dataset in ${DATASETS}; do
+  ${BASE}/bin/util/find-chip-arrays ${BASE}/tmp/data/filtered/${dataset} \
+    > ${WORK_DIR}/common/chip-list-filtered-${dataset}.txt
+
+  head -1 ${WORK_DIR}/common/BeadArray_phenotype_details.txt \
+    > ${WORK_DIR}/common/BeadArray_phenotype_details-${dataset}.txt
+
+  grep -f ${WORK_DIR}/common/chip-list-filtered-${dataset}.txt ${WORK_DIR}/common/BeadArray_phenotype_details.txt \
+    >> ${WORK_DIR}/common/BeadArray_phenotype_details-${dataset}.txt
+done
+
+set +x
+
+donor=$(( $(wc -l tmp/work/common/BeadArray_phenotype_details-donor.txt | awk '{print $1}') - 1 ))
+all=$(( $(wc -l tmp/work/common/BeadArray_phenotype_details-all.txt | awk '{print $1}') - 1 ))
+non_donor=$(( $(wc -l tmp/work/common/BeadArray_phenotype_details-non-donor.txt | awk '{print $1}') - 1 ))
+
+echo all: $all
+echo non-donor: $non_donor
+echo donor: $donor
+
+difference=$(( $all - $donor ))
+
+if [[ ${difference} -ne ${non_donor} ]]; then
+  echo "Difference of <all> - <donor> (${difference}) is not equal to <non-donor> (${non_donor})"
+  exit 1
+fi
+
+exit 0
