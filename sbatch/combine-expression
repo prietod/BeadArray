@@ -6,4 +6,6 @@ file=$3
 
 find ${job_dir}/chip -name "*[0-9]_${file}" \
   | ${BASE}/bin/util/combine-expression-data ${mode} \
-  | grep -v '\<NA\>' > ${job_dir}/combined/${file}
+  | egrep -v '\<NaN\>|\<Inf\>|\<-Inf\>|\<NA\>' > ${job_dir}/combined/${file}
+
+
