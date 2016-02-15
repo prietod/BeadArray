@@ -65,6 +65,9 @@ args <- commandArgs(trailingOnly = TRUE)
 # To use the combined filter data directory for storing qc data and results
 filter_combined_result_dir <- toString(args[1])
 
+# To enter input parameter for generating figures
+generate.figures <- toString(args[2])
+
 # To change the directory
 setwd(filter_combined_result_dir)
 
@@ -95,198 +98,208 @@ data.gene.lumi <- addControlData2lumi((getControlData(controlFile.lumi, sep = "\
 # To store control data for plotting
 data.control.lumi <- addControlData2lumi((getControlData(controlFile.lumi, sep = "\t")), data.gene.lumi)
 
-# To run a while loop to generate different plots
-# To create a density plot
-pdf(file = "all_density_before_normalization_lumi.pdf", width = 11, height = 8.5)
+# To check the input parameter for generating figures
+if (generate.figures == "yes")
+{
 
-# To define i.lumi for looping
-i.lumi = 1
+  # To run a while loop to generate different plots
+  # To create a density plot
+  pdf(file = "all_density_before_normalization_lumi.pdf", width = 11, height = 8.5)
 
-while(i.lumi <= dim(as.matrix(data.gene.lumi))[2]) {
+  # To define i.lumi for looping
+  i.lumi = 1
 
-  # To generate density plots for 10 arrays at a time
-  # To get an integer value of number of arrays
-  i.arrays.lumi = as.integer((dim(as.matrix(data.gene.lumi))[2])/10)
+  while(i.lumi <= dim(as.matrix(data.gene.lumi))[2]) {
 
-  # To compare if the arrays are the last 10 arrays or not
-  if (i.lumi < (i.arrays.lumi*10)) {
+    # To generate density plots for 10 arrays at a time
+    # To get an integer value of number of arrays
+    i.arrays.lumi = as.integer((dim(as.matrix(data.gene.lumi))[2])/10)
 
-    # To create a density plots before normalization
-    plot(data.gene.lumi[, i.lumi:(i.lumi + 9)], what = "density")
+    # To compare if the arrays are the last 10 arrays or not
+    if (i.lumi < (i.arrays.lumi*10)) {
+
+      # To create a density plots before normalization
+      plot(data.gene.lumi[, i.lumi:(i.lumi + 9)], what = "density")
+
+    }
+
+    else {
+
+      # To create a density plots before normalization
+      plot(data.gene.lumi[, i.lumi:(dim(as.matrix(data.gene.lumi))[2])], what = "density")
+
+    }
+
+    # To add 10 to a while loop
+    i.lumi = i.lumi + 10
 
   }
 
-  else {
+  garbage <- dev.off()
 
-    # To create a density plots before normalization
-    plot(data.gene.lumi[, i.lumi:(dim(as.matrix(data.gene.lumi))[2])], what = "density")
+
+  # To run a while loop to generate different plots
+  # To create a Cumulative Distribution Function (CDF) plot
+  pdf(file = "all_cdf_before_normalization_lumi.pdf", width = 11, height = 8.5)
+
+  # To define j.lumi for looping
+  j.lumi = 1
+
+  while(j.lumi <= dim(as.matrix(data.gene.lumi))[2]) {
+
+    # To generate CDF plots for 10 arrays at a time
+    # To get an integer value of number of arrays
+    j.arrays.lumi = as.integer((dim(as.matrix(data.gene.lumi))[2])/10)
+
+    # To compare if the arrays are the last 10 arrays or not
+    if (j.lumi < (j.arrays.lumi*10)) {
+
+      # To create a CDF plots before normalization
+      plotCDF(data.gene.lumi[, j.lumi:(j.lumi + 9)], reverse = TRUE)
+
+    }
+
+    else {
+
+      # To create a CDF plots before normalization
+      plotCDF(data.gene.lumi[, j.lumi:(dim(as.matrix(data.gene.lumi))[2])], reverse = TRUE)
+
+    }
+
+    # To add 10 to a while loop
+    j.lumi = j.lumi + 10
 
   }
 
-  # To add 10 to a while loop
-  i.lumi = i.lumi + 10
+  garbage <- dev.off()
 
+
+  # To run a while loop to generate different plots
+  # To create a housekeeping plot
+  pdf(file = "all_housekeeping_before_normalization_lumi.pdf", width = 11, height = 8.5)
+
+  # To define k.lumi for looping
+  k.lumi = 1
+
+  while(k.lumi < dim(as.matrix(data.gene.lumi))[2]) {
+
+    # To generate housekeeping plots for 10 arrays at a time
+    # To get an integer value of number of arrays
+    k.arrays.lumi = as.integer((dim(as.matrix(data.gene.lumi))[2])/10)
+
+    # To compare if the arrays are the last 10 arrays or not
+    if (k.lumi < (k.arrays.lumi*10)) {
+
+      # To create a housekeeping plots before normalization
+      plotHousekeepingGene(data.control.lumi[, k.lumi:(k.lumi + 9)])
+
+    }
+
+    else {
+
+      # To create a housekeeping plots before normalization
+      plotHousekeepingGene(data.control.lumi[, k.lumi:(dim(as.matrix(data.gene.lumi))[2])])
+
+    }
+
+    # To add 10 to a while loop
+    k.lumi = k.lumi + 10
+
+  }
+
+  garbage <- dev.off()
+
+
+
+  # To run a while loop to generate different plots
+  # To create a stringency gene plot
+  pdf(file = "all_stringency_gene_before_normalization_lumi.pdf", width = 11, height = 8.5)
+
+  # To define l.lumi for looping
+  l.lumi = 1
+
+  while(l.lumi < dim(as.matrix(data.gene.lumi))[2]) {
+
+    # To generate stringency gene plots for 10 arrays at a time
+    # To get an integer value of number of arrays
+    l.arrays.lumi = as.integer((dim(as.matrix(data.gene.lumi))[2])/10)
+
+    # To compare if the arrays are the last 10 arrays or not
+    if (l.lumi < (l.arrays.lumi*10)) {
+
+      # To create a stringency gene plots before normalization
+      plotStringencyGene(data.control.lumi[, l.lumi:(l.lumi + 9)])
+
+    }
+
+    else {
+
+      # To create a stringency gene plots before normalization
+      plotStringencyGene(data.control.lumi[, l.lumi:(dim(as.matrix(data.gene.lumi))[2])])
+
+    }
+
+    # To add 10 to a while loop
+    l.lumi = l.lumi + 10
+
+  }
+
+  garbage <- dev.off()
+
+  # To create a sample relations plot
+  pdf(file = "all_sample_relations_before_normalization_lumi.pdf", width = 11, height = 8.5)
+  plot(data.gene.lumi, what = 'sampleRelation')
+  garbage <- dev.off()
+
+  pdf(file = "all_sample_relations_mds_before_normalization_lumi.pdf", width = 11, height = 8.5)
+  plot(data.gene.lumi, what = 'sampleRelation', method = "mds")
+  garbage <- dev.off()
 }
-
-garbage <- dev.off()
-
-
-# To run a while loop to generate different plots
-# To create a Cumulative Distribution Function (CDF) plot
-pdf(file = "all_cdf_before_normalization_lumi.pdf", width = 11, height = 8.5)
-
-# To define j.lumi for looping
-j.lumi = 1
-
-while(j.lumi <= dim(as.matrix(data.gene.lumi))[2]) {
-
-  # To generate CDF plots for 10 arrays at a time
-  # To get an integer value of number of arrays
-  j.arrays.lumi = as.integer((dim(as.matrix(data.gene.lumi))[2])/10)
-
-  # To compare if the arrays are the last 10 arrays or not
-  if (j.lumi < (j.arrays.lumi*10)) {
-
-    # To create a CDF plots before normalization
-    plotCDF(data.gene.lumi[, j.lumi:(j.lumi + 9)], reverse = TRUE)
-
-  }
-
-  else {
-
-    # To create a CDF plots before normalization
-    plotCDF(data.gene.lumi[, j.lumi:(dim(as.matrix(data.gene.lumi))[2])], reverse = TRUE)
-
-  }
-
-  # To add 10 to a while loop
-  j.lumi = j.lumi + 10
-
-}
-
-garbage <- dev.off()
-
-
-# To run a while loop to generate different plots
-# To create a housekeeping plot
-pdf(file = "all_housekeeping_before_normalization_lumi.pdf", width = 11, height = 8.5)
-
-# To define k.lumi for looping
-k.lumi = 1
-
-while(k.lumi < dim(as.matrix(data.gene.lumi))[2]) {
-
-  # To generate housekeeping plots for 10 arrays at a time
-  # To get an integer value of number of arrays
-  k.arrays.lumi = as.integer((dim(as.matrix(data.gene.lumi))[2])/10)
-
-  # To compare if the arrays are the last 10 arrays or not
-  if (k.lumi < (k.arrays.lumi*10)) {
-
-    # To create a housekeeping plots before normalization
-    plotHousekeepingGene(data.control.lumi[, k.lumi:(k.lumi + 9)])
-
-  }
-
-  else {
-
-    # To create a housekeeping plots before normalization
-    plotHousekeepingGene(data.control.lumi[, k.lumi:(dim(as.matrix(data.gene.lumi))[2])])
-
-  }
-
-  # To add 10 to a while loop
-  k.lumi = k.lumi + 10
-
-}
-
-garbage <- dev.off()
-
-
-
-# To run a while loop to generate different plots
-# To create a stringency gene plot
-pdf(file = "all_stringency_gene_before_normalization_lumi.pdf", width = 11, height = 8.5)
-
-# To define l.lumi for looping
-l.lumi = 1
-
-while(l.lumi < dim(as.matrix(data.gene.lumi))[2]) {
-
-  # To generate stringency gene plots for 10 arrays at a time
-  # To get an integer value of number of arrays
-  l.arrays.lumi = as.integer((dim(as.matrix(data.gene.lumi))[2])/10)
-
-  # To compare if the arrays are the last 10 arrays or not
-  if (l.lumi < (l.arrays.lumi*10)) {
-
-    # To create a stringency gene plots before normalization
-    plotStringencyGene(data.control.lumi[, l.lumi:(l.lumi + 9)])
-
-  }
-
-  else {
-
-    # To create a stringency gene plots before normalization
-    plotStringencyGene(data.control.lumi[, l.lumi:(dim(as.matrix(data.gene.lumi))[2])])
-
-  }
-
-  # To add 10 to a while loop
-  l.lumi = l.lumi + 10
-
-}
-
-garbage <- dev.off()
-
-# To create a sample relations plot
-pdf(file = "all_sample_relations_before_normalization_lumi.pdf", width = 11, height = 8.5)
-plot(data.gene.lumi, what = 'sampleRelation')
-garbage <- dev.off()
-
-pdf(file = "all_sample_relations_mds_before_normalization_lumi.pdf", width = 11, height = 8.5)
-plot(data.gene.lumi, what = 'sampleRelation', method = "mds")
-garbage <- dev.off()
 
 # To perform variance stabilizing transform (VST)
 data.gene.lumi.t <- suppressWarnings(lumiT(data.gene.lumi, method = "vst", verbose = FALSE))
 
-# To run a while loop to generate different plots
-# To create a vst transformation plot
-pdf(file = "all_vst_transformation_before_normalization_lumi.pdf", width = 11, height = 8.5)
+# To check the input parameter for generating figures
+if (generate.figures == "yes")
+{
 
-# To define m.lumi for looping
-m.lumi = 1
+  # To run a while loop to generate different plots
+  # To create a vst transformation plot
+  pdf(file = "all_vst_transformation_before_normalization_lumi.pdf", width = 11, height = 8.5)
 
-while(m.lumi <= dim(as.matrix(data.gene.lumi.t))[2]) {
+  # To define m.lumi for looping
+  m.lumi = 1
 
-  # To generate a vst transformation plot for 10 arrays at a time
-  # To get an integer value of number of arrays
-  m.arrays.lumi = as.integer((dim(as.matrix(data.gene.lumi.t))[2])/10)
+  while(m.lumi <= dim(as.matrix(data.gene.lumi.t))[2]) {
 
-  # To compare if the arrays are the last 10 arrays or not
-  if (m.lumi < (m.arrays.lumi*10)) {
+    # To generate a vst transformation plot for 10 arrays at a time
+    # To get an integer value of number of arrays
+    m.arrays.lumi = as.integer((dim(as.matrix(data.gene.lumi.t))[2])/10)
 
-    # To create a vst transformation plot before normalization
-    plot.trans <- plotVST(data.gene.lumi.t[, m.lumi:(m.lumi + 9)])
-    matplot(log2(plot.trans$untransformed), plot.trans$transformed, main = "compare VST and log2 transform")
+    # To compare if the arrays are the last 10 arrays or not
+    if (m.lumi < (m.arrays.lumi*10)) {
+
+      # To create a vst transformation plot before normalization
+      plot.trans <- plotVST(data.gene.lumi.t[, m.lumi:(m.lumi + 9)])
+      matplot(log2(plot.trans$untransformed), plot.trans$transformed, main = "compare VST and log2 transform")
+
+    }
+
+    else {
+
+      # To create a vst transformation plot before normalization
+      plot.trans <- plotVST(data.gene.lumi.t[, m.lumi:(dim(as.matrix(data.gene.lumi.t))[2])])
+      matplot(log2(plot.trans$untransformed), plot.trans$transformed, main = "compare VST and log2 transform")
+
+    }
+
+    # To add 10 to a while loop
+    m.lumi = m.lumi + 10
 
   }
 
-  else {
-
-    # To create a vst transformation plot before normalization
-    plot.trans <- plotVST(data.gene.lumi.t[, m.lumi:(dim(as.matrix(data.gene.lumi.t))[2])])
-    matplot(log2(plot.trans$untransformed), plot.trans$transformed, main = "compare VST and log2 transform")
-
-  }
-
-  # To add 10 to a while loop
-  m.lumi = m.lumi + 10
-
+  garbage <- dev.off()
 }
-
-garbage <- dev.off()
 
 # Perform no background normalization and quantile normalization
 data.gene.lumi.n <- lumiN(data.gene.lumi.t, method = "quantile", verbose = FALSE)
@@ -294,85 +307,90 @@ data.gene.lumi.n <- lumiN(data.gene.lumi.t, method = "quantile", verbose = FALSE
 # To perform quality control estimation after normalization
 data.gene.lumi.n.q <- lumiQ(data.gene.lumi.n)
 
-# To run a while loop to generate different plots
-# To create a density plot
-pdf(file = "all_density_after_normalization_lumi.pdf", width = 11, height = 8.5)
+# To check the input parameter for generating figures
+if (generate.figures == "yes")
+{
 
-# To define n.lumi for looping
-n.lumi = 1
+  # To run a while loop to generate different plots
+  # To create a density plot
+  pdf(file = "all_density_after_normalization_lumi.pdf", width = 11, height = 8.5)
 
-while(n.lumi <= dim(as.matrix(data.gene.lumi.n.q))[2]) {
+  # To define n.lumi for looping
+  n.lumi = 1
 
-  # To generate density plots for 10 arrays at a time
-  # To get an integer value of number of arrays
-  n.arrays.lumi = as.integer((dim(as.matrix(data.gene.lumi.n.q))[2])/10)
+  while(n.lumi <= dim(as.matrix(data.gene.lumi.n.q))[2]) {
 
-  # To compare if the arrays are the last 10 arrays or not
-  if (n.lumi < (n.arrays.lumi*10)) {
+    # To generate density plots for 10 arrays at a time
+    # To get an integer value of number of arrays
+    n.arrays.lumi = as.integer((dim(as.matrix(data.gene.lumi.n.q))[2])/10)
 
-    # To create a density plots after normalization
-    plot(data.gene.lumi.n.q[, n.lumi:(n.lumi + 9)], what = "density")
+    # To compare if the arrays are the last 10 arrays or not
+    if (n.lumi < (n.arrays.lumi*10)) {
+
+      # To create a density plots after normalization
+      plot(data.gene.lumi.n.q[, n.lumi:(n.lumi + 9)], what = "density")
+
+    }
+
+    else {
+
+      # To create a density plots after normalization
+      plot(data.gene.lumi.n.q[, n.lumi:(dim(as.matrix(data.gene.lumi.n.q))[2])], what = "density")
+
+    }
+
+    # To add 10 to a while loop
+    n.lumi = n.lumi + 10
 
   }
 
-  else {
+  garbage <- dev.off()
 
-    # To create a density plots after normalization
-    plot(data.gene.lumi.n.q[, n.lumi:(dim(as.matrix(data.gene.lumi.n.q))[2])], what = "density")
+
+  # To run a while loop to generate different plots
+  # To create a boxplot plot
+  pdf(file = "all_boxplot_after_normalization_lumi.pdf", width = 11, height = 8.5)
+
+  # To define o.lumi for looping
+  o.lumi = 1
+
+  while(o.lumi < dim(as.matrix(data.gene.lumi.n.q))[2]) {
+
+    # To generate box plots for 10 arrays at a time
+    # To get an integer value of number of arrays
+    o.arrays.lumi = as.integer((dim(as.matrix(data.gene.lumi.n.q))[2])/10)
+
+    # To compare if the arrays are the last 10 arrays or not
+    if (o.lumi < (o.arrays.lumi*10)) {
+
+      # To create a box plots after normalization
+      plot(data.gene.lumi.n.q[, o.lumi:(o.lumi + 9)], what = "boxplot")
+
+    }
+
+    else {
+
+      # To create a box plots after normalization
+      plot(data.gene.lumi.n.q[, o.lumi:(dim(as.matrix(data.gene.lumi.n.q))[2])], what = "boxplot")
+
+    }
+
+    # To add 10 to a while loop
+    o.lumi = o.lumi + 10
 
   }
 
-  # To add 10 to a while loop
-  n.lumi = n.lumi + 10
+  garbage <- dev.off()
 
+  # To create a sample relations plot
+  pdf(file = "all_sample_relations_after_normalization_lumi.pdf", width = 11, height = 8.5)
+  plot(data.gene.lumi.n.q, what = 'sampleRelation')
+  garbage <- dev.off()
+
+  pdf(file = "all_sample_relations_mds_after_normalization_lumi.pdf", width = 11, height = 8.5)
+  plot(data.gene.lumi.n.q, what = 'sampleRelation', method = "mds")
+  garbage <- dev.off()
 }
-
-garbage <- dev.off()
-
-
-# To run a while loop to generate different plots
-# To create a boxplot plot
-pdf(file = "all_boxplot_after_normalization_lumi.pdf", width = 11, height = 8.5)
-
-# To define o.lumi for looping
-o.lumi = 1
-
-while(o.lumi < dim(as.matrix(data.gene.lumi.n.q))[2]) {
-
-  # To generate box plots for 10 arrays at a time
-  # To get an integer value of number of arrays
-  o.arrays.lumi = as.integer((dim(as.matrix(data.gene.lumi.n.q))[2])/10)
-
-  # To compare if the arrays are the last 10 arrays or not
-  if (o.lumi < (o.arrays.lumi*10)) {
-
-    # To create a box plots after normalization
-    plot(data.gene.lumi.n.q[, o.lumi:(o.lumi + 9)], what = "boxplot")
-
-  }
-
-  else {
-
-    # To create a box plots after normalization
-    plot(data.gene.lumi.n.q[, o.lumi:(dim(as.matrix(data.gene.lumi.n.q))[2])], what = "boxplot")
-
-  }
-
-  # To add 10 to a while loop
-  o.lumi = o.lumi + 10
-
-}
-
-garbage <- dev.off()
-
-# To create a sample relations plot
-pdf(file = "all_sample_relations_after_normalization_lumi.pdf", width = 11, height = 8.5)
-plot(data.gene.lumi.n.q, what = 'sampleRelation')
-garbage <- dev.off()
-
-pdf(file = "all_sample_relations_mds_after_normalization_lumi.pdf", width = 11, height = 8.5)
-plot(data.gene.lumi.n.q, what = 'sampleRelation', method = "mds")
-garbage <- dev.off()
 
 # To annotate Illumina IDs
 idsTosymbols.lumi = as.matrix(toTable(illuminaHumanv4ENTREZID))

@@ -68,6 +68,9 @@ args <- commandArgs(trailingOnly = TRUE)
 # To use the combined filter data directory for storing qc data and results
 filter_combined_result_dir <- toString(args[1])
 
+# To enter input parameter for generating figures
+generate.figures <- toString(args[2])
+
 # To change the directory
 setwd(filter_combined_result_dir)
 
@@ -91,85 +94,90 @@ write.table(as.matrix(proportion.expr), "probe_proportion_expressed.txt", sep = 
 # Perform normexp background normalization using negative control probes and quantile normalization using negative and positive control probes
 data.gene.norm <- neqc(data.gene, negctrl = "negative", regular = "regular", detection.p = "Detection Pval")
 
-# To run a while loop to generate different plots
-# To create a box plots for the regular probes and negative control probes before normalization and the regular probes after normalization
-pdf(file = "all_normalization_boxplot.pdf", width = 11, height = 8.5)
+# To check the input parameter for generating figures
+if (generate.figures == "yes")
+{
 
-# To define i for looping
-i = 1
+  # To run a while loop to generate different plots
+  # To create a box plots for the regular probes and negative control probes before normalization and the regular probes after normalization
+  pdf(file = "all_normalization_boxplot.pdf", width = 11, height = 8.5)
 
-while(i <= dim(as.matrix(data.gene.norm))[2]) {
+  # To define i for looping
+  i = 1
 
-  # To generate box plots for 10 arrays at a time
-  # To get an integer value of number of arrays
-  i.arrays = as.integer((dim(as.matrix(data.gene.norm))[2])/10)
+  while(i <= dim(as.matrix(data.gene.norm))[2]) {
 
-  # To compare if the arrays are the last 10 arrays or not
-  if (i < (i.arrays*10)) {
+    # To generate box plots for 10 arrays at a time
+    # To get an integer value of number of arrays
+    i.arrays = as.integer((dim(as.matrix(data.gene.norm))[2])/10)
 
-    # To create a box plots for the regular probes and negative control probes before normalization and the regular probes after normalization
-    par(mfrow = c(3,1))
-    boxplot(log2(data.gene$E[data.gene$genes$Status == "regular", i:(i + 9)]), range = 0, las = 2, xlab = "", ylab = expression(log[2](intensity)), main = "Regular probes")
-    boxplot(log2(data.gene$E[data.gene$genes$Status == "negative", i:(i + 9)]), range = 0, las = 2, xlab = "", ylab = expression(log[2](intensity)), main = "Negative control probes")
-    boxplot(data.gene.norm$E[, i:(i + 9)], range = 0, ylab = expression(log[2](intensity)), las = 2, xlab = "", main = "Regular probes, NEQC normalized")
+    # To compare if the arrays are the last 10 arrays or not
+    if (i < (i.arrays*10)) {
+
+      # To create a box plots for the regular probes and negative control probes before normalization and the regular probes after normalization
+      par(mfrow = c(3,1))
+      boxplot(log2(data.gene$E[data.gene$genes$Status == "regular", i:(i + 9)]), range = 0, las = 2, xlab = "", ylab = expression(log[2](intensity)), main = "Regular probes")
+      boxplot(log2(data.gene$E[data.gene$genes$Status == "negative", i:(i + 9)]), range = 0, las = 2, xlab = "", ylab = expression(log[2](intensity)), main = "Negative control probes")
+      boxplot(data.gene.norm$E[, i:(i + 9)], range = 0, ylab = expression(log[2](intensity)), las = 2, xlab = "", main = "Regular probes, NEQC normalized")
+
+    }
+
+    else {
+
+      # To create a box plots for the regular probes and negative control probes before normalization and the regular probes after normalization
+      par(mfrow = c(3,1))
+      boxplot(log2(data.gene$E[data.gene$genes$Status == "regular", i:(dim(as.matrix(data.gene.norm))[2])]), range = 0, las = 2, xlab = "", ylab = expression(log[2](intensity)), main = "Regular probes")
+      boxplot(log2(data.gene$E[data.gene$genes$Status == "negative", i:(dim(as.matrix(data.gene.norm))[2])]), range = 0, las = 2, xlab = "", ylab = expression(log[2](intensity)), main = "Negative control probes")
+      boxplot(data.gene.norm$E[, i:(dim(as.matrix(data.gene.norm))[2])], range = 0, ylab = expression(log[2](intensity)), las = 2, xlab = "", main = "Regular probes, NEQC normalized")
+
+    }
+
+    # To add 10 to a while loop
+    i = i + 10
 
   }
 
-  else {
+  garbage <- dev.off()
 
-    # To create a box plots for the regular probes and negative control probes before normalization and the regular probes after normalization
-    par(mfrow = c(3,1))
-    boxplot(log2(data.gene$E[data.gene$genes$Status == "regular", i:(dim(as.matrix(data.gene.norm))[2])]), range = 0, las = 2, xlab = "", ylab = expression(log[2](intensity)), main = "Regular probes")
-    boxplot(log2(data.gene$E[data.gene$genes$Status == "negative", i:(dim(as.matrix(data.gene.norm))[2])]), range = 0, las = 2, xlab = "", ylab = expression(log[2](intensity)), main = "Negative control probes")
-    boxplot(data.gene.norm$E[, i:(dim(as.matrix(data.gene.norm))[2])], range = 0, ylab = expression(log[2](intensity)), las = 2, xlab = "", main = "Regular probes, NEQC normalized")
 
+
+  # Multidimensional scaling (MDS), assesses sample similarity based on pair-wise distances between samples. Ideally, sample should separate based on biological variables (RNA source, sex, treatment etc.) but often technical effects
+  # (such as samples processed together on the same BeadChip) may dominate
+  # To generate the MDS plot
+  pdf(file = "all_mds_plot_after_normalization.pdf", width = 11, height = 8.5)
+  plotMDS(data.gene.norm$E)
+  garbage <- dev.off()
+
+  # To check the effects of boxes in MDS plot
+  pdf(file = "all_mds_box_effects_after_normalization.pdf", width = 11, height = 8.5)
+  plotMDS(data.gene.norm$E, labels = data.pheno$Box)
+  garbage <- dev.off()
+
+  # To check the effects of BeadChips in MDS plot
+  pdf(file = "all_mds_beadchip_effects_after_normalization.pdf", width = 11, height = 8.5)
+  plotMDS(data.gene.norm$E, labels = data.pheno$Chip_Barcode)
+  garbage <- dev.off()
+
+  # To check the effects of case-controls in MDS plot
+  if (sum(!is.na(data.pheno$casestatus)) > 0) {
+    pdf(file = "all_mds_case_control_effects_after_normalization.pdf", width = 11, height = 8.5)
+    plotMDS(data.gene.norm$E, labels = data.pheno$casestatus)
+    garbage <- dev.off()
   }
 
-  # To add 10 to a while loop
-  i = i + 10
+  # To check the effects of sex in MDS plot
+  if (sum(!is.na(data.pheno$Sex)) > 0) {
+    pdf(file = "all_mds_sex_effects_after_normalization.pdf", width = 11, height = 8.5)
+    plotMDS(data.gene.norm$E, labels = data.pheno$Sex)
+    garbage <- dev.off()
+  }
 
-}
-
-garbage <- dev.off()
-
-
-
-# Multidimensional scaling (MDS), assesses sample similarity based on pair-wise distances between samples. Ideally, sample should separate based on biological variables (RNA source, sex, treatment etc.) but often technical effects
-# (such as samples processed together on the same BeadChip) may dominate
-# To generate the MDS plot
-pdf(file = "all_mds_plot_after_normalization.pdf", width = 11, height = 8.5)
-plotMDS(data.gene.norm$E)
-garbage <- dev.off()
-
-# To check the effects of boxes in MDS plot
-pdf(file = "all_mds_box_effects_after_normalization.pdf", width = 11, height = 8.5)
-plotMDS(data.gene.norm$E, labels = data.pheno$Box)
-garbage <- dev.off()
-
-# To check the effects of BeadChips in MDS plot
-pdf(file = "all_mds_beadchip_effects_after_normalization.pdf", width = 11, height = 8.5)
-plotMDS(data.gene.norm$E, labels = data.pheno$Chip_Barcode)
-garbage <- dev.off()
-
-# To check the effects of case-controls in MDS plot
-if (sum(!is.na(data.pheno$casestatus)) > 0) {
-  pdf(file = "all_mds_case_control_effects_after_normalization.pdf", width = 11, height = 8.5)
-  plotMDS(data.gene.norm$E, labels = data.pheno$casestatus)
-  garbage <- dev.off()
-}
-
-# To check the effects of sex in MDS plot
-if (sum(!is.na(data.pheno$Sex)) > 0) {
-  pdf(file = "all_mds_sex_effects_after_normalization.pdf", width = 11, height = 8.5)
-  plotMDS(data.gene.norm$E, labels = data.pheno$Sex)
-  garbage <- dev.off()
-}
-
-# To check the effects of donors in MDS plot
-if (sum(!is.na(data.pheno$Donor_Number)) > 0) {
-  pdf(file = "all_mds_donors_effects_after_normalization.pdf", width = 11, height = 8.5)
-  plotMDS(data.gene.norm$E, labels = data.pheno$Donor_Number)
-  garbage <- dev.off()
+  # To check the effects of donors in MDS plot
+  if (sum(!is.na(data.pheno$Donor_Number)) > 0) {
+    pdf(file = "all_mds_donors_effects_after_normalization.pdf", width = 11, height = 8.5)
+    plotMDS(data.gene.norm$E, labels = data.pheno$Donor_Number)
+    garbage <- dev.off()
+  }
 }
 
 # To retrieve quality information and verify that probes annotated as "Bad" or "No Match" generally have lower signal
@@ -178,10 +186,15 @@ qual <- unlist(mget(ids.arrays, illuminaHumanv4PROBEQUALITY, ifnotfound = NA))
 arrays.qual = table(qual)
 ave.signal.arrays = rowMeans(data.gene.norm$E)
 
-# To make a box plot with array probe quality information
-pdf(file = "all_probe_quality_after_normalization.pdf", width = 11, height = 8.5)
-boxplot(ave.signal.arrays ~ qual)
-garbage <- dev.off()
+# To check the input parameter for generating figures
+if (generate.figures == "yes")
+{
+
+  # To make a box plot with array probe quality information
+  pdf(file = "all_probe_quality_after_normalization.pdf", width = 11, height = 8.5)
+  boxplot(ave.signal.arrays ~ qual)
+  garbage <- dev.off()
+}
 
 # To store normalized gene expression data for only high quality probes
 rem <- qual == "No match" | qual == "Bad"
@@ -199,77 +212,82 @@ data.gene.norm.filt <- data.gene.norm[!rem, ]
 iqr <- apply(data.gene.norm.filt$E, 1, IQR, na.rm = TRUE)
 top.var <- order(iqr, decreasing = TRUE)[1:500]
 
-# To generate the cluster plot
-pdf(file = "all_cluster_plot_after_normalization.pdf", width = 11, height = 8.5)
-plot(hclust(dist(t(data.gene.norm.filt$E[top.var,]))))
-garbage <- dev.off()
+# To check the input parameter for generating figures
+if (generate.figures == "yes")
+{
 
-# To check the effects of boxes in cluster plot
-pdf(file = "all_cluster_box_effects_after_normalization.pdf", width = 11, height = 8.5)
-plot(hclust(dist(t(data.gene.norm.filt$E[top.var,]))), labels = data.pheno$Box)
-garbage <- dev.off()
-
-# To check the effects of BeadChips in cluster plot
-pdf(file = "all_cluster_beadchip_effects_after_normalization.pdf", width = 11, height = 8.5)
-plot(hclust(dist(t(data.gene.norm.filt$E[top.var,]))), labels = data.pheno$Chip_Barcode)
-garbage <- dev.off()
-
-# To check the effects of case-controls in cluster plot
-if (sum(!is.na(data.pheno$casestatus)) > 0) {
-  pdf(file = "all_cluster_case_control_effects_after_normalization.pdf", width = 11, height = 8.5)
-  plot(hclust(dist(t(data.gene.norm.filt$E[top.var,]))), labels = data.pheno$casestatus)
+  # To generate the cluster plot
+  pdf(file = "all_cluster_plot_after_normalization.pdf", width = 11, height = 8.5)
+  plot(hclust(dist(t(data.gene.norm.filt$E[top.var,]))))
   garbage <- dev.off()
-}
 
-# To check the effects of sex in cluster plot
-if (sum(!is.na(data.pheno$Sex)) > 0) {
-  pdf(file = "all_cluster_sex_effects_after_normalization.pdf", width = 11, height = 8.5)
-  plot(hclust(dist(t(data.gene.norm.filt$E[top.var,]))), labels = data.pheno$Sex)
+  # To check the effects of boxes in cluster plot
+  pdf(file = "all_cluster_box_effects_after_normalization.pdf", width = 11, height = 8.5)
+  plot(hclust(dist(t(data.gene.norm.filt$E[top.var,]))), labels = data.pheno$Box)
   garbage <- dev.off()
-}
 
-# To check the effects of donors in cluster plot
-if (sum(!is.na(data.pheno$Donor_Number)) > 0) {
-  pdf(file = "all_cluster_donors_effects_after_normalization.pdf", width = 11, height = 8.5)
-  plot(hclust(dist(t(data.gene.norm.filt$E[top.var,]))), labels = data.pheno$Donor_Number)
+  # To check the effects of BeadChips in cluster plot
+  pdf(file = "all_cluster_beadchip_effects_after_normalization.pdf", width = 11, height = 8.5)
+  plot(hclust(dist(t(data.gene.norm.filt$E[top.var,]))), labels = data.pheno$Chip_Barcode)
   garbage <- dev.off()
-}
+
+  # To check the effects of case-controls in cluster plot
+  if (sum(!is.na(data.pheno$casestatus)) > 0) {
+    pdf(file = "all_cluster_case_control_effects_after_normalization.pdf", width = 11, height = 8.5)
+    plot(hclust(dist(t(data.gene.norm.filt$E[top.var,]))), labels = data.pheno$casestatus)
+    garbage <- dev.off()
+  }
+
+  # To check the effects of sex in cluster plot
+  if (sum(!is.na(data.pheno$Sex)) > 0) {
+    pdf(file = "all_cluster_sex_effects_after_normalization.pdf", width = 11, height = 8.5)
+    plot(hclust(dist(t(data.gene.norm.filt$E[top.var,]))), labels = data.pheno$Sex)
+    garbage <- dev.off()
+  }
+
+  # To check the effects of donors in cluster plot
+  if (sum(!is.na(data.pheno$Donor_Number)) > 0) {
+    pdf(file = "all_cluster_donors_effects_after_normalization.pdf", width = 11, height = 8.5)
+    plot(hclust(dist(t(data.gene.norm.filt$E[top.var,]))), labels = data.pheno$Donor_Number)
+    garbage <- dev.off()
+  }
 
 
-# To generate the heatmap
-pdf(file = "all_heatmap_plot_after_normalization.pdf", width = 11, height = 8.5)
-heatmap(data.gene.norm.filt$E[top.var,])
-garbage <- dev.off()
-
-# To check the effects of boxes in heatmap
-pdf(file = "all_heatmap_box_effects_after_normalization.pdf", width = 11, height = 8.5)
-heatmap(data.gene.norm.filt$E[top.var,], labCol = data.pheno$Box)
-garbage <- dev.off()
-
-# To check the effects of BeadChips in heatmap
-pdf(file = "all_heatmap_beadchip_effects_after_normalization.pdf", width = 11, height = 8.5)
-heatmap(data.gene.norm.filt$E[top.var,], labCol = data.pheno$Chip_Barcode)
-garbage <- dev.off()
-
-# To check the effects of case-controls in heatmap
-if (sum(!is.na(data.pheno$casestatus)) > 0) {
-  pdf(file = "all_heatmap_case_control_effects_after_normalization.pdf", width = 11, height = 8.5)
-  heatmap(data.gene.norm.filt$E[top.var,], labCol = data.pheno$casestatus)
+  # To generate the heatmap
+  pdf(file = "all_heatmap_plot_after_normalization.pdf", width = 11, height = 8.5)
+  heatmap(data.gene.norm.filt$E[top.var,])
   garbage <- dev.off()
-}
 
-# To check the effects of sex in heatmap
-if (sum(!is.na(data.pheno$Sex)) > 0) {
-  pdf(file = "all_heatmap_sex_effects_after_normalization.pdf", width = 11, height = 8.5)
-  heatmap(data.gene.norm.filt$E[top.var,], labCol = data.pheno$Sex)
+  # To check the effects of boxes in heatmap
+  pdf(file = "all_heatmap_box_effects_after_normalization.pdf", width = 11, height = 8.5)
+  heatmap(data.gene.norm.filt$E[top.var,], labCol = data.pheno$Box)
   garbage <- dev.off()
-}
 
-# To check the effects of donors in heatmap
-if (sum(!is.na(data.pheno$Donor_Number)) > 0) {
-  pdf(file = "all_heatmap_donors_effects_after_normalization.pdf", width = 11, height = 8.5)
-  heatmap(data.gene.norm.filt$E[top.var,], labCol = data.pheno$Donor_Number)
+  # To check the effects of BeadChips in heatmap
+  pdf(file = "all_heatmap_beadchip_effects_after_normalization.pdf", width = 11, height = 8.5)
+  heatmap(data.gene.norm.filt$E[top.var,], labCol = data.pheno$Chip_Barcode)
   garbage <- dev.off()
+
+  # To check the effects of case-controls in heatmap
+  if (sum(!is.na(data.pheno$casestatus)) > 0) {
+    pdf(file = "all_heatmap_case_control_effects_after_normalization.pdf", width = 11, height = 8.5)
+    heatmap(data.gene.norm.filt$E[top.var,], labCol = data.pheno$casestatus)
+    garbage <- dev.off()
+  }
+
+  # To check the effects of sex in heatmap
+  if (sum(!is.na(data.pheno$Sex)) > 0) {
+    pdf(file = "all_heatmap_sex_effects_after_normalization.pdf", width = 11, height = 8.5)
+    heatmap(data.gene.norm.filt$E[top.var,], labCol = data.pheno$Sex)
+    garbage <- dev.off()
+  }
+
+  # To check the effects of donors in heatmap
+  if (sum(!is.na(data.pheno$Donor_Number)) > 0) {
+    pdf(file = "all_heatmap_donors_effects_after_normalization.pdf", width = 11, height = 8.5)
+    heatmap(data.gene.norm.filt$E[top.var,], labCol = data.pheno$Donor_Number)
+    garbage <- dev.off()
+  }
 }
 
 # To annotate Illumina IDs
@@ -510,158 +528,163 @@ data.gene.lumi <- addControlData2lumi((getControlData(controlFile.lumi, sep = "\
 # To store control data for plotting
 data.control.lumi <- addControlData2lumi((getControlData(controlFile.lumi, sep = "\t")), data.gene.lumi)
 
-# To run a while loop to generate different plots
-# To create a density plot
-pdf(file = "all_density_before_normalization_lumi.pdf", width = 11, height = 8.5)
+# To check the input parameter for generating figures
+if (generate.figures == "yes")
+{
 
-# To define i.lumi for looping
-i.lumi = 1
+  # To run a while loop to generate different plots
+  # To create a density plot
+  pdf(file = "all_density_before_normalization_lumi.pdf", width = 11, height = 8.5)
 
-while(i.lumi <= dim(as.matrix(data.gene.lumi))[2]) {
+  # To define i.lumi for looping
+  i.lumi = 1
 
-  # To generate density plots for 10 arrays at a time
-  # To get an integer value of number of arrays
-  i.arrays.lumi = as.integer((dim(as.matrix(data.gene.lumi))[2])/10)
+  while(i.lumi <= dim(as.matrix(data.gene.lumi))[2]) {
 
-  # To compare if the arrays are the last 10 arrays or not
-  if (i.lumi < (i.arrays.lumi*10)) {
+    # To generate density plots for 10 arrays at a time
+    # To get an integer value of number of arrays
+    i.arrays.lumi = as.integer((dim(as.matrix(data.gene.lumi))[2])/10)
 
-    # To create a density plots before normalization
-    plot(data.gene.lumi[, i.lumi:(i.lumi + 9)], what = "density")
+    # To compare if the arrays are the last 10 arrays or not
+    if (i.lumi < (i.arrays.lumi*10)) {
+
+      # To create a density plots before normalization
+      plot(data.gene.lumi[, i.lumi:(i.lumi + 9)], what = "density")
+
+    }
+
+    else {
+
+      # To create a density plots before normalization
+      plot(data.gene.lumi[, i.lumi:(dim(as.matrix(data.gene.lumi))[2])], what = "density")
+
+    }
+
+    # To add 10 to a while loop
+    i.lumi = i.lumi + 10
 
   }
 
-  else {
+  garbage <- dev.off()
 
-    # To create a density plots before normalization
-    plot(data.gene.lumi[, i.lumi:(dim(as.matrix(data.gene.lumi))[2])], what = "density")
+
+  # To run a while loop to generate different plots
+  # To create a Cumulative Distribution Function (CDF) plot
+  pdf(file = "all_cdf_before_normalization_lumi.pdf", width = 11, height = 8.5)
+
+  # To define j.lumi for looping
+  j.lumi = 1
+
+  while(j.lumi <= dim(as.matrix(data.gene.lumi))[2]) {
+
+    # To generate CDF plots for 10 arrays at a time
+    # To get an integer value of number of arrays
+    j.arrays.lumi = as.integer((dim(as.matrix(data.gene.lumi))[2])/10)
+
+    # To compare if the arrays are the last 10 arrays or not
+    if (j.lumi < (j.arrays.lumi*10)) {
+
+      # To create a CDF plots before normalization
+      plotCDF(data.gene.lumi[, j.lumi:(j.lumi + 9)], reverse = TRUE)
+
+    }
+
+    else {
+
+      # To create a CDF plots before normalization
+      plotCDF(data.gene.lumi[, j.lumi:(dim(as.matrix(data.gene.lumi))[2])], reverse = TRUE)
+
+    }
+
+    # To add 10 to a while loop
+    j.lumi = j.lumi + 10
 
   }
 
-  # To add 10 to a while loop
-  i.lumi = i.lumi + 10
+  garbage <- dev.off()
 
+
+  # To run a while loop to generate different plots
+  # To create a housekeeping plot
+  pdf(file = "all_housekeeping_before_normalization_lumi.pdf", width = 11, height = 8.5)
+
+  # To define k.lumi for looping
+  k.lumi = 1
+
+  while(k.lumi < dim(as.matrix(data.gene.lumi))[2]) {
+
+    # To generate housekeeping plots for 10 arrays at a time
+    # To get an integer value of number of arrays
+    k.arrays.lumi = as.integer((dim(as.matrix(data.gene.lumi))[2])/10)
+
+    # To compare if the arrays are the last 10 arrays or not
+    if (k.lumi < (k.arrays.lumi*10)) {
+
+      # To create a housekeeping plots before normalization
+      plotHousekeepingGene(data.control.lumi[, k.lumi:(k.lumi + 9)])
+
+    }
+
+    else {
+
+      # To create a housekeeping plots before normalization
+      plotHousekeepingGene(data.control.lumi[, k.lumi:(dim(as.matrix(data.gene.lumi))[2])])
+
+    }
+
+    # To add 10 to a while loop
+    k.lumi = k.lumi + 10
+
+  }
+
+  garbage <- dev.off()
+
+
+
+  # To run a while loop to generate different plots
+  # To create a stringency gene plot
+  pdf(file = "all_stringency_gene_before_normalization_lumi.pdf", width = 11, height = 8.5)
+
+  # To define l.lumi for looping
+  l.lumi = 1
+
+  while(l.lumi < dim(as.matrix(data.gene.lumi))[2]) {
+
+    # To generate stringency gene plots for 10 arrays at a time
+    # To get an integer value of number of arrays
+    l.arrays.lumi = as.integer((dim(as.matrix(data.gene.lumi))[2])/10)
+
+    # To compare if the arrays are the last 10 arrays or not
+    if (l.lumi < (l.arrays.lumi*10)) {
+
+      # To create a stringency gene plots before normalization
+      plotStringencyGene(data.control.lumi[, l.lumi:(l.lumi + 9)])
+
+    }
+
+    else {
+
+      # To create a stringency gene plots before normalization
+      plotStringencyGene(data.control.lumi[, l.lumi:(dim(as.matrix(data.gene.lumi))[2])])
+
+    }
+
+    # To add 10 to a while loop
+    l.lumi = l.lumi + 10
+
+  }
+
+  garbage <- dev.off()
+
+  # To create a sample relations plot
+  pdf(file = "all_sample_relations_before_normalization_lumi.pdf", width = 11, height = 8.5)
+  plot(data.gene.lumi, what = 'sampleRelation')
+  garbage <- dev.off()
+
+  pdf(file = "all_sample_relations_mds_before_normalization_lumi.pdf", width = 11, height = 8.5)
+  plot(data.gene.lumi, what = 'sampleRelation', method = "mds")
+  garbage <- dev.off()
 }
-
-garbage <- dev.off()
-
-
-# To run a while loop to generate different plots
-# To create a Cumulative Distribution Function (CDF) plot
-pdf(file = "all_cdf_before_normalization_lumi.pdf", width = 11, height = 8.5)
-
-# To define j.lumi for looping
-j.lumi = 1
-
-while(j.lumi <= dim(as.matrix(data.gene.lumi))[2]) {
-
-  # To generate CDF plots for 10 arrays at a time
-  # To get an integer value of number of arrays
-  j.arrays.lumi = as.integer((dim(as.matrix(data.gene.lumi))[2])/10)
-
-  # To compare if the arrays are the last 10 arrays or not
-  if (j.lumi < (j.arrays.lumi*10)) {
-
-    # To create a CDF plots before normalization
-    plotCDF(data.gene.lumi[, j.lumi:(j.lumi + 9)], reverse = TRUE)
-
-  }
-
-  else {
-
-    # To create a CDF plots before normalization
-    plotCDF(data.gene.lumi[, j.lumi:(dim(as.matrix(data.gene.lumi))[2])], reverse = TRUE)
-
-  }
-
-  # To add 10 to a while loop
-  j.lumi = j.lumi + 10
-
-}
-
-garbage <- dev.off()
-
-
-# To run a while loop to generate different plots
-# To create a housekeeping plot
-pdf(file = "all_housekeeping_before_normalization_lumi.pdf", width = 11, height = 8.5)
-
-# To define k.lumi for looping
-k.lumi = 1
-
-while(k.lumi < dim(as.matrix(data.gene.lumi))[2]) {
-
-  # To generate housekeeping plots for 10 arrays at a time
-  # To get an integer value of number of arrays
-  k.arrays.lumi = as.integer((dim(as.matrix(data.gene.lumi))[2])/10)
-
-  # To compare if the arrays are the last 10 arrays or not
-  if (k.lumi < (k.arrays.lumi*10)) {
-
-    # To create a housekeeping plots before normalization
-    plotHousekeepingGene(data.control.lumi[, k.lumi:(k.lumi + 9)])
-
-  }
-
-  else {
-
-    # To create a housekeeping plots before normalization
-    plotHousekeepingGene(data.control.lumi[, k.lumi:(dim(as.matrix(data.gene.lumi))[2])])
-
-  }
-
-  # To add 10 to a while loop
-  k.lumi = k.lumi + 10
-
-}
-
-garbage <- dev.off()
-
-
-
-# To run a while loop to generate different plots
-# To create a stringency gene plot
-pdf(file = "all_stringency_gene_before_normalization_lumi.pdf", width = 11, height = 8.5)
-
-# To define l.lumi for looping
-l.lumi = 1
-
-while(l.lumi < dim(as.matrix(data.gene.lumi))[2]) {
-
-  # To generate stringency gene plots for 10 arrays at a time
-  # To get an integer value of number of arrays
-  l.arrays.lumi = as.integer((dim(as.matrix(data.gene.lumi))[2])/10)
-
-  # To compare if the arrays are the last 10 arrays or not
-  if (l.lumi < (l.arrays.lumi*10)) {
-
-    # To create a stringency gene plots before normalization
-    plotStringencyGene(data.control.lumi[, l.lumi:(l.lumi + 9)])
-
-  }
-
-  else {
-
-    # To create a stringency gene plots before normalization
-    plotStringencyGene(data.control.lumi[, l.lumi:(dim(as.matrix(data.gene.lumi))[2])])
-
-  }
-
-  # To add 10 to a while loop
-  l.lumi = l.lumi + 10
-
-}
-
-garbage <- dev.off()
-
-# To create a sample relations plot
-pdf(file = "all_sample_relations_before_normalization_lumi.pdf", width = 11, height = 8.5)
-plot(data.gene.lumi, what = 'sampleRelation')
-garbage <- dev.off()
-
-pdf(file = "all_sample_relations_mds_before_normalization_lumi.pdf", width = 11, height = 8.5)
-plot(data.gene.lumi, what = 'sampleRelation', method = "mds")
-garbage <- dev.off()
 
 # Background normalization using normal-exponential convolution using negative controls (neqc)
 # Log2 transformation
@@ -671,85 +694,90 @@ data.gene.lumi.n <- neqc.normData(data.gene.lumi, getControlData(controlFile.lum
 # To perform quality control estimation after normalization
 data.gene.lumi.n.q <- lumiQ(data.gene.lumi.n)
 
-# To run a while loop to generate different plots
-# To create a density plot
-pdf(file = "all_density_after_normalization_lumi.pdf", width = 11, height = 8.5)
+# To check the input parameter for generating figures
+if (generate.figures == "yes")
+{
 
-# To define n.lumi for looping
-n.lumi = 1
+  # To run a while loop to generate different plots
+  # To create a density plot
+  pdf(file = "all_density_after_normalization_lumi.pdf", width = 11, height = 8.5)
 
-while(n.lumi <= dim(as.matrix(data.gene.lumi.n.q))[2]) {
+  # To define n.lumi for looping
+  n.lumi = 1
 
-  # To generate density plots for 10 arrays at a time
-  # To get an integer value of number of arrays
-  n.arrays.lumi = as.integer((dim(as.matrix(data.gene.lumi.n.q))[2])/10)
+  while(n.lumi <= dim(as.matrix(data.gene.lumi.n.q))[2]) {
 
-  # To compare if the arrays are the last 10 arrays or not
-  if (n.lumi < (n.arrays.lumi*10)) {
+    # To generate density plots for 10 arrays at a time
+    # To get an integer value of number of arrays
+    n.arrays.lumi = as.integer((dim(as.matrix(data.gene.lumi.n.q))[2])/10)
 
-    # To create a density plots after normalization
-    plot(data.gene.lumi.n.q[, n.lumi:(n.lumi + 9)], what = "density")
+    # To compare if the arrays are the last 10 arrays or not
+    if (n.lumi < (n.arrays.lumi*10)) {
+
+      # To create a density plots after normalization
+      plot(data.gene.lumi.n.q[, n.lumi:(n.lumi + 9)], what = "density")
+
+    }
+
+    else {
+
+      # To create a density plots after normalization
+      plot(data.gene.lumi.n.q[, n.lumi:(dim(as.matrix(data.gene.lumi.n.q))[2])], what = "density")
+
+    }
+
+    # To add 10 to a while loop
+    n.lumi = n.lumi + 10
 
   }
 
-  else {
+  garbage <- dev.off()
 
-    # To create a density plots after normalization
-    plot(data.gene.lumi.n.q[, n.lumi:(dim(as.matrix(data.gene.lumi.n.q))[2])], what = "density")
+
+  # To run a while loop to generate different plots
+  # To create a boxplot plot
+  pdf(file = "all_boxplot_after_normalization_lumi.pdf", width = 11, height = 8.5)
+
+  # To define o.lumi for looping
+  o.lumi = 1
+
+  while(o.lumi < dim(as.matrix(data.gene.lumi.n.q))[2]) {
+
+    # To generate box plots for 10 arrays at a time
+    # To get an integer value of number of arrays
+    o.arrays.lumi = as.integer((dim(as.matrix(data.gene.lumi.n.q))[2])/10)
+
+    # To compare if the arrays are the last 10 arrays or not
+    if (o.lumi < (o.arrays.lumi*10)) {
+
+      # To create a box plots after normalization
+      plot(data.gene.lumi.n.q[, o.lumi:(o.lumi + 9)], what = "boxplot")
+
+    }
+
+    else {
+
+      # To create a box plots after normalization
+      plot(data.gene.lumi.n.q[, o.lumi:(dim(as.matrix(data.gene.lumi.n.q))[2])], what = "boxplot")
+
+    }
+
+    # To add 10 to a while loop
+    o.lumi = o.lumi + 10
 
   }
 
-  # To add 10 to a while loop
-  n.lumi = n.lumi + 10
+  garbage <- dev.off()
 
+  # To create a sample relations plot
+  pdf(file = "all_sample_relations_after_normalization_lumi.pdf", width = 11, height = 8.5)
+  plot(data.gene.lumi.n.q, what = 'sampleRelation')
+  garbage <- dev.off()
+
+  pdf(file = "all_sample_relations_mds_after_normalization_lumi.pdf", width = 11, height = 8.5)
+  plot(data.gene.lumi.n.q, what = 'sampleRelation', method = "mds")
+  garbage <- dev.off()
 }
-
-garbage <- dev.off()
-
-
-# To run a while loop to generate different plots
-# To create a boxplot plot
-pdf(file = "all_boxplot_after_normalization_lumi.pdf", width = 11, height = 8.5)
-
-# To define o.lumi for looping
-o.lumi = 1
-
-while(o.lumi < dim(as.matrix(data.gene.lumi.n.q))[2]) {
-
-  # To generate box plots for 10 arrays at a time
-  # To get an integer value of number of arrays
-  o.arrays.lumi = as.integer((dim(as.matrix(data.gene.lumi.n.q))[2])/10)
-
-  # To compare if the arrays are the last 10 arrays or not
-  if (o.lumi < (o.arrays.lumi*10)) {
-
-    # To create a box plots after normalization
-    plot(data.gene.lumi.n.q[, o.lumi:(o.lumi + 9)], what = "boxplot")
-
-  }
-
-  else {
-
-    # To create a box plots after normalization
-    plot(data.gene.lumi.n.q[, o.lumi:(dim(as.matrix(data.gene.lumi.n.q))[2])], what = "boxplot")
-
-  }
-
-  # To add 10 to a while loop
-  o.lumi = o.lumi + 10
-
-}
-
-garbage <- dev.off()
-
-# To create a sample relations plot
-pdf(file = "all_sample_relations_after_normalization_lumi.pdf", width = 11, height = 8.5)
-plot(data.gene.lumi.n.q, what = 'sampleRelation')
-garbage <- dev.off()
-
-pdf(file = "all_sample_relations_mds_after_normalization_lumi.pdf", width = 11, height = 8.5)
-plot(data.gene.lumi.n.q, what = 'sampleRelation', method = "mds")
-garbage <- dev.off()
 
 # To annotate Illumina IDs
 idsTosymbols.lumi = as.matrix(toTable(illuminaHumanv4ENTREZID))
