@@ -120,6 +120,12 @@ methods-step-2() {
   done
 }
 
+combine-normalized-methods() {
+  sbatch-submit "combine-normalized-methods" \
+    "${sbatch_args} --mem=32G --cpus-per-task=2 --time=0-01:00:00" \
+    "${BASE}/sbatch/combine-normalized-methods"
+}
+
 main() {
 
   #------------------------------------------------------------------------------------
@@ -210,6 +216,10 @@ main() {
   #------------------------------------------------------------------------------------
 
   run "methods-step-2"
+
+  #---
+
+  run "combine-normalized-methods"
 }
 
 

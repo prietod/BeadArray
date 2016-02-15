@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+set -x
+
+source ${BASE}/lib/env.sh
+source ${BASE}/lib/util.sh
+
+${BASE}/bin/util/combine-normalized-methods
+
+donor_dirs="donor-1 donor-1_filter donor-2 donor-2_filter"
+
+for dir in ${donor_dirs}; do
+
+  sbatch-submit "combine-normalized-methods-${dir}" \
+     "--mem=32G --cpus-per-task=4 --time=0-04:00:00" \
+     "${BASE}/bin/run-R" \
+     "${BASE}/code/BeadArray-normalization-compare-methods.R" \
+     "${WORK_DIR}/combine-normalized-methods/${dir}"
+done
