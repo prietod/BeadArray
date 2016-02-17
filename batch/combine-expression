@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-set -x
-
 source ${BASE}/lib/env.sh
 source ${BASE}/lib/util.sh
 
@@ -24,12 +22,16 @@ for dataset in ${DATASETS}; do
 
       mkdir -p ${job_dir}/combined
 
-      sbatch-submit "${job_name}" \
-        "--mem=120G --cpus-per-task=4 --time=0-04:00:00" \
-        "${BASE}/sbatch/combine-expression" \
-          ${job_dir} \
-          ${mode} \
-          ${file}
+      job_ids=${job_ids}:$(
+        sbatch-submit "${job_name}" \
+          "--mem=120G --cpus-per-task=4 --time=0-04:00:00" \
+          "${BASE}/job/combine-expression" \
+            ${job_dir} \
+            ${mode} \
+            ${file}
+      )
     done
   done
 done
+
+echo "${job_ids#:}"

@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+set -x
+
+source ${BASE}/lib/env.sh
+source ${BASE}/lib/util.sh
+
+mkdir -p $(dirname ${RAW_CHIP_LIST})
+
+${BASE}/bin/util/generate-chip-list all > ${RAW_CHIP_LIST}

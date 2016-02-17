@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+source ${BASE}/lib/env.sh
+source ${BASE}/lib/util.sh
+
 job_dir=$1
 mode=$2
 file=$3
@@ -7,5 +10,3 @@ file=$3
 find ${job_dir}/chip -name "*[0-9]_${file}" \
   | ${BASE}/bin/util/combine-expression-data ${mode} \
   | egrep -v '\<NaN\>|\<Inf\>|\<-Inf\>|\<NA\>' > ${job_dir}/combined/${file}
-
-

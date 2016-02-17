@@ -20,13 +20,30 @@ setvar EXCLUDE_DONOR_PATTERN_FILE     "$BASE/tmp/work/common/exclude-donor.txt"
 setvar METHODS                        "${METHODS:-$(echo {a..p})}"
 setvar DATASETS                       "${DATASETS:-donor non-donor all}"
 
+setvar GENERATE_PDFS                  "${GENERATE_PDFS:-no}" # yes or no
+
+setvar DEFAULT_PIPELINE               "generate-raw-chip-list
+                                       copy-raw-data
+                                       raw-qc
+                                       combine-qc-details
+                                       sample-filter
+                                       copy-filtered-data
+                                       methods-step-1
+                                       combine-expression
+                                       generate-phenotype-details
+                                       methods-step-2
+                                       combine-normalized-methods"
+
+setvar PIPELINE                       "${PIPELINE:-${DEFAULT_PIPELINE}}"
+
 setvar STATE_DIR                      "$BASE/tmp/state"
 setvar R_VERSION                      "3.2.3"
 setvar TEST_MODE                      "${TEST_MODE:-false}"
 setvar LOG_DIR                        "$BASE/tmp/log"
 setvar WORK_DIR                       "$BASE/tmp/work"
 
-setvar R_LIBS                         "${HOME}/lib/R/${R_VERSION}"
+#setvar R_LIBS                         "${HOME}/lib/R/${R_VERSION}"
+setvar R_LIBS                         "${BASE}/.R/${R_VERSION}"
 
 # Our own variables we use when running Slurm
 setvar SLURM_MEM                      "16G"

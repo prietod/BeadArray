@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+source ${BASE}/lib/env.sh
+source ${BASE}/lib/util.sh
+
+for chip_id in $(sed 's/_*$//' ${RAW_CHIP_LIST} | sort -u); do
+  [[ $(grep ${chip_id} ${RAW_DATA_EXCLUDE_PATTERNS} | wc -l) -eq 12 ]] && echo $chip_id
+done > ${WORK_DIR}/common/raw-chips-to-exclude.txt
+
+grep -v -f ${WORK_DIR}/common/raw-chips-to-exclude.txt ${RAW_CHIP_LIST} \
+  > ${WORK_DIR}/common/raw-qc-chip-list.txt
+
+array_count="$(line_count ${WORK_DIR}/common/raw-qc-chip-list.txt)"
+
+mkdir -p ${WORK_DIR}/raw-qc
+mkdir -p ${WORK_DIR}/raw-qc-average
+
+job_ids=$(
+  sbatch-submit "raw-qc" \
+  "--array=1-${array_count} --mem=16G --cpus-per-task=2 --time=0-04:00:00" \
+  "${BASE}/job/raw-qc" "${BASE}/code/BeadArray-qc.R" "${WORK_DIR}/raw-qc"
+)
+
+job_ids=${job_ids}:$(
+  sbatch-submit "raw-qc-average" \
+    "--array=1-${array_count} --mem=16G --cpus-per-task=2 --time=0-04:00:00" \
+    "${BASE}/job/raw-qc" "${BASE}/code/BeadArray-qc-average.R" "${WORK_DIR}/raw-qc-average"
+)
+
+echo "${job_ids#:}"

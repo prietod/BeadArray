@@ -1,4 +1,4 @@
 /.RData
 /test.sh
-/tmp.*
+/.tmp-*
 /.R

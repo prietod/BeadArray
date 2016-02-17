@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
 
-set -x
-
 source ${BASE}/lib/env.sh
 source ${BASE}/lib/util.sh
 
 for dataset in ${DATASETS}; do
+
   array_count=$( ls ${FILTERED_DATA_DIR}/${dataset} | wc -l )
   ls ${FILTERED_DATA_DIR}/${dataset} > ${WORK_DIR}/common/chip-list-${dataset}.txt
 
@@ -13,12 +12,16 @@ for dataset in ${DATASETS}; do
     job_dir="${WORK_DIR}/method-${method}-step-1-${dataset}"
     mkdir -p ${job_dir}
 
-    sbatch-submit "method-${method}-step-1-${dataset}" \
+    job_ids=${job_ids}:$(
+      sbatch-submit "method-${method}-step-1-${dataset}" \
       "--array=1-${array_count} --mem=16G --cpus-per-task=2 --time=0-04:00:00" \
-      "${BASE}/sbatch/methods-step-1" \
+      "${BASE}/job/methods-step-1" \
         "${BASE}/code/BeadArray-method-${method}-step-1.R" \
         "${FILTERED_DATA_DIR}/${dataset}" \
         "${job_dir}" \
         "${WORK_DIR}/common/chip-list-${dataset}.txt"
+    )
   done
 done
+
+echo ${job_ids#:}

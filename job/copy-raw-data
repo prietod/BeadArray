@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+set -x
+
+source ${BASE}/lib/env.sh
+source ${BASE}/lib/util.sh
+
+ensure_dir ${RAW_DATA_DIR}
+
+${BASE}/bin/util/copy-data ${RAW_CHIP_LIST} ${RAW_DATA_EXCLUDE_PATTERNS} ${JINFINITI_DATA_DIR} ${RAW_DATA_DIR}

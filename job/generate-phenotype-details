@@ -19,23 +19,6 @@ for dataset in ${DATASETS}; do
 
   grep -f ${WORK_DIR}/common/chip-list-filtered-${dataset}.txt ${WORK_DIR}/common/BeadArray_phenotype_details.txt \
     >> ${WORK_DIR}/common/BeadArray_phenotype_details-${dataset}.txt
+
+  wc -l ${WORK_DIR}/common/BeadArray_phenotype_details-${dataset}.txt
 done
-
-set +x
-
-donor=$(( $(wc -l tmp/work/common/BeadArray_phenotype_details-donor.txt | awk '{print $1}') - 1 ))
-all=$(( $(wc -l tmp/work/common/BeadArray_phenotype_details-all.txt | awk '{print $1}') - 1 ))
-non_donor=$(( $(wc -l tmp/work/common/BeadArray_phenotype_details-non-donor.txt | awk '{print $1}') - 1 ))
-
-echo all: $all
-echo non-donor: $non_donor
-echo donor: $donor
-
-difference=$(( $all - $donor ))
-
-if [[ ${difference} -ne ${non_donor} ]]; then
-  echo "Difference of <all> - <donor> (${difference}) is not equal to <non-donor> (${non_donor})"
-  exit 1
-fi
-
-exit 0

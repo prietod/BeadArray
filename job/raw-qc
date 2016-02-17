@@ -1,12 +1,10 @@
 #!/usr/bin/env bash
 
-set -x
-
 source ${BASE}/lib/env.sh
 source ${BASE}/lib/util.sh
 
 get_chip_barcode() {
-  sed -n "${SLURM_ARRAY_TASK_ID}p" ${RAW_CHIP_LIST}
+  sed -n "${SLURM_ARRAY_TASK_ID}p" ${WORK_DIR}/common/raw-qc-chip-list.txt
 }
 
 script=$1

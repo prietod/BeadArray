@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+source ${BASE}/lib/env.sh
+source ${BASE}/lib/util.sh
+
+job_id=$(
+  sbatch-submit "generate-phenotype-details" \
+    "${sbatch_args} --mem=32G --cpus-per-task=2 --time=0-01:00:00" \
+    "${BASE}/job/generate-phenotype-details"
+)
+
+echo ${job_id}

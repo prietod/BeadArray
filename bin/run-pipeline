@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+export BASE=$(readlink -f $(dirname $0)/..)
+
+source ${BASE}/lib/env.sh
+source ${BASE}/lib/util.sh
+
+sleep 1; epoch=$(date +%s)
+
+render-template() {
+  eval "echo \"$(cat $1)\""
+}
+
+pipeline_name="BeadArray"
+
+step_dir=${BASE}/tmp/steps/${epoch}
+
+mkdir -p ${step_dir}
+mkdir -p ${LOG_DIR}
+
+ln -nsf ${step_dir} ${BASE}/tmp/steps/current
+ln -nsf ${step_dir}.log ${BASE}/tmp/steps/current.log
+
+for script in ${PIPELINE}; do
+  step="$(( ++step ))"
+  next_step="$(( $step + 1 ))"
+  render-template ${BASE}/static/step-template > ${step_dir}/${pipeline_name}-${step}
+  chmod +x ${step_dir}/${pipeline_name}-${step}
+done
+
+cat <<EOF > ${step_dir}/${pipeline_name}-${next_step}
+  touch ${step_dir}.complete
+  exit 0
+EOF
+
+chmod +x ${step_dir}/${pipeline_name}-${next_step}
+
+# kick off the beginning...each of these steps will daisy-chain submit the next 
+
+sbatch --output=${step_dir}/${pipeline_name}-1.log ${step_dir}/${pipeline_name}-1

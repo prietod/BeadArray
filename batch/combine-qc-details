@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+source ${BASE}/lib/env.sh
+source ${BASE}/lib/util.sh
+
+sbatch-submit "combine-qc-details" \
+  "${sbatch_args} --mem=16G --cpus-per-task=2 --time=0-01:00:00" \
+  "${BASE}/job/combine-qc-details"

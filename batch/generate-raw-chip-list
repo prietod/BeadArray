@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+source ${BASE}/lib/env.sh
+source ${BASE}/lib/util.sh
+
+sbatch-submit "generate-raw-chip-list" "" ${BASE}/job/generate-chip-list

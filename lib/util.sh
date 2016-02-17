@@ -15,21 +15,14 @@ sbatch-submit() {
   [[ -f ${script} ]] || error_exit "Script '${script}' not found."
   [[ -x ${script} ]] || error_exit "Script '${script}' not executable."
 
-  set -x
-
   job_id=$( sbatch \
              --job-name=${job_name} \
              --output=${log_spec} \
+             --mail-type=FAIL \
              ${slurm_opts} \
              ${script} "$@" | awk '{print $NF}' )
 
-  ensure_dir ${SLURM_STATE_DIR}
-
-  echo ${job_id} > ${SLURM_STATE_DIR}/${job_name}-job_id.txt
-
-  sleep 1
-
-  set +x
+  echo ${job_id}
 }
 
 run() {
@@ -77,7 +70,7 @@ error_exit() {
   exit 1
 }
 
-ensure_dir() { local path=$1; [[ -d ${path} ]] || mkdir -vp ${path}; }
+ensure_dir() { local path=$1; [[ -d ${path} ]] || mkdir -p ${path}; }
 
 line_count() { wc -l "$1" | awk '{print $1}'; }
 

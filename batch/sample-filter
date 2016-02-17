@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+source ${BASE}/lib/env.sh
+source ${BASE}/lib/util.sh
+
+
+for name in qc qc-average; do
+  mkdir -p ${WORK_DIR}/raw-${name}/combined
+
+  job_ids=${job_ids}:$(
+    sbatch-submit "sample-filter-${name}" \
+      "${sbatch_args} --mem=32G --cpus-per-task=4 --time=0-01:00:00" \
+      "${BASE}/bin/run-R" \
+        ${BASE}/code/BeadArray-sample-filter.R \
+        ${WORK_DIR}/raw-${name}/combined \
+        raw-qc-details.txt
+  )
+done
+
+echo ${job_ids#:}

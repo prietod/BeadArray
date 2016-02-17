@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+set -x
+
+source ${BASE}/lib/env.sh
+source ${BASE}/lib/util.sh
+
+qc_runs="raw-qc raw-qc-average"
+
+for qc_run in ${qc_runs}; do
+
+  ensure_dir ${WORK_DIR}/${qc_run}/combined
+
+  # Add a statically defined-header
+  #
+  cat ${BASE}/static/qc_header.txt > ${WORK_DIR}/${qc_run}/combined/raw-qc-details.txt
+
+  # Combine all *_raw_qc_details.txt files for each qc run
+  #
+  find ${WORK_DIR}/${qc_run}/chip -name '*_raw_qc_details.txt' \
+    | xargs -n1 -I{} cat {} >> ${WORK_DIR}/${qc_run}/combined/raw-qc-details.txt
+done
+

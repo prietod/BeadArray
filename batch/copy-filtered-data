@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+source ${BASE}/lib/env.sh
+source ${BASE}/lib/util.sh
+
+job_id=$(
+  sbatch-submit "copy-filtered-data" \
+    "${sbatch_args} --mem=32G --cpus-per-task=4 --time=0-01:00:00" \
+    "${BASE}/job/copy-filtered-data"
+)
+
+echo ${job_id}

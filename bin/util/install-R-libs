@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+
+BASE=${BASE:-$(readlink -f $(dirname $0)/../..)}
+
+source $BASE/lib/env.sh
+source $BASE/lib/util.sh
+
+packages="
+BiocGenerics_0.16.1.tar.gz
+Biobase_2.30.0.tar.gz
+org.Hs.eg.db_3.2.3.tar.gz
+AnnotationDbi_1.32.3.tar.gz
+qvalue_2.2.2.tar.gz
+S4Vectors_0.8.11.tar.gz
+IRanges_2.4.7.tar.gz
+illuminaHumanv4.db_1.26.0.tar.gz
+beadarray_2.20.1.tar.gz
+preprocessCore_1.32.0.tar.gz
+affyio_1.40.0.tar.gz
+affy_1.48.0.tar.gz
+TxDb.Hsapiens.UCSC.hg19.knownGene_3.2.2.tar.gz
+FDb.InfiniumMethylation.hg19_2.2.0.tar.gz
+GenomeInfoDb_1.6.3.tar.gz
+minfi_1.16.0.tar.gz
+methylumi_2.16.0.tar.gz
+nleqslv_3.0.tar.gz
+lumi_2.22.1.tar.gz
+corrplot_0.73.tar.gz
+mnormt_1.5-3.tar.gz
+psych_1.5.8.tar.gz
+"
+
+module load apps/R/${R_VERSION}
+
+export R_LIBS=${R_LIBS}
+
+mkdir -p ${R_LIBS}
+
+for pkg in ${packages}; do
+  R CMD INSTALL /hiidata/projects/BeadArray/R-packages/${pkg} || exit 1
+done

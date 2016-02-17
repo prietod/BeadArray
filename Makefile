@@ -22,11 +22,17 @@ all:
 	@echo "qc-average-clean-all"
 	@echo "test-fix-data"
 
+reset-pipe: cancel-all clean-tmp
+	PIPELINE="sample-filter copy-filtered-data methods-step-1 \
+	combine-expression generate-phenotype-details methods-step-2 combine-normalized-methods"
+		bin/run-pipeline
+	tail -F tmp/steps/current.log
+
 log:
-	@sacct -S $$(date -d '24 hours ago' '+%FT%T' ) --format "jobid%-16,start,jobname%-50,elapsed,state"
+	@sacct -S $$(date -d '24 hours ago' '+%FT%T' ) --format "jobid%-16,start,jobname%-50,elapsed,state" | grep -v \.batch
 
 clean-tmp:
-	-mkdir -p .tmp && mv tmp/* .tmp && rm -rf .tmp &
+	epoch=$$(date +%s); mkdir -p .tmp-$$epoch && mv tmp/* .tmp-$$epoch && rm -rf .tmp-$$epoch &
 
 rerun-phenotype:
 	bin/run-all

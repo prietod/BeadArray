@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+BASE=\${BASE:-\$(readlink -f \$(dirname "\${BASH_SOURCE}")/..)}
+
+source \${BASE}/lib/env.sh
+source \${BASE}/lib/util.sh
+
+job_id=\$( ${BASE}/batch/${script} )
+
+sbatch --output=${step_dir}/${pipeline_name}-${next_step}.log --dependency=afterok:\${job_id} ${step_dir}/${pipeline_name}-${next_step}
