@@ -4,18 +4,11 @@
 # To compare several different normalization methods based on replicated data from donors
 # To load libraries
 library("psych")
-library("qvalue")
 library("corrplot")
 
 #------------------------------------------------------------------------
 # Get cli args and assign appropriate variables
 #------------------------------------------------------------------------
-
-args <- commandArgs(trailingOnly = TRUE)
-
-result_dir <- toString(args[1])
-
-setwd(result_dir)
 
 # To create a function to obtain various statistical values
 pairwisecorrelationstat <- function(matrix.data) {
@@ -76,9 +69,6 @@ pairwisecorrelationstat <- function(matrix.data) {
     }
   }
 
-  # To get q-values for Kolmogorov-Smirnov test
-  # matrix.data.results[, 10] = qvalue(as.numeric(matrix.data.results[, 9]))$qvalues
-
   # To return result matrix
   return(matrix.data.results)
 
@@ -118,10 +108,6 @@ for (i in 1:length(file.names)) {
   corrplot.mixed(data.cor.plots, lower = "ellipse", upper = "circle")
   garbage <- dev.off()
 
-  # pdf(file = paste("method", letters[i], "scatter_plot.pdf", sep = "_"), width = 11, height = 8.5)
-  # pairs(donor.data.cor)
-  # garbage <- dev.off()
-
   # To run for loop for each gene
   for (j.id in 1:dim(donor.data)[1]) {
 
@@ -136,7 +122,7 @@ for (i in 1:length(file.names)) {
   donor.col.header = c(donor.col.header, paste("method", letters[i], "ID", sep = "."))
   donor.col.header = c(donor.col.header, paste("method", letters[i], "r.Spearman", sep = "."), paste("method", letters[i], "Fisher.Z.Spearman", sep = "."), paste("method", letters[i], "rsquare.Spearman", sep = "."))
   donor.col.header = c(donor.col.header, paste("method", letters[i], "r.Pearson", sep = "."), paste("method", letters[i], "Fisher.Z.Pearson", sep = "."), paste("method", letters[i], "rsquare.Pearson", sep = "."))
-  donor.col.header = c(donor.col.header, paste("method", letters[i], "D.K-S-test", sep = "."), paste("method", letters[i], "p.K-S-test", sep = "."), paste("method", letters[i], "q.K-S-test", sep = "."))
+  donor.col.header = c(donor.col.header, paste("method", letters[i], "D.K-S-test", sep = "."), paste("method", letters[i], "p.K-S-test", sep = "."))
 
 }
 
@@ -145,83 +131,88 @@ pdf(file = "coefficient_variations_boxplot.pdf", width = 11, height = 8.5)
 boxplot(cv.values, ylab = "Coefficient of variations", names = letters[1:length(file.names)], xlab = "Different methods", main = "Coefficient of variations between different methods")
 garbage <- dev.off()
 
+# To make the coefficient of variations box plot
+pdf(file = "coefficient_variations_boxplot_a-j_m-p.pdf", width = 11, height = 8.5)
+boxplot(cv.values[, c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 14, 15, 16)], ylab = "Coefficient of variations", names = letters[c(1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 13, 14, 15, 16)], xlab = "Different methods", main = "Coefficient of variations between different methods")
+garbage <- dev.off()
+
 # To give a header line
 colnames(donor.data.cor.results) = donor.col.header
 
-# To make a table with counts with different cut-offs of r square
-donor.r.square.cutoffs <- matrix(, nrow = 42, ncol = (length(file.names) + 1))
+# To make a table with counts with different cut-offs of r
+donor.r.cutoffs <- matrix(, nrow = 42, ncol = (length(file.names) + 1))
 
 # To store first column of a r square cutoff matrix
-donor.r.square.cutoffs.rows = character(0)
-donor.r.square.cutoffs.rows = c(donor.r.square.cutoffs.rows, "Spearman.99.rsquare.count", "Spearman.99.rsquare.number", "Spearman.99.rsquare.percentage", "Spearman.95.rsquare.count", "Spearman.95.rsquare.number", "Spearman.95.rsquare.percentage")
-donor.r.square.cutoffs.rows = c(donor.r.square.cutoffs.rows, "Spearman.90.rsquare.count", "Spearman.90.rsquare.number", "Spearman.90.rsquare.percentage", "Spearman.85.rsquare.count", "Spearman.85.rsquare.number", "Spearman.85.rsquare.percentage")
-donor.r.square.cutoffs.rows = c(donor.r.square.cutoffs.rows, "Spearman.80.rsquare.count", "Spearman.80.rsquare.number", "Spearman.80.rsquare.percentage", "Spearman.70.rsquare.count", "Spearman.70.rsquare.number", "Spearman.70.rsquare.percentage")
-donor.r.square.cutoffs.rows = c(donor.r.square.cutoffs.rows, "Spearman.50.rsquare.count", "Spearman.50.rsquare.number", "Spearman.50.rsquare.percentage")
-donor.r.square.cutoffs.rows = c(donor.r.square.cutoffs.rows, "Pearson.99.rsquare.count", "Pearson.99.rsquare.number", "Pearson.99.rsquare.percentage", "Pearson.95.rsquare.count", "Pearson.95.rsquare.number", "Pearson.95.rsquare.percentage")
-donor.r.square.cutoffs.rows = c(donor.r.square.cutoffs.rows, "Pearson.90.rsquare.count", "Pearson.90.rsquare.number", "Pearson.90.rsquare.percentage", "Pearson.85.rsquare.count", "Pearson.85.rsquare.number", "Pearson.85.rsquare.percentage")
-donor.r.square.cutoffs.rows = c(donor.r.square.cutoffs.rows, "Pearson.80.rsquare.count", "Pearson.80.rsquare.number", "Pearson.80.rsquare.percentage", "Pearson.70.rsquare.count", "Pearson.70.rsquare.number", "Pearson.70.rsquare.percentage")
-donor.r.square.cutoffs.rows = c(donor.r.square.cutoffs.rows, "Pearson.50.rsquare.count", "Pearson.50.rsquare.number", "Pearson.50.rsquare.percentage")
+donor.r.cutoffs.rows = character(0)
+donor.r.cutoffs.rows = c(donor.r.cutoffs.rows, "Spearman.99.r.count", "Spearman.99.r.number", "Spearman.99.r.percentage", "Spearman.95.r.count", "Spearman.95.r.number", "Spearman.95.r.percentage")
+donor.r.cutoffs.rows = c(donor.r.cutoffs.rows, "Spearman.90.r.count", "Spearman.90.r.number", "Spearman.90.r.percentage", "Spearman.85.r.count", "Spearman.85.r.number", "Spearman.85.r.percentage")
+donor.r.cutoffs.rows = c(donor.r.cutoffs.rows, "Spearman.80.r.count", "Spearman.80.r.number", "Spearman.80.r.percentage", "Spearman.70.r.count", "Spearman.70.r.number", "Spearman.70.r.percentage")
+donor.r.cutoffs.rows = c(donor.r.cutoffs.rows, "Spearman.50.r.count", "Spearman.50.r.number", "Spearman.50.r.percentage")
+donor.r.cutoffs.rows = c(donor.r.cutoffs.rows, "Pearson.99.r.count", "Pearson.99.r.number", "Pearson.99.r.percentage", "Pearson.95.r.count", "Pearson.95.r.number", "Pearson.95.r.percentage")
+donor.r.cutoffs.rows = c(donor.r.cutoffs.rows, "Pearson.90.r.count", "Pearson.90.r.number", "Pearson.90.r.percentage", "Pearson.85.r.count", "Pearson.85.r.number", "Pearson.85.r.percentage")
+donor.r.cutoffs.rows = c(donor.r.cutoffs.rows, "Pearson.80.r.count", "Pearson.80.r.number", "Pearson.80.r.percentage", "Pearson.70.r.count", "Pearson.70.r.number", "Pearson.70.r.percentage")
+donor.r.cutoffs.rows = c(donor.r.cutoffs.rows, "Pearson.50.r.count", "Pearson.50.r.number", "Pearson.50.r.percentage")
 
-donor.r.square.cutoffs[, 1] <- donor.r.square.cutoffs.rows
+donor.r.cutoffs[, 1] <- donor.r.cutoffs.rows
 
-donor.r.square.cutoffs.cols = c("Info")
+donor.r.cutoffs.cols = c("Info")
 
 # To for loop numbers of methods
 for (k in 1:length(file.names)) {
 
   # Header line
-  donor.r.square.cutoffs.cols = c(donor.r.square.cutoffs.cols, as.character(paste("method", letters[k], sep = ".")))
+  donor.r.cutoffs.cols = c(donor.r.cutoffs.cols, as.character(paste("method", letters[k], sep = ".")))
 
   # To store different cut-offs of r square results
-  donor.r.square.cutoffs[1, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "rsquare.Spearman", sep = "."))]) > 0.99))
-  donor.r.square.cutoffs[2, k+1] = dim(donor.data.cor.results)[1]
-  donor.r.square.cutoffs[3, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "rsquare.Spearman", sep = "."))]) > 0.99))/dim(donor.data.cor.results)[1]
-  donor.r.square.cutoffs[4, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "rsquare.Spearman", sep = "."))]) > 0.95))
-  donor.r.square.cutoffs[5, k+1] = dim(donor.data.cor.results)[1]
-  donor.r.square.cutoffs[6, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "rsquare.Spearman", sep = "."))]) > 0.95))/dim(donor.data.cor.results)[1]
-  donor.r.square.cutoffs[7, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "rsquare.Spearman", sep = "."))]) > 0.90))
-  donor.r.square.cutoffs[8, k+1] = dim(donor.data.cor.results)[1]
-  donor.r.square.cutoffs[9, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "rsquare.Spearman", sep = "."))]) > 0.90))/dim(donor.data.cor.results)[1]
-  donor.r.square.cutoffs[10, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "rsquare.Spearman", sep = "."))]) > 0.85))
-  donor.r.square.cutoffs[11, k+1] = dim(donor.data.cor.results)[1]
-  donor.r.square.cutoffs[12, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "rsquare.Spearman", sep = "."))]) > 0.85))/dim(donor.data.cor.results)[1]
-  donor.r.square.cutoffs[13, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "rsquare.Spearman", sep = "."))]) > 0.80))
-  donor.r.square.cutoffs[14, k+1] = dim(donor.data.cor.results)[1]
-  donor.r.square.cutoffs[15, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "rsquare.Spearman", sep = "."))]) > 0.80))/dim(donor.data.cor.results)[1]
-  donor.r.square.cutoffs[16, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "rsquare.Spearman", sep = "."))]) > 0.70))
-  donor.r.square.cutoffs[17, k+1] = dim(donor.data.cor.results)[1]
-  donor.r.square.cutoffs[18, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "rsquare.Spearman", sep = "."))]) > 0.70))/dim(donor.data.cor.results)[1]
-  donor.r.square.cutoffs[19, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "rsquare.Spearman", sep = "."))]) > 0.50))
-  donor.r.square.cutoffs[20, k+1] = dim(donor.data.cor.results)[1]
-  donor.r.square.cutoffs[21, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "rsquare.Spearman", sep = "."))]) > 0.50))/dim(donor.data.cor.results)[1]
-  donor.r.square.cutoffs[22, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "rsquare.Pearson", sep = "."))]) > 0.99))
-  donor.r.square.cutoffs[23, k+1] = dim(donor.data.cor.results)[1]
-  donor.r.square.cutoffs[24, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "rsquare.Pearson", sep = "."))]) > 0.99))/dim(donor.data.cor.results)[1]
-  donor.r.square.cutoffs[25, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "rsquare.Pearson", sep = "."))]) > 0.95))
-  donor.r.square.cutoffs[26, k+1] = dim(donor.data.cor.results)[1]
-  donor.r.square.cutoffs[27, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "rsquare.Pearson", sep = "."))]) > 0.95))/dim(donor.data.cor.results)[1]
-  donor.r.square.cutoffs[28, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "rsquare.Pearson", sep = "."))]) > 0.90))
-  donor.r.square.cutoffs[29, k+1] = dim(donor.data.cor.results)[1]
-  donor.r.square.cutoffs[30, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "rsquare.Pearson", sep = "."))]) > 0.90))/dim(donor.data.cor.results)[1]
-  donor.r.square.cutoffs[31, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "rsquare.Pearson", sep = "."))]) > 0.85))
-  donor.r.square.cutoffs[32, k+1] = dim(donor.data.cor.results)[1]
-  donor.r.square.cutoffs[33, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "rsquare.Pearson", sep = "."))]) > 0.85))/dim(donor.data.cor.results)[1]
-  donor.r.square.cutoffs[34, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "rsquare.Pearson", sep = "."))]) > 0.80))
-  donor.r.square.cutoffs[35, k+1] = dim(donor.data.cor.results)[1]
-  donor.r.square.cutoffs[36, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "rsquare.Pearson", sep = "."))]) > 0.80))/dim(donor.data.cor.results)[1]
-  donor.r.square.cutoffs[37, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "rsquare.Pearson", sep = "."))]) > 0.70))
-  donor.r.square.cutoffs[38, k+1] = dim(donor.data.cor.results)[1]
-  donor.r.square.cutoffs[39, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "rsquare.Pearson", sep = "."))]) > 0.70))/dim(donor.data.cor.results)[1]
-  donor.r.square.cutoffs[40, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "rsquare.Pearson", sep = "."))]) > 0.50))
-  donor.r.square.cutoffs[41, k+1] = dim(donor.data.cor.results)[1]
-  donor.r.square.cutoffs[42, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "rsquare.Pearson", sep = "."))]) > 0.50))/dim(donor.data.cor.results)[1]
+  donor.r.cutoffs[1, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "r.Spearman", sep = "."))]) > 0.99))
+  donor.r.cutoffs[2, k+1] = dim(donor.data.cor.results)[1]
+  donor.r.cutoffs[3, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "r.Spearman", sep = "."))]) > 0.99))/dim(donor.data.cor.results)[1]
+  donor.r.cutoffs[4, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "r.Spearman", sep = "."))]) > 0.95))
+  donor.r.cutoffs[5, k+1] = dim(donor.data.cor.results)[1]
+  donor.r.cutoffs[6, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "r.Spearman", sep = "."))]) > 0.95))/dim(donor.data.cor.results)[1]
+  donor.r.cutoffs[7, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "r.Spearman", sep = "."))]) > 0.90))
+  donor.r.cutoffs[8, k+1] = dim(donor.data.cor.results)[1]
+  donor.r.cutoffs[9, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "r.Spearman", sep = "."))]) > 0.90))/dim(donor.data.cor.results)[1]
+  donor.r.cutoffs[10, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "r.Spearman", sep = "."))]) > 0.85))
+  donor.r.cutoffs[11, k+1] = dim(donor.data.cor.results)[1]
+  donor.r.cutoffs[12, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "r.Spearman", sep = "."))]) > 0.85))/dim(donor.data.cor.results)[1]
+  donor.r.cutoffs[13, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "r.Spearman", sep = "."))]) > 0.80))
+  donor.r.cutoffs[14, k+1] = dim(donor.data.cor.results)[1]
+  donor.r.cutoffs[15, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "r.Spearman", sep = "."))]) > 0.80))/dim(donor.data.cor.results)[1]
+  donor.r.cutoffs[16, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "r.Spearman", sep = "."))]) > 0.70))
+  donor.r.cutoffs[17, k+1] = dim(donor.data.cor.results)[1]
+  donor.r.cutoffs[18, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "r.Spearman", sep = "."))]) > 0.70))/dim(donor.data.cor.results)[1]
+  donor.r.cutoffs[19, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "r.Spearman", sep = "."))]) > 0.50))
+  donor.r.cutoffs[20, k+1] = dim(donor.data.cor.results)[1]
+  donor.r.cutoffs[21, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "r.Spearman", sep = "."))]) > 0.50))/dim(donor.data.cor.results)[1]
+  donor.r.cutoffs[22, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "r.Pearson", sep = "."))]) > 0.99))
+  donor.r.cutoffs[23, k+1] = dim(donor.data.cor.results)[1]
+  donor.r.cutoffs[24, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "r.Pearson", sep = "."))]) > 0.99))/dim(donor.data.cor.results)[1]
+  donor.r.cutoffs[25, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "r.Pearson", sep = "."))]) > 0.95))
+  donor.r.cutoffs[26, k+1] = dim(donor.data.cor.results)[1]
+  donor.r.cutoffs[27, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "r.Pearson", sep = "."))]) > 0.95))/dim(donor.data.cor.results)[1]
+  donor.r.cutoffs[28, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "r.Pearson", sep = "."))]) > 0.90))
+  donor.r.cutoffs[29, k+1] = dim(donor.data.cor.results)[1]
+  donor.r.cutoffs[30, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "r.Pearson", sep = "."))]) > 0.90))/dim(donor.data.cor.results)[1]
+  donor.r.cutoffs[31, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "r.Pearson", sep = "."))]) > 0.85))
+  donor.r.cutoffs[32, k+1] = dim(donor.data.cor.results)[1]
+  donor.r.cutoffs[33, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "r.Pearson", sep = "."))]) > 0.85))/dim(donor.data.cor.results)[1]
+  donor.r.cutoffs[34, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "r.Pearson", sep = "."))]) > 0.80))
+  donor.r.cutoffs[35, k+1] = dim(donor.data.cor.results)[1]
+  donor.r.cutoffs[36, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "r.Pearson", sep = "."))]) > 0.80))/dim(donor.data.cor.results)[1]
+  donor.r.cutoffs[37, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "r.Pearson", sep = "."))]) > 0.70))
+  donor.r.cutoffs[38, k+1] = dim(donor.data.cor.results)[1]
+  donor.r.cutoffs[39, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "r.Pearson", sep = "."))]) > 0.70))/dim(donor.data.cor.results)[1]
+  donor.r.cutoffs[40, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "r.Pearson", sep = "."))]) > 0.50))
+  donor.r.cutoffs[41, k+1] = dim(donor.data.cor.results)[1]
+  donor.r.cutoffs[42, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "r.Pearson", sep = "."))]) > 0.50))/dim(donor.data.cor.results)[1]
 
 }
 
 # To give a header line
-colnames(donor.r.square.cutoffs) = donor.r.square.cutoffs.cols
+colnames(donor.r.cutoffs) = donor.r.cutoffs.cols
 
 # To write output files
 write.table(cv.values, "coefficient_variations.cls", sep = "\t", quote = FALSE, row.names = FALSE, col.names = FALSE)
 write.table(donor.data.cor.results, "correlation_statistics.cls", sep = "\t", quote = FALSE, row.names = FALSE, col.names = TRUE)
-write.table(donor.r.square.cutoffs, "r_square_cutoff.cls", sep = "\t", quote = FALSE, row.names = FALSE, col.names = TRUE)
+write.table(donor.r.cutoffs, "r_cutoff.cls", sep = "\t", quote = FALSE, row.names = FALSE, col.names = TRUE)
