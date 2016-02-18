@@ -7,11 +7,10 @@ source ${BASE}/lib/util.sh
 
 ensure_dir ${RAW_DATA_DIR}
 
-exclude_file=${WORK_DIR}/common/exclude-data-raw.txt
+replaced_samples_chip_arrays() {
+  sed -n '2,$p' /hiidata/projects/BeadArray/replaced_samples.txt  | awk -F'\t' '{print $8 "_" $9}'
+}
 
-{ sed -n '2,$p' /hiidata/projects/BeadArray/replaced_samples.txt  | awk -F'\t' '{print $8 "_" $9}';
-  cat ${RAW_DATA_EXCLUDE_PATTERNS};
-} \
-| sort -u > ${exclude_file}
+{ replaced_samples_chip_arrays; cat ${BASE}/static/exclude-data-raw.txt; } | sort -u > ${RAW_DATA_EXCLUDE_PATTERNS}
 
-${BASE}/bin/util/copy-data ${RAW_CHIP_LIST} ${exclude_file} ${JINFINITI_DATA_DIR} ${RAW_DATA_DIR}
+${BASE}/bin/util/copy-data ${RAW_CHIP_LIST} ${RAW_DATA_EXCLUDE_PATTERNS} ${JINFINITI_DATA_DIR} ${RAW_DATA_DIR}
