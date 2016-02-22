@@ -5,15 +5,44 @@ set -x
 source ${BASE}/lib/env.sh
 source ${BASE}/lib/util.sh
 
-${BASE}/bin/util/combine-normalized-methods
+donor_dirs="
+donor-1
+donor-1_filter
+donor-2
+donor-2_filter
+"
 
-donor_dirs="donor-1 donor-1_filter donor-2 donor-2_filter"
+in_list() {
+  local element="$1"; shift
+  local item
 
-for dir in ${donor_dirs}; do
+  for item in "$@"; do
+    [[ $element == "$item" ]] && return 0
+  done
 
-  sbatch-submit "combine-normalized-methods-${dir}" \
-     "--mem=32G --cpus-per-task=4 --time=0-04:00:00" \
-     "${BASE}/bin/run-R" \
-     "${BASE}/code/BeadArray-normalization-compare-methods.R" \
-     "${WORK_DIR}/combine-normalized-methods/${dir}"
+  return 1
+}
+
+filter_methods() {
+  local m
+  subset=$1; shift
+
+  for m in "$@"; do
+    case $subset in
+      all) in_list ${m} 'm' 'n' || echo ${m}
+    esac
+  done
+}
+
+for subset in ${COMBINE_NORMALIZED_METHODS_SUBSETS}; do
+  METHODS="$(filter_methods ${subset} $METHODS)" ${BASE}/bin/util/combine-normalized-methods ${subset}
+
+  for donor_dir in ${donor_dirs}; do
+    METHODS="$(filter_methods ${subset} $METHODS)" \
+    sbatch-submit "combine-normalized-methods-${subset}-${donor_dir}" \
+      "--mem=32G --cpus-per-task=4 --time=0-04:00:00" \
+      "${BASE}/bin/run-R" \
+      "${BASE}/code/BeadArray-normalization-compare-methods.R" \
+      "${WORK_DIR}/combine-normalized-methods/${subset}/${donor_dir}"
+  done
 done

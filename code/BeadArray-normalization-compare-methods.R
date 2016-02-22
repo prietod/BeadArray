@@ -142,9 +142,9 @@ boxplot(cv.values, ylab = "Coefficient of variations", names = letters[1:length(
 garbage <- dev.off()
 
 # To make the coefficient of variations box plot
-pdf(file = "coefficient_variations_boxplot_a-j_m-p.pdf", width = 11, height = 8.5)
-boxplot(cv.values[, c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 14, 15, 16)], ylab = "Coefficient of variations", names = letters[c(1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 13, 14, 15, 16)], xlab = "Different methods", main = "Coefficient of variations between different methods")
-garbage <- dev.off()
+# DISABLED: pdf(file = "coefficient_variations_boxplot_a-j_m-p.pdf", width = 11, height = 8.5)
+# DISABLED: boxplot(cv.values[, c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 14, 15, 16)], ylab = "Coefficient of variations", names = letters[c(1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 13, 14, 15, 16)], xlab = "Different methods", main = "Coefficient of variations between different methods")
+# DISABLED: garbage <- dev.off()
 
 # To give a header line
 colnames(donor.data.cor.results) = donor.col.header

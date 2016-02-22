@@ -24,6 +24,8 @@ setvar DATASETS                       "${DATASETS:-donor non-donor all}"
 
 setvar GENERATE_PDFS                  "${GENERATE_PDFS:-no}" # yes or no
 
+setvar COMBINE_NORMALIZED_METHODS_SUBSETS "${COMBINE_NORMALIZED_METHODS_SUBSETS:-donor all}"
+
 setvar DEFAULT_PIPELINE               "generate-raw-chip-list
                                        copy-raw-data
                                        raw-qc
