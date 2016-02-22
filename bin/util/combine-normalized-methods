@@ -7,34 +7,41 @@ source $BASE/lib/util.sh
 
 donors="1 2"
 
+prefixes="
+${WORK_DIR}/method-${method}-step-1-donor/combined/
+${WORK_DIR}/method-${method}-step-1-all/combined/
+"
+
 remove_bad_value_lines() {
   egrep -v '\<NaN\>|\<Inf\>|\<-Inf\>|\<NA\>'
 }
 
+
 for method in $METHODS; do
 
-  prefix=${WORK_DIR}/method-${method}-step-1-donor/combined/
+  for prefix in ${prefixes}; do
 
-  for donor in $donors; do
+    for donor in $donors; do
 
-    for suffix in "" "_filter"; do
+      for suffix in "" "_filter"; do
 
-      dest_dir=${WORK_DIR}/combine-normalized-methods/donor-${donor}${suffix}
+        dest_dir=${WORK_DIR}/combine-normalized-methods/donor-${donor}${suffix}
 
-      mkdir -p ${dest_dir}
+        mkdir -p ${dest_dir}
 
-      if [[ -f ${prefix}/donor_${donor}_expression_normalized.txt ]]; then
-       remove_bad_value_lines < ${prefix}/donor_${donor}_expression_normalized${suffix}.txt \
-          > ${dest_dir}/donor_${donor}-method-${method}_expression_normalized${suffix}.txt
+        if [[ -f ${prefix}/donor_${donor}_expression_normalized.txt ]]; then
+        remove_bad_value_lines < ${prefix}/donor_${donor}_expression_normalized${suffix}.txt \
+            > ${dest_dir}/donor_${donor}-method-${method}_expression_normalized${suffix}.txt
 
-      elif [[ -f ${prefix}/donor_${donor}_expression_normalized_lumi.txt ]]; then
-        remove_bad_value_lines < ${prefix}/donor_${donor}_expression_normalized${suffix}_lumi.txt \
-          > ${dest_dir}/donor_${donor}-method-${method}_expression_normalized${suffix}_lumi.txt
-      else
-        echo "Error: Neither file exists: ${prefix}donor_${donor}_expression_normalized${suffix}.txt or " \
-             "${prefix}/donor_${donor}_expression_normalized${suffix}_lumi.txt" 1>&2
-        exit 1
-      fi
+        elif [[ -f ${prefix}/donor_${donor}_expression_normalized_lumi.txt ]]; then
+          remove_bad_value_lines < ${prefix}/donor_${donor}_expression_normalized${suffix}_lumi.txt \
+            > ${dest_dir}/donor_${donor}-method-${method}_expression_normalized${suffix}_lumi.txt
+        else
+          echo "Error: Neither file exists: ${prefix}donor_${donor}_expression_normalized${suffix}.txt or " \
+              "${prefix}/donor_${donor}_expression_normalized${suffix}_lumi.txt" 1>&2
+          exit 1
+        fi
+      done
     done
   done
 done
