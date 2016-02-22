@@ -10,6 +10,16 @@ library("corrplot")
 # Get cli args and assign appropriate variables
 #------------------------------------------------------------------------
 
+args <- commandArgs(trailingOnly = TRUE)
+
+result_dir <- toString(args[1])
+
+setwd(result_dir)
+
+#------------------------------------------------------------------------
+# Get cli args and assign appropriate variables
+#------------------------------------------------------------------------
+
 # To create a function to obtain various statistical values
 pairwisecorrelationstat <- function(matrix.data) {
 
