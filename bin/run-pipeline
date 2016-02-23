@@ -19,7 +19,6 @@ mkdir -p ${step_dir}
 mkdir -p ${LOG_DIR}
 
 ln -nsf ${step_dir} ${BASE}/tmp/steps/current
-ln -nsf ${step_dir}.log ${BASE}/tmp/steps/current.log
 
 for script in ${PIPELINE}; do
   step="$(( ++step ))"
@@ -35,6 +34,6 @@ EOF
 
 chmod +x ${step_dir}/${pipeline_name}-${next_step}
 
-# kick off the beginning...each of these steps will daisy-chain submit the next 
+# kick off the beginning...each of these steps will daisy-chain submit the next
 
 sbatch --output=${step_dir}/${pipeline_name}-1.log ${step_dir}/${pipeline_name}-1
