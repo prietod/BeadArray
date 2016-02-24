@@ -15,9 +15,9 @@ setvar RAW_CHIP_LIST                  "${WORK_DIR}/common/chip-list-raw.txt"
 setvar FILTERED_CHIP_LIST             "${WORK_DIR}/common/chip-list-filtered.txt"
 setvar RAW_DATA_EXCLUDE_PATTERNS      "${WORK_DIR}/common/exclude-data-raw.txt"
 
-setvar EXCLUDE_ALL_PATTERN_FILE       "$BASE/tmp/work/common/exclude-all.txt"
-setvar EXCLUDE_NON_DONOR_PATTERN_FILE "$BASE/tmp/work/common/exclude-non-donor.txt"
-setvar EXCLUDE_DONOR_PATTERN_FILE     "$BASE/tmp/work/common/exclude-donor.txt"
+setvar EXCLUDE_ALL_PATTERN_FILE       "${WORK_DIR}/common/exclude-all.txt"
+setvar EXCLUDE_NON_DONOR_PATTERN_FILE "${WORK_DIR}/common/exclude-non-donor.txt"
+setvar EXCLUDE_DONOR_PATTERN_FILE     "${WORK_DIR}/common/exclude-donor.txt"
 
 setvar METHODS                        "${METHODS:-$(echo {a..p})}"
 setvar DATASETS                       "${DATASETS:-donor non-donor all}"
