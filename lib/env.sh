@@ -22,7 +22,7 @@ setvar EXCLUDE_DONOR_PATTERN_FILE     "$BASE/tmp/work/common/exclude-donor.txt"
 setvar METHODS                        "${METHODS:-$(echo {a..p})}"
 setvar DATASETS                       "${DATASETS:-donor non-donor all}"
 
-setvar GENERATE_PDFS                  "${GENERATE_PDFS:-no}" # yes or no
+setvar GENERATE_PDFS                  "${GENERATE_PDFS:-yes}" # yes or no
 
 setvar NORMALIZED_EXCLUDE_DATASETS    "${NORMALIZED_EXCLUDE_DATASETS:-non-donor}"
 
