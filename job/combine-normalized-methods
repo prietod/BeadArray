@@ -12,37 +12,23 @@ donor-2
 donor-2_filter
 "
 
-in_list() {
-  local element="$1"; shift
-  local item
+for dataset in ${DATASETS}; do
+  if ! in_list ${dataset} ${NORMALIZED_EXCLUDE_DATASETS}; then
+    METHODS="$(get_methods ${dataset})" \
+      ${BASE}/bin/util/combine-normalized-methods ${dataset}
 
-  for item in "$@"; do
-    [[ $element == "$item" ]] && return 0
-  done
-
-  return 1
-}
-
-filter_methods() {
-  local m
-  subset=$1; shift
-
-  for m in "$@"; do
-    case $subset in
-      all) in_list ${m} 'm' 'n' || echo ${m}
-    esac
-  done
-}
-
-for subset in ${COMBINE_NORMALIZED_METHODS_SUBSETS}; do
-  METHODS="$(filter_methods ${subset} $METHODS)" ${BASE}/bin/util/combine-normalized-methods ${subset}
-
-  for donor_dir in ${donor_dirs}; do
-    METHODS="$(filter_methods ${subset} $METHODS)" \
-    sbatch-submit "combine-normalized-methods-${subset}-${donor_dir}" \
-      "--mem=32G --cpus-per-task=4 --time=0-04:00:00" \
-      "${BASE}/bin/run-R" \
-      "${BASE}/code/BeadArray-normalization-compare-methods.R" \
-      "${WORK_DIR}/combine-normalized-methods/${subset}/${donor_dir}"
-  done
+    for donor_dir in ${donor_dirs}; do
+      METHODS="$(get_methods ${dataset})" \
+        sbatch-submit "combine-normalized-methods-${dataset}-${donor_dir}" \
+          "--mem=32G --cpus-per-task=4 --time=0-04:00:00" \
+          "${BASE}/bin/run-R" \
+          "${BASE}/code/BeadArray-normalization-compare-methods.R" \
+          "${WORK_DIR}/combine-normalized-methods/${dataset}/${donor_dir}"
+    done
+  else
+    echo "$(basename $0): dataset '${dataset}' matches a value in " \
+         "\$NORMALIZED_EXCLUDE_DATASETS ($NORMALIZED_EXCLUDE_DATASETS). Skipping." 1>&2
+  fi
 done
+
+exit 0

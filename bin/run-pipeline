@@ -28,8 +28,10 @@ for script in ${PIPELINE}; do
 done
 
 cat <<EOF > ${step_dir}/${pipeline_name}-${next_step}
-  touch ${step_dir}.complete
-  exit 0
+#!/usr/bin/env bash
+
+touch ${step_dir}.complete
+exit 0
 EOF
 
 chmod +x ${step_dir}/${pipeline_name}-${next_step}

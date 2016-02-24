@@ -84,3 +84,27 @@ get_job_ids() {
     cat ${SLURM_STATE_DIR}/${job_name}-job_id.txt
   done | join_lines
 }
+
+in_list() {
+  local element="$1"; shift
+
+  [[ $# -eq 0 ]] && return 1 # false if no elements to match
+
+  local item; for item in "$@"; do
+    [[ $element == "$item" ]] && return 0
+  done
+
+  return 1
+}
+
+get_methods() {
+  local dataset=$1
+
+  case $dataset in
+    all|non-donor) excluded_methods="m n";;
+  esac
+
+  local m; for m in ${METHODS}; do
+    ! in_list ${m} ${excluded_methods} && echo ${m}
+  done
+}

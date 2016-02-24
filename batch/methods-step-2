@@ -4,7 +4,8 @@ source ${BASE}/lib/env.sh
 source ${BASE}/lib/util.sh
 
 for dataset in ${DATASETS}; do
-  for method in ${METHODS}; do
+
+  for method in $(get_methods ${dataset}); do
     /bin/cp \
       ${WORK_DIR}/common/BeadArray_phenotype_details-${dataset}.txt \
       ${WORK_DIR}/method-${method}-step-1-${dataset}/combined/BeadArray_phenotype_details.txt

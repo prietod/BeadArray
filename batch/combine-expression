@@ -11,7 +11,7 @@ lumi-wo:wo_control_expression_lumi.txt
 "
 
 for dataset in ${DATASETS}; do
-  for method in ${METHODS}; do
+  for method in $(get_methods ${dataset}); do
     for line in ${expression_file_specs}; do
       mode=$(echo $line | awk -F: '{print $1}')
       file=$(echo $line | awk -F: '{print $2}')

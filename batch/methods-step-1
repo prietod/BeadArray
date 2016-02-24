@@ -8,7 +8,8 @@ for dataset in ${DATASETS}; do
   array_count=$( ls ${FILTERED_DATA_DIR}/${dataset} | wc -l )
   ls ${FILTERED_DATA_DIR}/${dataset} > ${WORK_DIR}/common/chip-list-${dataset}.txt
 
-  for method in $METHODS; do
+  for method in $(get_methods ${dataset}); do
+
     job_dir="${WORK_DIR}/method-${method}-step-1-${dataset}"
     mkdir -p ${job_dir}
 

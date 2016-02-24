@@ -11,17 +11,17 @@ remove_bad_value_lines() {
   egrep -v '\<NaN\>|\<Inf\>|\<-Inf\>|\<NA\>'
 }
 
-subset=$1
+dataset=$1
 
-for method in $METHODS; do
+for method in $(get_methods ${dataset}); do
 
-  prefix="${WORK_DIR}/method-${method}-step-1-${subset}/combined/"
+  prefix="${WORK_DIR}/method-${method}-step-1-${dataset}/combined/"
 
   for donor in $donors; do
 
     for suffix in "" "_filter"; do
 
-      dest_dir=${WORK_DIR}/combine-normalized-methods/${subset}/donor-${donor}${suffix}
+      dest_dir=${WORK_DIR}/combine-normalized-methods/${dataset}/donor-${donor}${suffix}
 
       mkdir -p ${dest_dir}
 
