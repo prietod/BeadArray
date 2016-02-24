@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+file_to_stat=$1
+
+sacct -X --noheader --user=$USER --format=CPUTimeRAW \
+  --starttime=$(date '+%FT%T' -d @$(stat --format=%Y ${file_to_stat})) \
+    | awk '{ i+= $1} END {print i / 60 / 60 " CPU Hours"}'
+

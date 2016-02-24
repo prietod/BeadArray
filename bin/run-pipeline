@@ -30,8 +30,10 @@ done
 cat <<EOF > ${step_dir}/${pipeline_name}-${next_step}
 #!/usr/bin/env bash
 
-touch ${step_dir}.complete
+${BASE}/bin/util/get-cpu-hours ${step_dir}/${pipeline_name}-1.log > ${step_dir}.complete
+
 exit 0
+
 EOF
 
 chmod +x ${step_dir}/${pipeline_name}-${next_step}
