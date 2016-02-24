@@ -150,7 +150,7 @@ garbage <- dev.off()
 colnames(donor.data.cor.results) = donor.col.header
 
 # To make a table with counts with different cut-offs of r
-donor.r.cutoffs <- matrix(, nrow = 42, ncol = (length(file.names) + 1))
+donor.r.cutoffs <- matrix(, nrow = 57, ncol = (length(file.names) + 1))
 
 # To store first column of a r square cutoff matrix
 donor.r.cutoffs.rows = character(0)
@@ -162,6 +162,9 @@ donor.r.cutoffs.rows = c(donor.r.cutoffs.rows, "Pearson.99.r.count", "Pearson.99
 donor.r.cutoffs.rows = c(donor.r.cutoffs.rows, "Pearson.90.r.count", "Pearson.90.r.number", "Pearson.90.r.percentage", "Pearson.85.r.count", "Pearson.85.r.number", "Pearson.85.r.percentage")
 donor.r.cutoffs.rows = c(donor.r.cutoffs.rows, "Pearson.80.r.count", "Pearson.80.r.number", "Pearson.80.r.percentage", "Pearson.70.r.count", "Pearson.70.r.number", "Pearson.70.r.percentage")
 donor.r.cutoffs.rows = c(donor.r.cutoffs.rows, "Pearson.50.r.count", "Pearson.50.r.number", "Pearson.50.r.percentage")
+donor.r.cutoffs.rows = c(donor.r.cutoffs.rows, "KS.0.025.D.count", "KS.0.025.D.number", "KS.0.025.D.percentage", "KS.0.020.D.count", "KS.0.020.D.number", "KS.0.020.D.percentage")
+donor.r.cutoffs.rows = c(donor.r.cutoffs.rows, "KS.0.015.D.count", "KS.0.015.D.number", "KS.0.015.D.percentage", "KS.0.010.D.count", "KS.0.010.D.number", "KS.0.010.D.percentage")
+donor.r.cutoffs.rows = c(donor.r.cutoffs.rows, "KS.0.005.D.count", "KS.0.005.D.number", "KS.0.005.D.percentage")
 
 donor.r.cutoffs[, 1] <- donor.r.cutoffs.rows
 
@@ -217,6 +220,22 @@ for (k in 1:length(file.names)) {
   donor.r.cutoffs[41, k+1] = dim(donor.data.cor.results)[1]
   donor.r.cutoffs[42, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "r.Pearson", sep = "."))]) > 0.50))/dim(donor.data.cor.results)[1]
 
+  donor.r.cutoffs[43, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "D.K-S-test", sep = "."))]) > 0.025))
+  donor.r.cutoffs[44, k+1] = dim(donor.data.cor.results)[1]
+  donor.r.cutoffs[45, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "D.K-S-test", sep = "."))]) > 0.025))/dim(donor.data.cor.results)[1]
+  donor.r.cutoffs[46, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "D.K-S-test", sep = "."))]) > 0.020))
+  donor.r.cutoffs[47, k+1] = dim(donor.data.cor.results)[1]
+  donor.r.cutoffs[48, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "D.K-S-test", sep = "."))]) > 0.020))/dim(donor.data.cor.results)[1]
+  donor.r.cutoffs[49, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "D.K-S-test", sep = "."))]) > 0.015))
+  donor.r.cutoffs[50, k+1] = dim(donor.data.cor.results)[1]
+  donor.r.cutoffs[51, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "D.K-S-test", sep = "."))]) > 0.015))/dim(donor.data.cor.results)[1]
+  donor.r.cutoffs[52, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "D.K-S-test", sep = "."))]) > 0.010))
+  donor.r.cutoffs[53, k+1] = dim(donor.data.cor.results)[1]
+  donor.r.cutoffs[54, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "D.K-S-test", sep = "."))]) > 0.010))/dim(donor.data.cor.results)[1]
+  donor.r.cutoffs[55, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "D.K-S-test", sep = "."))]) > 0.005))
+  donor.r.cutoffs[56, k+1] = dim(donor.data.cor.results)[1]
+  donor.r.cutoffs[57, k+1] = sum((as.numeric(donor.data.cor.results[, as.character(paste("method", letters[k], "D.K-S-test", sep = "."))]) > 0.005))/dim(donor.data.cor.results)[1]
+
 }
 
 # To give a header line
@@ -225,4 +244,4 @@ colnames(donor.r.cutoffs) = donor.r.cutoffs.cols
 # To write output files
 write.table(cv.values, "coefficient_variations.cls", sep = "\t", quote = FALSE, row.names = FALSE, col.names = FALSE)
 write.table(donor.data.cor.results, "correlation_statistics.cls", sep = "\t", quote = FALSE, row.names = FALSE, col.names = TRUE)
-write.table(donor.r.cutoffs, "r_cutoff.cls", sep = "\t", quote = FALSE, row.names = FALSE, col.names = TRUE)
+write.table(donor.r.cutoffs, "r_D_cutoffs.cls", sep = "\t", quote = FALSE, row.names = FALSE, col.names = TRUE)
